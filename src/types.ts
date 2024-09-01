@@ -17,8 +17,12 @@ export interface FreeBall extends Ball {
   velocity: Point;
 }
 
-export interface Game {
+export interface Chain {
   balls: Ball[];
+}
+
+export interface Game {
+  chains: Chain[];
   launcher: Launcher;
   freeBalls: FreeBall[];
   ballRadius: number;

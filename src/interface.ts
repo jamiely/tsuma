@@ -1,4 +1,5 @@
-import { Game, launchBall } from "./game";
+import { launchBall } from "./game";
+import { Game } from "./types";
 
 export const createInterface = (game: Game) => (element: HTMLElement) => {
   element.addEventListener("mousemove", (event) => {
