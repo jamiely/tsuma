@@ -97,4 +97,5 @@ button:focus-visible {
 
 #game {
   background-color: green;
+  border: 5px gray solid;
 }

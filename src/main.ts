@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg'
 import { setupCounter } from './counter.ts'
 import { renderGame } from './renderer.ts'
 import { createGame, step } from './game.ts'
+import { createInterface } from './interface.ts'
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
@@ -29,15 +30,21 @@ setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
 const canvas = document.getElementById('game')! as HTMLCanvasElement;
 const game = createGame();
 
-function render() {
-  requestAnimationFrame(() => {
-    renderGame(canvas)(game)
-  })
+function run() {
+  createInterface(game)(canvas);
 
-  setTimeout(() => {
-    step(game);
-    render();
-  }, 0);
+  function render() {
+    requestAnimationFrame(() => {
+      renderGame(canvas)(game)
+    })
+
+    setTimeout(() => {
+      step(game);
+      render();
+    }, 0);
+  }
+
+  render();
 }
 
-render();
+run();
