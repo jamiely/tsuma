@@ -1,10 +1,9 @@
-import { Ball, Game, Launcher } from "./game";
-
-const ballRadius = 10;
+import { Ball, Game } from "./types";
 
 export const renderGame =
   (canvas: HTMLCanvasElement) =>
-  ({ balls, freeBalls, launcher }: Game) => {
+  (game: Game) => {
+    const { balls, freeBalls, launcher, ballRadius } = game;
     const context = canvas.getContext("2d");
     if (!context) {
       console.error("There is no 2d context available.");
@@ -15,24 +14,25 @@ export const renderGame =
     context.fillStyle = "white";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    balls.forEach(renderBall(context));
-    freeBalls.forEach(renderBall(context));
-    renderLauncher(context)(launcher)
+    balls.forEach(renderBall(context, ballRadius));
+    freeBalls.forEach(renderBall(context, ballRadius));
+    renderLauncher(context, game);
   };
 
 const TwoPI = 2 * Math.PI;
 
 const renderBall =
-  (context: CanvasRenderingContext2D) =>
-  ({ position: { x, y }, color }: {position: Ball['position'], color: Ball['color']}) => {
+  (context: CanvasRenderingContext2D, ballRadius: number) =>
+  ({ position: { x, y }, color }: Ball) => {
     context.beginPath();
     context.arc(x, y, ballRadius, 0, TwoPI);
     context.fillStyle = color;
     context.fill();
   };
 
-const renderLauncher = (context: CanvasRenderingContext2D) => (launcher: Launcher) => {
-  renderBall(context)(launcher);
+const renderLauncher = (context: CanvasRenderingContext2D, game: Game) => {
+  const launcher = game.launcher;
+  renderBall(context, game.ballRadius)(launcher);
   context.beginPath();
   const {position: {x, y}, pointTo: {x: otherX, y: otherY}} = launcher;
   context.moveTo(x, y);

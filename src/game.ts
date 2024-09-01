@@ -1,39 +1,14 @@
-interface Point {
-  x: number;
-  y: number;
-}
-
-type Color = 'red' | 'blue' | 'green' | 'yellow' | 'purple';
-
-export interface Ball {
-  position: Point;
-  color: Color;
-}
-
-export interface FreeBall extends Ball {
-  velocity: Point;
-}
-
-export interface Game {
-  balls: Ball[];
-  launcher: Launcher;
-  freeBalls: FreeBall[];
-}
-
-export interface Launcher extends Ball {
-  pointTo: Point;
-}
+import { Ball, Game } from "./types";
+import { distance, randomColor } from "./util";
 
 export const createGame = (): Game => {
   return {
-    balls: [{ position: { x: 100, y: 100 }, color: 'red' }, { position: { x: 10, y: 10 }, color: 'blue' }],
+    ballRadius: 10,
+    balls: [{ position: { x: 200, y: 200 }, color: 'red' }, { position: { x: 10, y: 10 }, color: 'blue' }],
     launcher: {position: {x: 300, y:300}, pointTo: {x:0, y:0}, color: 'purple'},
     freeBalls: [],
   };
 };
-
-const colors: Color[] = ['red', 'green', 'blue', 'yellow', 'purple']
-const randomColor = () => colors[Math.floor(Math.random() * colors.length)]; 
 
 export const launchBall = (game: Game) => {
   // the un-normalized velocity vector
@@ -63,4 +38,34 @@ export function step(game: Game) {
     ball.position.x += ball.velocity.x;
     ball.position.y += ball.velocity.y;
   })
+
+  handleCollisions(game);
+}
+
+function handleCollisions(game: Game) {
+  const {balls, freeBalls} = game;
+
+  const diameter = game.ballRadius * 2;
+  const didCollide = (ball1: Ball, ball2: Ball) => {
+    return diameter > distance(ball1.position, ball2.position);
+  }
+
+  // this is not quite what we want later,
+  // since we don't want to balls to disappear
+  let hasCollision = false;
+  do {
+    hasCollision = false;
+    // slow
+    outer:
+    for(let i = freeBalls.length - 1; i >= 0; i--) {
+      for(let j = balls.length - 1; j >= 0; j--) {
+        if(didCollide(freeBalls[i], balls[j])) {
+          freeBalls.splice(i, 1);
+          balls.splice(j, 1);
+          hasCollision = true;
+          break outer;
+        }
+      }
+    }
+  } while (hasCollision);
 }
