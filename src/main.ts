@@ -3,7 +3,7 @@ import typescriptLogo from './typescript.svg'
 import viteLogo from '/vite.svg'
 import { setupCounter } from './counter.ts'
 import { renderGame } from './renderer.ts'
-import { createGame } from './game.ts'
+import { createGame, step } from './game.ts'
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
@@ -27,4 +27,17 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
 
 const canvas = document.getElementById('game')! as HTMLCanvasElement;
-requestAnimationFrame(() => renderGame(canvas)(createGame()))
+const game = createGame();
+
+function render() {
+  requestAnimationFrame(() => {
+    renderGame(canvas)(game)
+  })
+
+  setTimeout(() => {
+    step(game);
+    render();
+  }, 0);
+}
+
+render();
