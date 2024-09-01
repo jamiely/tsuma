@@ -11,6 +11,10 @@ export const renderGame =
       return;
     }
 
+    // clear the canvas
+    context.fillStyle = "white";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
     balls.forEach(renderBall(context));
   };
 
