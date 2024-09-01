@@ -2,9 +2,12 @@ import './style.css'
 import typescriptLogo from './typescript.svg'
 import viteLogo from '/vite.svg'
 import { setupCounter } from './counter.ts'
+import { renderGame } from './renderer.ts'
+import { createGame } from './game.ts'
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
+    <canvas id="game" width="600" height="400" />
     <a href="https://vitejs.dev" target="_blank">
       <img src="${viteLogo}" class="logo" alt="Vite logo" />
     </a>
@@ -22,3 +25,6 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 `
 
 setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+
+const canvas = document.getElementById('game')! as HTMLCanvasElement;
+requestAnimationFrame(() => renderGame(canvas)(createGame()))
