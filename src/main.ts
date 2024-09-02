@@ -6,9 +6,11 @@ import { renderGame } from './renderer.ts'
 import { createGame, step } from './game.ts'
 import { createInterface } from './interface.ts'
 
+const game = createGame();
+
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
-    <canvas id="game" width="600" height="400" />
+    <canvas id="game" width="${game.bounds.size.width}" height="${game.bounds.size.height}" />
     <a href="https://vitejs.dev" target="_blank">
       <img src="${viteLogo}" class="logo" alt="Vite logo" />
     </a>
@@ -28,20 +30,17 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
 
 const canvas = document.getElementById('game')! as HTMLCanvasElement;
-const game = createGame();
 
 function run() {
   createInterface(game)(canvas);
 
   function render() {
     requestAnimationFrame(() => {
-      renderGame(canvas)(game)
-    })
-
-    setTimeout(() => {
       step(game);
+      renderGame(canvas)(game)
+
       render();
-    }, 0);
+    })
   }
 
   render();

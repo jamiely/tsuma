@@ -3,8 +3,17 @@ export interface Point {
   y: number;
 }
 
+export interface Size {
+  width: number;
+  height: number;
+}
+
 export interface HasPosition {
   position: Point;
+}
+
+export interface Rectangle extends HasPosition {
+  size: Size;
 }
 
 export type Color = "red" | "blue" | "green" | "yellow" | "purple";
@@ -26,6 +35,7 @@ export interface Game {
   launcher: Launcher;
   freeBalls: FreeBall[];
   ballRadius: number;
+  bounds: Rectangle;
 }
 
 export interface Launcher extends Ball {

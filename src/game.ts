@@ -21,6 +21,10 @@ export const createGame = (): Game => {
       color: "purple",
     },
     freeBalls: [],
+    bounds: {
+      position: {x:0, y:0},
+      size: {width: 800, height: 400},
+    }
   };
 };
 
