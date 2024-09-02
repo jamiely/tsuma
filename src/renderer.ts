@@ -13,6 +13,8 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   context.fillStyle = "white";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
+  renderWaypoints(context, game);
+
   for (let i = 0; i < chains.length; i++) {
     let current: ChainedBall | undefined = chains[i].head;
     while (current) {
@@ -25,6 +27,28 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
 };
 
 const TwoPI = 2 * Math.PI;
+
+const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) => 
+  game.paths.forEach((path) => {
+    context.beginPath();
+    const {start: {value: start}, end: {value: end}} = path;
+
+    [start, end].forEach(({x, y}) => {
+      context.beginPath();
+      context.arc(x, y, 5, 0, TwoPI);
+      context.fillStyle = 'gray';
+      context.fill();
+    })
+
+    console.log(start, end);
+
+    context.beginPath();
+    context.setLineDash([5, 15]);
+    context.moveTo(start.x, start.y);
+    context.lineTo(end.x, end.y);
+    context.strokeStyle = 'lightgray';
+    context.stroke();
+  })
 
 const renderBall =
   (context: CanvasRenderingContext2D, ballRadius: number) =>
@@ -39,7 +63,6 @@ const renderLauncher = (context: CanvasRenderingContext2D, game: Game) => {
   const launcherLength = 30;
   const launcher = game.launcher;
   renderBall(context, game.ballRadius)(launcher);
-  context.beginPath();
 
   const { position, pointTo } = launcher;
   const normalized = { ...pointTo };
@@ -48,6 +71,7 @@ const renderLauncher = (context: CanvasRenderingContext2D, game: Game) => {
   scale(normalized, launcherLength);
   add(normalized, position);
 
+  context.beginPath();
   context.moveTo(position.x, position.y);
   context.lineTo(normalized.x, normalized.y);
   context.stroke();

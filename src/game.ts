@@ -27,8 +27,9 @@ const createChain = ({
 }): Chain => {
   const head: ChainedBall = {
     collidable: false,
+    waypoint: waypointPath.start,
     ball: {
-      position: headPosition,
+      position: {...waypointPath.start.value},
       prevPosition: headPosition,
       color: HIDDEN_BALL_COLOR,
     },
@@ -41,6 +42,7 @@ const createChain = ({
     subtract(position, { x: game.ballRadius * 2, y: 0 });
     const cball: ChainedBall = {
       collidable: !isFoot,
+      waypoint: waypointPath.start,
       ball: {
         position,
         prevPosition: position,
@@ -55,7 +57,7 @@ const createChain = ({
 };
 
 export const createGame = (): Game => {
-  const waypointPath = createWaypointPath({ x: 0, y: 200 }, { x: 600, y: 200 });
+  const waypointPath = createWaypointPath({ x: 10, y: 200 }, { x: 600, y: 300 });
   const game: Game = {
     chainedBallSpeed: 1.5,
     ballRadius: 10,
@@ -166,6 +168,7 @@ function handleCollisions(game: Game) {
               position,
               prevPosition: position,
             },
+            waypoint: cball.waypoint,
           };
           if (insertPrevious) {
             newBall.previous = cball.previous;

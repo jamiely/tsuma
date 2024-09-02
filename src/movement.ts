@@ -3,7 +3,7 @@
 // that is in front of them, in a chain. The leader of the
 // chain will follow a pre-specified path.
 
-import { Ball, ChainedBall, Game, Point } from "./types";
+import { ChainedBall, Game, Point } from "./types";
 import { inBounds, scale, subtract, toUnit } from "./util";
 
 export function stepMovement(game: Game) {
