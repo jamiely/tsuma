@@ -16,7 +16,20 @@ export interface Rectangle extends HasPosition {
   size: Size;
 }
 
-export type Color = "red" | "blue" | "green" | "yellow" | "purple" | "black";
+export const SUPER_LIGHT_GRAY = '#f8f9f9';
+
+export interface Node<T> {
+  previous?: Node<T>;
+  next?: Node<T>;
+  value: T
+}
+
+export interface WaypointPath {
+  start: Node<Point>;
+  end: Node<Point>;
+}
+
+export type Color = "red" | "blue" | "green" | "yellow" | "purple" | "black" | "#f8f9f9";
 
 export interface Ball extends HasPosition {
   color: Color;
@@ -29,11 +42,13 @@ export interface FreeBall extends Ball {
 
 export interface ChainedBall {
   ball: Ball;
+  collidable: boolean;
   previous?: ChainedBall;
   next?: ChainedBall;
 }
 
 export interface Chain {
+  path: WaypointPath;
   head: ChainedBall;
   foot: ChainedBall;
 }
@@ -45,6 +60,7 @@ export interface Game {
   freeBalls: FreeBall[];
   ballRadius: number;
   bounds: Rectangle;
+  paths: WaypointPath[];
 }
 
 export interface Launcher extends Ball {

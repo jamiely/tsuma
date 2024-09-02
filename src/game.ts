@@ -1,4 +1,5 @@
 import { stepMovement } from "./movement";
+import { createWaypointPath } from "./path";
 import {
   Ball,
   Chain,
@@ -7,23 +8,30 @@ import {
   Game,
   Launcher,
   Point,
+  SUPER_LIGHT_GRAY,
+  WaypointPath,
 } from "./types";
 import { distance, randomColor, scale, subtract, toUnit } from "./util";
+
+const HIDDEN_BALL_COLOR = SUPER_LIGHT_GRAY;
 
 const createChain = ({
   game,
   headPosition,
   length,
+  waypointPath,
 }: {
   length: number;
   game: Game;
   headPosition: Point;
+  waypointPath: WaypointPath;
 }): Chain => {
   const head: ChainedBall = {
+    collidable: false,
     ball: {
       position: headPosition,
       prevPosition: headPosition,
-      color: "black",
+      color: HIDDEN_BALL_COLOR,
     },
   };
   let previous = head;
@@ -33,10 +41,11 @@ const createChain = ({
     const position = { ...previous.ball.position };
     subtract(position, { x: game.ballRadius * 2, y: 0 });
     const cball: ChainedBall = {
+      collidable: !isFoot,
       ball: {
         position,
         prevPosition: position,
-        color: isFoot ? "black" : randomColor(),
+        color: isFoot ? HIDDEN_BALL_COLOR : randomColor(),
       },
       previous,
     };
@@ -47,6 +56,7 @@ const createChain = ({
 };
 
 export const createGame = (): Game => {
+  const path = createWaypointPath({ x: 0, y: 200 }, {x: 600, y: 200})
   const game: Game = {
     chainedBallSpeed: 1.5,
     ballRadius: 10,
@@ -63,6 +73,7 @@ export const createGame = (): Game => {
       position: { x: 0, y: 0 },
       size: { width: 800, height: 400 },
     },
+    paths: [path],
   };
 
   const chain1 = createChain({
@@ -71,13 +82,7 @@ export const createGame = (): Game => {
     length: 6,
   });
 
-  const chain2 = createChain({
-    game,
-    headPosition: { x: 30, y: 30 },
-    length: 3,
-  });
-
-  game.chains.push(chain1, chain2);
+  game.chains.push(chain1);
 
   return game;
 };
@@ -106,6 +111,13 @@ export function step(game: Game) {
   handleCollisions(game);
 }
 
+const ballsCollide = (game: Game) => {
+  const diameter = game.ballRadius * 2;
+  return (ball1: Ball, ball2: Ball) => {
+    return diameter > distance(ball1.position, ball2.position);
+  }
+};
+
 function handleCollisions(game: Game) {
   // if a launched ball collides with a ball in a chain,
   // the launched ball should be merged into the chain.
@@ -118,10 +130,8 @@ function handleCollisions(game: Game) {
 
   const { chains, freeBalls } = game;
 
-  const diameter = game.ballRadius * 2;
-  const didCollide = (ball1: Ball, ball2: Ball) => {
-    return diameter > distance(ball1.position, ball2.position);
-  };
+
+  const didCollide = ballsCollide(game);
 
   // this is not quite what we want later,
   // since we don't want to balls to disappear
@@ -135,7 +145,7 @@ function handleCollisions(game: Game) {
 
         while(cball) {
           // cannot collide with black balls
-          if (cball.ball.color === "black" ||
+          if (!cball.collidable ||
             !didCollide(freeBalls[i], cball.ball)) {
             cball = cball.next;
             continue;
@@ -148,6 +158,7 @@ function handleCollisions(game: Game) {
 
           const {position, color} = freeBalls[i];
           const newBall: ChainedBall = {
+            collidable: true,
             ball: {
               color,
               position,
@@ -165,6 +176,11 @@ function handleCollisions(game: Game) {
             cball.next!.previous = newBall;
             cball.next = newBall;
           }
+
+          // go up and down the chain from the new ball, pushing
+          // out the balls until they don't collid
+          // if(newBall.previous) moveBackwards(game, newBall.previous);
+          // moveForwards(newBall.next);
           
           freeBalls.splice(i, 1);
           hasCollision = true;
@@ -173,4 +189,20 @@ function handleCollisions(game: Game) {
       }
     }
   } while (hasCollision);
+}
+
+function moveBackwards(game: Game, cball: ChainedBall) {
+  if(! cball.next) return;
+
+  if(!ballsCollide(game)(cball.next.ball, cball.ball)) return;
+
+  const dist = distance(cball.next.ball.position, cball.ball.position);
+  const overlap = game.ballRadius * 2 - dist;
+  if(overlap < 0) return;
+  
+  // move the ball back towards the previous position it was in
+  const delta = subtract(cball.ball.position, cball.ball.prevPosition)
+  // difficult to find the right amount to scale by. we would need to
+  // determine the magnitude of the change. I think using the waypoint method is
+  // better at this point.
 }

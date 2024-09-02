@@ -4,7 +4,7 @@
 // chain will follow a pre-specified path.
 
 import { Ball, ChainedBall, Game, Point } from "./types";
-import { scale, subtract, toUnit } from "./util";
+import { inBounds, scale, subtract, toUnit } from "./util";
 
 export function stepMovement(game: Game) {
   stepChains(game);
@@ -16,7 +16,14 @@ function stepFreeBalls(game: Game) {
     ball.position.x += ball.velocity.x;
     ball.position.y += ball.velocity.y;
   });
+
+  for(let i = game.freeBalls.length - 1; i >= 0; i--) {
+    if(inBounds(game.freeBalls[i].position, game.bounds)) continue;
+
+    game.freeBalls.splice(i, 1);
+  }
 }
+
 function stepChains(game: Game) {
   const { chains } = game;
 

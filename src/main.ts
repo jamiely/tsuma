@@ -10,7 +10,7 @@ const game = createGame();
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
-    <canvas id="game" width="${game.bounds.size.width}" height="${game.bounds.size.height}" />
+    <canvas id="game" width="${game.bounds.position.x + game.bounds.size.width}" height="${game.bounds.position.y + game.bounds.size.height}" />
     <a href="https://vitejs.dev" target="_blank">
       <img src="${viteLogo}" class="logo" alt="Vite logo" />
     </a>
