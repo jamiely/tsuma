@@ -1,14 +1,22 @@
 import { stepMovement } from "./movement";
-import { Ball, Chain, Game, Launcher, Point } from "./types";
+import { Ball, Chain, Game, Launcher } from "./types";
 import { distance, randomColor, scale, subtract, toUnit } from "./util";
 
 export const createGame = (): Game => {
   const chains: Chain[] = [
     {
-      balls: [
-        { position: { x: 200, y: 200 }, color: "red" },
-        { position: { x: 10, y: 10 }, color: "blue" },
-      ],
+      head: {
+        ball: { position: { x: 200, y: 200 }, color: "red" },
+        previous: undefined,
+        next: undefined,
+      },
+    },
+    {
+      head: {
+        ball: { position: { x: 10, y: 10 }, color: "blue" },
+        previous: undefined,
+        next: undefined,
+      },
     },
   ];
 
@@ -23,28 +31,28 @@ export const createGame = (): Game => {
     },
     freeBalls: [],
     bounds: {
-      position: {x:0, y:0},
-      size: {width: 800, height: 400},
+      position: { x: 0, y: 0 },
+      size: { width: 800, height: 400 },
     },
   };
 };
 
-const launcherVelocity = ({pointTo, position, launcherSpeed}: Launcher) => {
+const launcherVelocity = ({ pointTo, position, launcherSpeed }: Launcher) => {
   // the un-normalized velocity vector
-  const velocity = {...pointTo};
+  const velocity = { ...pointTo };
   subtract(velocity, position);
   toUnit(velocity);
   scale(velocity, launcherSpeed);
   return velocity;
-}
+};
 
-export const launchBall = ({launcher, freeBalls}: Game) => {
+export const launchBall = ({ launcher, freeBalls }: Game) => {
   freeBalls.push({
     position: { ...launcher.position },
     velocity: launcherVelocity(launcher),
     color: randomColor(),
   });
-}
+};
 
 export function step(game: Game) {
   stepMovement(game);
@@ -68,15 +76,14 @@ function handleCollisions(game: Game) {
     // slow
     outer: for (let i = freeBalls.length - 1; i >= 0; i--) {
       for (let k = chains.length - 1; k >= 0; k--) {
-        const balls = chains[k].balls;
-        for (let j = balls.length - 1; j >= 0; j--) {
-          if (didCollide(freeBalls[i], balls[j])) {
-            freeBalls.splice(i, 1);
-            balls.splice(j, 1);
-            hasCollision = true;
-            break outer;
-          }
-        }
+        const ball = chains[k].head.ball;
+        if (!didCollide(freeBalls[i], ball)) continue;
+        
+        freeBalls.splice(i, 1);
+        // there is no head now, but later the head will be adjusted
+        chains.splice(k, 1);
+        hasCollision = true;
+        break outer;
       }
     }
   } while (hasCollision);

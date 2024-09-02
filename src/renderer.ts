@@ -12,7 +12,7 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   context.fillStyle = "white";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  chains.forEach(({ balls }) => balls.forEach(renderBall(context, ballRadius)));
+  chains.forEach(({ head }) => [head.ball].forEach(renderBall(context, ballRadius)));
   freeBalls.forEach(renderBall(context, ballRadius));
   renderLauncher(context, game);
 };

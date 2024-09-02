@@ -20,7 +20,7 @@ function stepFreeBalls(game: Game) {
 function stepChains(game: Game) {
   const {chains} = game;
   chains.forEach(chain => {
-    chain.balls.forEach((ball) => {
+    [chain.head.ball].forEach((ball) => {
       ball.position.x += 1;
     })
   })

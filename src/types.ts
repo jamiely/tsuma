@@ -26,8 +26,14 @@ export interface FreeBall extends Ball {
   velocity: Point;
 }
 
+interface ChainedBall {
+  ball: Ball;
+  previous: ChainedBall | undefined;
+  next: ChainedBall | undefined;
+}
+
 export interface Chain {
-  balls: Ball[];
+  head: ChainedBall;
 }
 
 export interface Game {
