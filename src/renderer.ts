@@ -1,4 +1,4 @@
-import { Ball, ChainedBall, Game } from "./types";
+import { Ball, Node, ChainedBall, Game, Point } from "./types";
 import { add, distance, scale, subtract, toUnit } from "./util";
 
 export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
@@ -28,25 +28,33 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
 
 const TwoPI = 2 * Math.PI;
 
-const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) => 
+const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) =>
   game.paths.forEach((path) => {
     context.beginPath();
-    const {start: {value: start}, end: {value: end}} = path;
+    const { start } = path;
 
-    [start, end].forEach(({x, y}) => {
+    let previous: Node<Point> | undefined = undefined;
+    let current: Node<Point> | undefined = start;
+
+    while (current) {
       context.beginPath();
-      context.arc(x, y, 5, 0, TwoPI);
-      context.fillStyle = 'gray';
+      context.arc(current.value.x, current.value.y, 5, 0, TwoPI);
+      context.fillStyle = "gray";
       context.fill();
-    })
 
-    context.beginPath();
-    context.setLineDash([5, 15]);
-    context.moveTo(start.x, start.y);
-    context.lineTo(end.x, end.y);
-    context.strokeStyle = 'lightgray';
-    context.stroke();
-  })
+      if (previous) {
+        context.beginPath();
+        context.setLineDash([5, 15]);
+        context.moveTo(previous.value.x, previous.value.y);
+        context.lineTo(current.value.x, current.value.y);
+        context.strokeStyle = "lightgray";
+        context.stroke();
+      }
+
+      previous = current;
+      current = current.next;
+    }
+  });
 
 const renderBall =
   (context: CanvasRenderingContext2D, ballRadius: number) =>
@@ -71,7 +79,7 @@ const renderLauncher = (context: CanvasRenderingContext2D, game: Game) => {
 
   context.beginPath();
   context.setLineDash([]);
-  context.strokeStyle = 'black';
+  context.strokeStyle = "black";
   context.moveTo(position.x, position.y);
   context.lineTo(normalized.x, normalized.y);
   context.stroke();

@@ -1,5 +1,5 @@
 import { stepMovement } from "./movement";
-import { createWaypointPath } from "./path";
+import { createWaypointPath, createWaypointPathCustom, sinPath } from "./path";
 import {
   Ball,
   Chain,
@@ -58,7 +58,8 @@ const createChain = ({
 };
 
 export const createGame = (): Game => {
-  const waypointPath = createWaypointPath({ x: 10, y: 200 }, { x: 600, y: 300 });
+  // const waypointPath = createWaypointPath({ x: 10, y: 200 }, { x: 600, y: 300 });
+  const waypointPath = createWaypointPathCustom(sinPath())
   const game: Game = {
     chainedBallSpeed: 1.5,
     ballRadius: 10,
@@ -81,7 +82,7 @@ export const createGame = (): Game => {
   const chain1 = createChain({
     game,
     headPosition: { x: 200, y: 200 },
-    length: 6,
+    length: 3,
     waypointPath,
   });
 

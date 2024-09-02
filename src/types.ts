@@ -45,7 +45,7 @@ export interface ChainedBall {
   collidable: boolean;
   previous?: ChainedBall;
   next?: ChainedBall;
-  waypoint: Node<Point>;
+  waypoint?: Node<Point>;
 }
 
 export interface Chain {

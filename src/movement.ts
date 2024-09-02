@@ -4,7 +4,7 @@
 // chain will follow a pre-specified path.
 
 import { ChainedBall, Game, Point } from "./types";
-import { inBounds, scale, subtract, toUnit } from "./util";
+import { distance, inBounds, scale, subtract, toUnit } from "./util";
 
 export function stepMovement(game: Game) {
   stepChains(game);
@@ -29,12 +29,13 @@ function stepChains(game: Game) {
 
   chains.forEach((chain) => {
     // updatePositionDelta(chain.head, {x: game.chainedBallSpeed, y: 0});
-    updatePositionTowardsWaypoint(chain.head);
+    updatePositionTowardsWaypoint(chain.head, game);
     
     let current: ChainedBall | undefined = chain.head.next;
     let previous: ChainedBall | undefined = chain.head;
     while (current) {
       updatePosition(current, previous.ball.prevPosition, game);
+      // updatePositionBasedOnLeader(current);
 
       previous = current;
       current = current.next;
@@ -46,6 +47,20 @@ function setPreviousPosition({ball: {prevPosition, position}}: ChainedBall) {
   prevPosition.x = position.x;
   prevPosition.y = position.y;
 }
+
+// function updatePositionBasedOnLeader(cball: ChainedBall, game: Game) {
+//   setPreviousPosition(cball);
+
+//   const {ball: {position}, waypoint: {value: waypoint}} = cball;
+
+//   const v = {...waypoint}
+//   subtract(v, position);
+//   toUnit(v);
+//   scale(v, game.chainedBallSpeed);
+
+//   position.x = px;
+//   position.y = py;
+// }
 
 function updatePosition(cball: ChainedBall, pt: Point, game: Game) {
   setPreviousPosition(cball);
@@ -61,16 +76,24 @@ function updatePosition(cball: ChainedBall, pt: Point, game: Game) {
   position.y += delta.y;
 }
 
-function updatePositionTowardsWaypoint(cball: ChainedBall) {
+function updatePositionTowardsWaypoint(cball: ChainedBall, game: Game) {
   setPreviousPosition(cball);
+  
+  if(! cball.waypoint) return;
   
   const {ball: { position }, waypoint: {value: waypoint}} = cball;
   const normalized = {...waypoint};
 
   subtract(normalized, position);
   toUnit(normalized);
-  scale(normalized, 1.5);
+  scale(normalized, game.chainedBallSpeed);
 
   position.x += normalized.x;
   position.y += normalized.y;
+
+  const DISTANCE_DELTA = 1;
+  const dist = distance(waypoint, position);
+  if(dist < DISTANCE_DELTA) {
+    cball.waypoint = cball.waypoint.next;
+  }
 }
