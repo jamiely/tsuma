@@ -1,29 +1,48 @@
 import { stepMovement } from "./movement";
-import { Ball, Chain, Game, Launcher } from "./types";
+import { Ball, Chain, ChainedBall, Game, Launcher, Point } from "./types";
 import { distance, randomColor, scale, subtract, toUnit } from "./util";
 
-export const createGame = (): Game => {
-  const chains: Chain[] = [
-    {
-      head: {
-        ball: { position: { x: 200, y: 200 }, color: "red" },
-        previous: undefined,
-        next: undefined,
+const createChain = ({
+  game,
+  headPosition,
+  length,
+}: {
+  length: number;
+  game: Game;
+  headPosition: Point;
+}): Chain => {
+  const head: ChainedBall = {
+    ball: {
+      position: headPosition,
+      prevPosition: headPosition,
+      color: randomColor(),
+    }
+  }
+  let previous = head;
+  for(let i = 1; i < length; i++) {
+    const position = {...previous.ball.position};
+    subtract(position, {x: game.ballRadius * 2, y: 0});
+    const cball: ChainedBall = {
+      ball: {
+        position,
+        prevPosition: position,
+        color: randomColor(),
       },
-    },
-    {
-      head: {
-        ball: { position: { x: 10, y: 10 }, color: "blue" },
-        previous: undefined,
-        next: undefined,
-      },
-    },
-  ];
+      previous,
+    }
+    previous.next = cball;
+    previous = cball;
+  }
+  return {head};
+};
 
-  return {
+export const createGame = (): Game => {
+  const game: Game = {
+    chainedBallSpeed: 1.5,
     ballRadius: 10,
-    chains,
+    chains: [],
     launcher: {
+      prevPosition: { x: 300, y: 300 },
       position: { x: 300, y: 300 },
       pointTo: { x: 0, y: 0 },
       color: "purple",
@@ -35,6 +54,23 @@ export const createGame = (): Game => {
       size: { width: 800, height: 400 },
     },
   };
+
+  const chain1 = createChain({
+    game,
+    headPosition: {x: 200, y: 200},
+    length: 6
+  })
+  
+  const chain2 = createChain({
+    game,
+    headPosition: {x: 30, y: 30},
+    length: 3
+  })
+
+
+  game.chains.push(chain1, chain2);
+
+  return game;
 };
 
 const launcherVelocity = ({ pointTo, position, launcherSpeed }: Launcher) => {
@@ -49,6 +85,7 @@ const launcherVelocity = ({ pointTo, position, launcherSpeed }: Launcher) => {
 export const launchBall = ({ launcher, freeBalls }: Game) => {
   freeBalls.push({
     position: { ...launcher.position },
+    prevPosition: { ...launcher.position },
     velocity: launcherVelocity(launcher),
     color: randomColor(),
   });
@@ -78,7 +115,7 @@ function handleCollisions(game: Game) {
       for (let k = chains.length - 1; k >= 0; k--) {
         const ball = chains[k].head.ball;
         if (!didCollide(freeBalls[i], ball)) continue;
-        
+
         freeBalls.splice(i, 1);
         // there is no head now, but later the head will be adjusted
         chains.splice(k, 1);

@@ -20,16 +20,17 @@ export type Color = "red" | "blue" | "green" | "yellow" | "purple";
 
 export interface Ball extends HasPosition {
   color: Color;
+  prevPosition: Point;
 }
 
 export interface FreeBall extends Ball {
   velocity: Point;
 }
 
-interface ChainedBall {
+export interface ChainedBall {
   ball: Ball;
-  previous: ChainedBall | undefined;
-  next: ChainedBall | undefined;
+  previous?: ChainedBall;
+  next?: ChainedBall;
 }
 
 export interface Chain {
@@ -37,6 +38,7 @@ export interface Chain {
 }
 
 export interface Game {
+  chainedBallSpeed: number;
   chains: Chain[];
   launcher: Launcher;
   freeBalls: FreeBall[];

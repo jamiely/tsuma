@@ -1,4 +1,4 @@
-import { Ball, Game } from "./types";
+import { Ball, ChainedBall, Game } from "./types";
 
 export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   const { chains, freeBalls, ballRadius } = game;
@@ -12,7 +12,13 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   context.fillStyle = "white";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  chains.forEach(({ head }) => [head.ball].forEach(renderBall(context, ballRadius)));
+  for(let i = 0; i < chains.length; i++) {
+    let current: ChainedBall | undefined = chains[i].head;
+    while(current) {
+        renderBall(context, ballRadius)(current.ball);
+        current = current.next;
+    }
+  }
   freeBalls.forEach(renderBall(context, ballRadius));
   renderLauncher(context, game);
 };

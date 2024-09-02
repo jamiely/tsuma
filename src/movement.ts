@@ -3,7 +3,8 @@
 // that is in front of them, in a chain. The leader of the
 // chain will follow a pre-specified path.
 
-import { Game } from "./types";
+import { Ball, ChainedBall, Game, Point } from "./types";
+import { scale, subtract, toUnit } from "./util";
 
 export function stepMovement(game: Game) {
   stepChains(game);
@@ -16,12 +17,46 @@ function stepFreeBalls(game: Game) {
     ball.position.y += ball.velocity.y;
   });
 }
-
 function stepChains(game: Game) {
-  const {chains} = game;
-  chains.forEach(chain => {
-    [chain.head.ball].forEach((ball) => {
-      ball.position.x += 1;
-    })
-  })
+  const { chains } = game;
+
+  chains.forEach((chain) => {
+    updatePositionDelta(chain.head, {x: game.chainedBallSpeed, y: 0});
+    
+    let current: ChainedBall | undefined = chain.head.next;
+    let previous: ChainedBall | undefined = chain.head;
+    while (current) {
+      updatePosition(current, previous.ball.prevPosition, game);
+
+      previous = current;
+      current = current.next;
+    }
+  });
+}
+
+function setPreviousPosition({ball: {prevPosition, position}}: ChainedBall) {
+  prevPosition.x = position.x;
+  prevPosition.y = position.y;
+}
+
+function updatePosition(cball: ChainedBall, pt: Point, game: Game) {
+  setPreviousPosition(cball);
+
+  const {position} = cball.ball
+
+  const delta = {...pt};
+  subtract(delta, position);
+  toUnit(delta);
+  scale(delta, game.chainedBallSpeed);
+
+  position.x += delta.x;
+  position.y += delta.y;
+}
+
+function updatePositionDelta(cball: ChainedBall, delta: Point) {
+  setPreviousPosition(cball);
+
+  const {ball: { position }} = cball;
+  position.x += delta.x;
+  position.y += delta.y;
 }
