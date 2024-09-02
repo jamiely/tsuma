@@ -27,15 +27,24 @@ function stepFreeBalls(game: Game) {
 function stepChains(game: Game) {
   const { chains } = game;
 
-  chains.forEach((chain) => {
-    updatePositionTowardsWaypoint(chain.head, game);
+  for(let i=0; i<chains.length; i++) {
+    updatePositionTowardsWaypoint(chains[i].head, game);
     
-    let current: ChainedBall | undefined = chain.head.next;
+    let current: ChainedBall | undefined = chains[i].head.next;
     while (current) {
       updatePositionTowardsWaypoint(current, game);
+
       current = current.next;
     }
-  });
+
+    if(!inBounds(chains[i].head.ball.position, game.bounds)) {
+      const next = chains[i].head.next;
+      if(next) {
+        chains[i].head = next;
+        chains[i].head.previous = undefined;
+      }
+    }
+  }
 }
 
 function setPreviousPosition({ball: {prevPosition, position}}: ChainedBall) {

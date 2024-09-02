@@ -57,8 +57,6 @@ const createChain = ({
 };
 
 export const createGame = (): Game => {
-  // const waypointPath = createWaypointPath({ x: 10, y: 200 }, { x: 600, y: 300 });
-  const waypointPath = createWaypointPathCustom(sinPath())
   const game: Game = {
     chainedBallSpeed: 1.5,
     ballRadius: 10,
@@ -75,8 +73,11 @@ export const createGame = (): Game => {
       position: { x: 0, y: 0 },
       size: { width: 800, height: 400 },
     },
-    paths: [waypointPath],
+    paths: [],
   };
+
+  const waypointPath = createWaypointPathCustom(sinPath(game))
+  game.paths.push(waypointPath);
 
   const chain1 = createChain({
     game,

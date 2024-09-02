@@ -1,4 +1,4 @@
-import { Node, Point, WaypointPath } from "./types";
+import { Game, Node, Point, WaypointPath } from "./types";
 
 export const createWaypointPath = (
   startPt: Point,
@@ -40,10 +40,10 @@ export const createWaypointPathCustom = (
   };
 };
 
-export const sinPath = () => {
+export const sinPath = (game: Game) => {
   const increment = Math.PI * 16;
   return function* () {
-    for (let x = increment; x <= 800; x += increment) {
+    for (let x = increment; x <= game.bounds.size.width + 50; x += increment) {
       yield {
         x,
         y: Math.sin(.01 * x) * 100 + 200,
