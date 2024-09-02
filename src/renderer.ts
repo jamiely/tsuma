@@ -1,4 +1,5 @@
 import { Ball, ChainedBall, Game } from "./types";
+import { add, distance, scale, subtract, toUnit } from "./util";
 
 export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   const { chains, freeBalls, ballRadius } = game;
@@ -12,11 +13,11 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   context.fillStyle = "white";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  for(let i = 0; i < chains.length; i++) {
+  for (let i = 0; i < chains.length; i++) {
     let current: ChainedBall | undefined = chains[i].head;
-    while(current) {
-        renderBall(context, ballRadius)(current.ball);
-        current = current.next;
+    while (current) {
+      renderBall(context, ballRadius)(current.ball);
+      current = current.next;
     }
   }
   freeBalls.forEach(renderBall(context, ballRadius));
@@ -35,14 +36,19 @@ const renderBall =
   };
 
 const renderLauncher = (context: CanvasRenderingContext2D, game: Game) => {
+  const launcherLength = 30;
   const launcher = game.launcher;
   renderBall(context, game.ballRadius)(launcher);
   context.beginPath();
-  const {
-    position: { x, y },
-    pointTo: { x: otherX, y: otherY },
-  } = launcher;
-  context.moveTo(x, y);
-  context.lineTo(otherX, otherY);
+
+  const { position, pointTo } = launcher;
+  const normalized = { ...pointTo };
+  subtract(normalized, position);
+  toUnit(normalized);
+  scale(normalized, launcherLength);
+  add(normalized, position);
+
+  context.moveTo(position.x, position.y);
+  context.lineTo(normalized.x, normalized.y);
   context.stroke();
 };

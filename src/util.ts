@@ -20,6 +20,10 @@ export const inBounds = (pt: Point, {position, size}: Rectangle) => {
 }
 
 export const magnitude = ({ x, y }: Point) => Math.sqrt(x * x + y * y);
+export const add = (a: Point, b: Point) => {
+  a.x += b.x;
+  a.y += b.y;
+};
 export const subtract = (a: Point, b: Point) => {
   a.x -= b.x;
   a.y -= b.y;

@@ -4,7 +4,6 @@ import {
   Ball,
   Chain,
   ChainedBall,
-  FreeBall,
   Game,
   Launcher,
   Point,
@@ -52,11 +51,11 @@ const createChain = ({
     previous.next = cball;
     previous = cball;
   }
-  return { head, foot: previous };
+  return { head, foot: previous, path: waypointPath };
 };
 
 export const createGame = (): Game => {
-  const path = createWaypointPath({ x: 0, y: 200 }, {x: 600, y: 200})
+  const waypointPath = createWaypointPath({ x: 0, y: 200 }, { x: 600, y: 200 });
   const game: Game = {
     chainedBallSpeed: 1.5,
     ballRadius: 10,
@@ -73,13 +72,14 @@ export const createGame = (): Game => {
       position: { x: 0, y: 0 },
       size: { width: 800, height: 400 },
     },
-    paths: [path],
+    paths: [waypointPath],
   };
 
   const chain1 = createChain({
     game,
     headPosition: { x: 200, y: 200 },
     length: 6,
+    waypointPath,
   });
 
   game.chains.push(chain1);
@@ -115,7 +115,7 @@ const ballsCollide = (game: Game) => {
   const diameter = game.ballRadius * 2;
   return (ball1: Ball, ball2: Ball) => {
     return diameter > distance(ball1.position, ball2.position);
-  }
+  };
 };
 
 function handleCollisions(game: Game) {
@@ -130,7 +130,6 @@ function handleCollisions(game: Game) {
 
   const { chains, freeBalls } = game;
 
-
   const didCollide = ballsCollide(game);
 
   // this is not quite what we want later,
@@ -141,22 +140,25 @@ function handleCollisions(game: Game) {
     // slow
     outer: for (let i = freeBalls.length - 1; i >= 0; i--) {
       for (let k = chains.length - 1; k >= 0; k--) {
-        let cball: ChainedBall | undefined = chains[k].head
+        let cball: ChainedBall | undefined = chains[k].head;
 
-        while(cball) {
+        while (cball) {
           // cannot collide with black balls
-          if (!cball.collidable ||
-            !didCollide(freeBalls[i], cball.ball)) {
+          if (!cball.collidable || !didCollide(freeBalls[i], cball.ball)) {
             cball = cball.next;
             continue;
           }
 
           // figure out whether the free ball is closer to prev or next
-          const distPrev = cball.previous ? distance(freeBalls[i].position, cball.previous.ball.position) : undefined;
-          const distNext = cball.next ? distance(freeBalls[i].position, cball.next.ball.position) : undefined;
+          const distPrev = cball.previous
+            ? distance(freeBalls[i].position, cball.previous.ball.position)
+            : undefined;
+          const distNext = cball.next
+            ? distance(freeBalls[i].position, cball.next.ball.position)
+            : undefined;
           const insertPrevious = distPrev && distNext && distPrev < distNext;
 
-          const {position, color} = freeBalls[i];
+          const { position, color } = freeBalls[i];
           const newBall: ChainedBall = {
             collidable: true,
             ball: {
@@ -164,8 +166,8 @@ function handleCollisions(game: Game) {
               position,
               prevPosition: position,
             },
-          }
-          if(insertPrevious) {
+          };
+          if (insertPrevious) {
             newBall.previous = cball.previous;
             newBall.next = cball;
             cball.previous!.next = newBall;
@@ -181,7 +183,7 @@ function handleCollisions(game: Game) {
           // out the balls until they don't collid
           // if(newBall.previous) moveBackwards(game, newBall.previous);
           // moveForwards(newBall.next);
-          
+
           freeBalls.splice(i, 1);
           hasCollision = true;
           break outer;
@@ -192,16 +194,16 @@ function handleCollisions(game: Game) {
 }
 
 function moveBackwards(game: Game, cball: ChainedBall) {
-  if(! cball.next) return;
+  if (!cball.next) return;
 
-  if(!ballsCollide(game)(cball.next.ball, cball.ball)) return;
+  if (!ballsCollide(game)(cball.next.ball, cball.ball)) return;
 
   const dist = distance(cball.next.ball.position, cball.ball.position);
   const overlap = game.ballRadius * 2 - dist;
-  if(overlap < 0) return;
-  
+  if (overlap < 0) return;
+
   // move the ball back towards the previous position it was in
-  const delta = subtract(cball.ball.position, cball.ball.prevPosition)
+  const delta = subtract(cball.ball.position, cball.ball.prevPosition);
   // difficult to find the right amount to scale by. we would need to
   // determine the magnitude of the change. I think using the waypoint method is
   // better at this point.
