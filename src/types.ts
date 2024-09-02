@@ -29,7 +29,7 @@ export interface WaypointPath {
   end: Node<Point>;
 }
 
-export type Color = "red" | "blue" | "green" | "yellow" | "purple" | "black" | "#f8f9f9";
+export type Color = "red" | "blue" | "green" | "gold" | "purple" | "black" | "#f8f9f9";
 
 export interface Ball extends HasPosition {
   color: Color;

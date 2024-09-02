@@ -1,5 +1,5 @@
 import { stepMovement } from "./movement";
-import { createWaypointPath, createWaypointPathCustom, sinPath } from "./path";
+import { createWaypointPathCustom, sinPath } from "./path";
 import {
   Ball,
   Chain,
@@ -12,11 +12,10 @@ import {
 } from "./types";
 import { distance, randomColor, scale, subtract, toUnit } from "./util";
 
-const HIDDEN_BALL_COLOR = 'black' as const;
+const HIDDEN_BALL_COLOR = SUPER_LIGHT_GRAY;
 
 const createChain = ({
   game,
-  headPosition,
   length,
   waypointPath,
 }: {
@@ -31,7 +30,7 @@ const createChain = ({
     waypoint: startingWaypoint,
     ball: {
       position: {...waypointPath.start.value},
-      prevPosition: headPosition,
+      prevPosition: {...waypointPath.start.value},
       color: HIDDEN_BALL_COLOR,
     },
   };

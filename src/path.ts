@@ -41,12 +41,12 @@ export const createWaypointPathCustom = (
 };
 
 export const sinPath = () => {
-  const increment = Math.PI * 4;
+  const increment = Math.PI * 16;
   return function* () {
     for (let x = increment; x <= 800; x += increment) {
       yield {
         x,
-        y: Math.sin(.05 * x) * 100 + 200,
+        y: Math.sin(.01 * x) * 100 + 200,
       };
     }
   };

@@ -1,5 +1,5 @@
 import { Ball, Node, ChainedBall, Game, Point } from "./types";
-import { add, distance, scale, subtract, toUnit } from "./util";
+import { add, scale, subtract, toUnit } from "./util";
 
 export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   const { chains, freeBalls, ballRadius } = game;
@@ -38,8 +38,8 @@ const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) =>
 
     while (current) {
       context.beginPath();
-      context.arc(current.value.x, current.value.y, 5, 0, TwoPI);
-      context.fillStyle = "gray";
+      context.arc(current.value.x, current.value.y, 2, 0, TwoPI);
+      context.fillStyle = "lightgray";
       context.fill();
 
       if (previous) {
