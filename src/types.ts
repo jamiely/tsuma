@@ -40,4 +40,5 @@ export interface Game {
 
 export interface Launcher extends Ball {
   pointTo: Point;
+  launcherSpeed: number;
 }

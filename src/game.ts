@@ -1,6 +1,6 @@
 import { stepMovement } from "./movement";
-import { Ball, Chain, Game } from "./types";
-import { distance, randomColor } from "./util";
+import { Ball, Chain, Game, Launcher, Point } from "./types";
+import { distance, randomColor, scale, subtract, toUnit } from "./util";
 
 export const createGame = (): Game => {
   const chains: Chain[] = [
@@ -19,35 +19,32 @@ export const createGame = (): Game => {
       position: { x: 300, y: 300 },
       pointTo: { x: 0, y: 0 },
       color: "purple",
+      launcherSpeed: 2,
     },
     freeBalls: [],
     bounds: {
       position: {x:0, y:0},
       size: {width: 800, height: 400},
-    }
+    },
   };
 };
 
-export const launchBall = (game: Game) => {
+const launcherVelocity = ({pointTo, position, launcherSpeed}: Launcher) => {
   // the un-normalized velocity vector
-  const velocity = {
-    x: game.launcher.pointTo.x - game.launcher.position.x,
-    y: game.launcher.pointTo.y - game.launcher.position.y,
-  };
+  const velocity = {...pointTo};
+  subtract(velocity, position);
+  toUnit(velocity);
+  scale(velocity, launcherSpeed);
+  return velocity;
+}
 
-  // normalized velocity vector
-  const magnitude = Math.sqrt(
-    velocity.x * velocity.x + velocity.y * velocity.y
-  );
-  velocity.x /= magnitude;
-  velocity.y /= magnitude;
-
-  game.freeBalls.push({
-    position: { ...game.launcher.position },
-    velocity,
+export const launchBall = ({launcher, freeBalls}: Game) => {
+  freeBalls.push({
+    position: { ...launcher.position },
+    velocity: launcherVelocity(launcher),
     color: randomColor(),
   });
-};
+}
 
 export function step(game: Game) {
   stepMovement(game);
