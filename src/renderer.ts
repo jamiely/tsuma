@@ -40,8 +40,6 @@ const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) =>
       context.fill();
     })
 
-    console.log(start, end);
-
     context.beginPath();
     context.setLineDash([5, 15]);
     context.moveTo(start.x, start.y);
@@ -72,6 +70,8 @@ const renderLauncher = (context: CanvasRenderingContext2D, game: Game) => {
   add(normalized, position);
 
   context.beginPath();
+  context.setLineDash([]);
+  context.strokeStyle = 'black';
   context.moveTo(position.x, position.y);
   context.lineTo(normalized.x, normalized.y);
   context.stroke();

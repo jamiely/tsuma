@@ -28,7 +28,8 @@ function stepChains(game: Game) {
   const { chains } = game;
 
   chains.forEach((chain) => {
-    updatePositionDelta(chain.head, {x: game.chainedBallSpeed, y: 0});
+    // updatePositionDelta(chain.head, {x: game.chainedBallSpeed, y: 0});
+    updatePositionTowardsWaypoint(chain.head);
     
     let current: ChainedBall | undefined = chain.head.next;
     let previous: ChainedBall | undefined = chain.head;
@@ -60,10 +61,16 @@ function updatePosition(cball: ChainedBall, pt: Point, game: Game) {
   position.y += delta.y;
 }
 
-function updatePositionDelta(cball: ChainedBall, delta: Point) {
+function updatePositionTowardsWaypoint(cball: ChainedBall) {
   setPreviousPosition(cball);
+  
+  const {ball: { position }, waypoint: {value: waypoint}} = cball;
+  const normalized = {...waypoint};
 
-  const {ball: { position }} = cball;
-  position.x += delta.x;
-  position.y += delta.y;
+  subtract(normalized, position);
+  toUnit(normalized);
+  scale(normalized, 1.5);
+
+  position.x += normalized.x;
+  position.y += normalized.y;
 }

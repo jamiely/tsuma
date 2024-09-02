@@ -12,7 +12,7 @@ import {
 } from "./types";
 import { distance, randomColor, scale, subtract, toUnit } from "./util";
 
-const HIDDEN_BALL_COLOR = SUPER_LIGHT_GRAY;
+const HIDDEN_BALL_COLOR = 'black' as const;
 
 const createChain = ({
   game,
@@ -25,9 +25,10 @@ const createChain = ({
   headPosition: Point;
   waypointPath: WaypointPath;
 }): Chain => {
+  const startingWaypoint = waypointPath.start.next!
   const head: ChainedBall = {
     collidable: false,
-    waypoint: waypointPath.start,
+    waypoint: startingWaypoint,
     ball: {
       position: {...waypointPath.start.value},
       prevPosition: headPosition,
@@ -42,7 +43,7 @@ const createChain = ({
     subtract(position, { x: game.ballRadius * 2, y: 0 });
     const cball: ChainedBall = {
       collidable: !isFoot,
-      waypoint: waypointPath.start,
+      waypoint: startingWaypoint,
       ball: {
         position,
         prevPosition: position,
