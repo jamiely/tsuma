@@ -1,5 +1,13 @@
 import { stepMovement } from "./movement";
-import { Ball, Chain, ChainedBall, Game, Launcher, Point } from "./types";
+import {
+  Ball,
+  Chain,
+  ChainedBall,
+  FreeBall,
+  Game,
+  Launcher,
+  Point,
+} from "./types";
 import { distance, randomColor, scale, subtract, toUnit } from "./util";
 
 const createChain = ({
@@ -15,25 +23,27 @@ const createChain = ({
     ball: {
       position: headPosition,
       prevPosition: headPosition,
-      color: randomColor(),
-    }
-  }
+      color: "black",
+    },
+  };
   let previous = head;
-  for(let i = 1; i < length; i++) {
-    const position = {...previous.ball.position};
-    subtract(position, {x: game.ballRadius * 2, y: 0});
+
+  for (let i = 0; i <= length; i++) {
+    const isFoot = i === length;
+    const position = { ...previous.ball.position };
+    subtract(position, { x: game.ballRadius * 2, y: 0 });
     const cball: ChainedBall = {
       ball: {
         position,
         prevPosition: position,
-        color: randomColor(),
+        color: isFoot ? "black" : randomColor(),
       },
       previous,
-    }
+    };
     previous.next = cball;
     previous = cball;
   }
-  return {head};
+  return { head, foot: previous };
 };
 
 export const createGame = (): Game => {
@@ -57,16 +67,15 @@ export const createGame = (): Game => {
 
   const chain1 = createChain({
     game,
-    headPosition: {x: 200, y: 200},
-    length: 6
-  })
-  
+    headPosition: { x: 200, y: 200 },
+    length: 6,
+  });
+
   const chain2 = createChain({
     game,
-    headPosition: {x: 30, y: 30},
-    length: 3
-  })
-
+    headPosition: { x: 30, y: 30 },
+    length: 3,
+  });
 
   game.chains.push(chain1, chain2);
 
@@ -98,6 +107,15 @@ export function step(game: Game) {
 }
 
 function handleCollisions(game: Game) {
+  // if a launched ball collides with a ball in a chain,
+  // the launched ball should be merged into the chain.
+  // it should become part of the chain between the two
+  // balls it is closest to in the chain.
+  //
+  // on collision, figure out whether the launched ball is
+  // closer to the previous or next ball in the chain. Insert
+  // between the balls it is closest to.
+
   const { chains, freeBalls } = game;
 
   const diameter = game.ballRadius * 2;
@@ -113,14 +131,45 @@ function handleCollisions(game: Game) {
     // slow
     outer: for (let i = freeBalls.length - 1; i >= 0; i--) {
       for (let k = chains.length - 1; k >= 0; k--) {
-        const ball = chains[k].head.ball;
-        if (!didCollide(freeBalls[i], ball)) continue;
+        let cball: ChainedBall | undefined = chains[k].head
 
-        freeBalls.splice(i, 1);
-        // there is no head now, but later the head will be adjusted
-        chains.splice(k, 1);
-        hasCollision = true;
-        break outer;
+        while(cball) {
+          // cannot collide with black balls
+          if (cball.ball.color === "black" ||
+            !didCollide(freeBalls[i], cball.ball)) {
+            cball = cball.next;
+            continue;
+          }
+
+          // figure out whether the free ball is closer to prev or next
+          const distPrev = cball.previous ? distance(freeBalls[i].position, cball.previous.ball.position) : undefined;
+          const distNext = cball.next ? distance(freeBalls[i].position, cball.next.ball.position) : undefined;
+          const insertPrevious = distPrev && distNext && distPrev < distNext;
+
+          const {position, color} = freeBalls[i];
+          const newBall: ChainedBall = {
+            ball: {
+              color,
+              position,
+              prevPosition: position,
+            },
+          }
+          if(insertPrevious) {
+            newBall.previous = cball.previous;
+            newBall.next = cball;
+            cball.previous!.next = newBall;
+            cball.previous = newBall;
+          } else {
+            newBall.previous = cball;
+            newBall.next = cball.next;
+            cball.next!.previous = newBall;
+            cball.next = newBall;
+          }
+          
+          freeBalls.splice(i, 1);
+          hasCollision = true;
+          break outer;
+        }
       }
     }
   } while (hasCollision);

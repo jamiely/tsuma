@@ -16,7 +16,7 @@ export interface Rectangle extends HasPosition {
   size: Size;
 }
 
-export type Color = "red" | "blue" | "green" | "yellow" | "purple";
+export type Color = "red" | "blue" | "green" | "yellow" | "purple" | "black";
 
 export interface Ball extends HasPosition {
   color: Color;
@@ -35,6 +35,7 @@ export interface ChainedBall {
 
 export interface Chain {
   head: ChainedBall;
+  foot: ChainedBall;
 }
 
 export interface Game {
