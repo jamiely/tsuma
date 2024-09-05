@@ -61,14 +61,21 @@ export interface Chain {
   inserting: 0;
 }
 
+
+
 export interface Game {
-  chainedBallSpeed: number;
+  options: {
+    chainedBallSpeed: number;
+    launchedBallSpeed: number;
+    firingDelay: number;
+  },
   chains: Chain[];
   launcher: Launcher;
   freeBalls: FreeBall[];
   ballRadius: number;
   bounds: Rectangle;
   paths: WaypointPath[];
+  lastFire: number;
 }
 
 export interface Launcher extends Ball {

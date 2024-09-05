@@ -58,7 +58,11 @@ const createChain = ({
 
 export const createGame = (): Game => {
   const game: Game = {
-    chainedBallSpeed: 1.5,
+    options: {
+      chainedBallSpeed: 1.5,
+      launchedBallSpeed: 2,
+      firingDelay: 600,
+    },
     ballRadius: 10,
     chains: [],
     launcher: {
@@ -74,6 +78,7 @@ export const createGame = (): Game => {
       size: { width: 800, height: 400 },
     },
     paths: [],
+    lastFire: 0,
   };
 
   const waypointPath = createWaypointPathCustom(sinPath(game, 100));
@@ -100,7 +105,15 @@ const launcherVelocity = ({ pointTo, position, launcherSpeed }: Launcher) => {
   return velocity;
 };
 
-export const launchBall = ({ launcher, freeBalls }: Game) => {
+export const launchBall = (game: Game) => {
+  const { launcher, freeBalls } = game;
+
+  const now = Date.now();
+
+  if(now - game.lastFire < game.options.firingDelay) return;
+
+  game.lastFire = now;
+
   freeBalls.push({
     position: { ...launcher.position },
     prevPosition: { ...launcher.position },

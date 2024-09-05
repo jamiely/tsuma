@@ -5,7 +5,16 @@
 
 import { ballsCollide } from "./collision";
 import { Chain, ChainedBall, Game } from "./types";
-import { distance, inBounds, scale, subtract, toUnit } from "./util";
+import {
+  add,
+  distance,
+  inBounds,
+  magnitude,
+  scale,
+  setPoint,
+  subtract,
+  toUnit,
+} from "./util";
 
 export function stepMovement(game: Game) {
   stepChains(game);
@@ -64,7 +73,7 @@ function stepInsertingChainBall({
     chainedBall
   );
 
-  if (
+  while (
     chainedBall.previous &&
     ballsCollide(game)(chainedBall.ball, chainedBall.previous.ball)
   ) {
@@ -74,7 +83,7 @@ function stepInsertingChainBall({
       updatePositionTowardsWaypoint(current, game);
       current = current.previous;
     }
-    console.log('updatePositionTowardsWaypoint');
+    console.log("updatePositionTowardsWaypoint");
   }
 
   if (!insertionComplete) return;
@@ -121,7 +130,7 @@ export function updatePositionTowardsWaypoint(cball: ChainedBall, game: Game) {
 
   subtract(normalized, position);
   toUnit(normalized);
-  scale(normalized, game.chainedBallSpeed);
+  scale(normalized, game.options.chainedBallSpeed);
 
   position.x += normalized.x;
   position.y += normalized.y;
@@ -142,7 +151,8 @@ function updatePositionTowardsInsertion(
     insertion,
   } = cball;
 
-  if (!insertion) throw 'do not call updatePositionTowardsInsertion unless inserting';
+  if (!insertion)
+    throw "do not call updatePositionTowardsInsertion unless inserting";
 
   const { position: insertAt } = insertion;
 
@@ -151,10 +161,25 @@ function updatePositionTowardsInsertion(
 
   subtract(normalized, position);
   toUnit(normalized);
-  scale(normalized, game.chainedBallSpeed);
+  scale(normalized, game.options.launchedBallSpeed);
 
-  position.x += normalized.x;
-  position.y += normalized.y;
+  const newPos = { ...position };
+  const newPosCopy = { ...newPos }
+  const posCopy = { ...position };
+  add(newPos, normalized);
+  subtract(newPosCopy, insertAt);
+  subtract(posCopy, insertAt);
+  if (
+    magnitude(newPosCopy) >
+    magnitude(posCopy)
+  ) {
+    // we overshot the insertion point
+    setPoint(position, insertAt);
+  }
+  else {
+    setPoint(position, newPos);
+  }
+  
 
   const DISTANCE_DELTA = 1;
   const dist = distance(insertAt, position);

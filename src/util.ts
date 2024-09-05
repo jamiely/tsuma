@@ -39,6 +39,11 @@ export const toUnit = (pt: Point) => {
   pt.y /= mag;
 };
 
+export const setPoint = (dest: Point, src: Point) => {
+  dest.x = src.x;
+  dest.y = src.y;
+}
+
 // via chat GPT
 export function getIntersection(
   A: Point, B: Point,
