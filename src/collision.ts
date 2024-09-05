@@ -1,16 +1,16 @@
 import { Ball, ChainedBall, Game } from "./types";
 import { distance, getIntersection } from "./util";
 
-export function handleCollisions(game: Game) {
-  // if a launched ball collides with a ball in a chain,
-  // the launched ball should be merged into the chain.
-  // it should become part of the chain between the two
-  // balls it is closest to in the chain.
-  //
-  // on collision, figure out whether the launched ball is
-  // closer to the previous or next ball in the chain. Insert
-  // between the balls it is closest to.
+// when a launched ball collides with a chain, 
+// there are 3 things that happen.
+// 1. the chain stops moving for some period of time
+// 2. if the launched ball enters between two balls
+//    in the chain, then it inserts itself between those
+//    two balls, pushing everything ahead of it forward.
+// 3. if the launched ball enters at the beginning or end
+//    the line, nothing gets pushed.
 
+export function handleCollisions(game: Game) {
   const { chains, freeBalls } = game;
 
   const didCollide = ballsCollide(game);
@@ -31,6 +31,8 @@ export function handleCollisions(game: Game) {
             continue;
           }
 
+          chains[k].inserting++;
+
           // figure out whether the free ball is closer to prev or next
           const distPrev = cball.previous
             ? distance(freeBalls[i].position, cball.previous.ball.position)
@@ -49,40 +51,35 @@ export function handleCollisions(game: Game) {
               prevPosition: position,
             },
             waypoint: cball.waypoint,
-            inserting: true,
+            insertion: {
+              position,
+            }
           };
 
-          let otherBall = cball.next;
-          if (insertPrevious) {
-            otherBall = cball.previous;
+          let frontBall = cball.previous;
             newBall.previous = cball.previous;
             newBall.next = cball;
             cball.previous!.next = newBall;
-            cball.previous = newBall;
-          } else {
-            newBall.previous = cball;
-            newBall.next = cball.next;
-            cball.next!.previous = newBall;
-            cball.next = newBall;
-          }
+            cball.previous = newBall
+          // let frontBall = cball.next;
+          // if (insertPrevious) {
+          //   frontBall = cball.previous;
+          //   newBall.previous = cball.previous;
+          //   newBall.next = cball;
+          //   cball.previous!.next = newBall;
+          //   cball.previous = newBall;
+          // } else {
+          //   newBall.previous = cball;
+          //   newBall.next = cball.next;
+          //   cball.next!.previous = newBall;
+          //   cball.next = newBall;
+          // }
 
-          if (otherBall) {
-            const intersection = getIntersection(
-              cball.ball.position,
-              otherBall.ball.position,
-              position,
-              prevPosition
-            );
-            if (intersection) {
-              newBall.ball.position = intersection;
-              newBall.ball.prevPosition = { ...intersection };
-            }
+          if (frontBall) {
+            // this is where the ball will end up
+            newBall.waypoint = frontBall.waypoint;
+            newBall.insertion!.position = {...frontBall.ball.position};
           }
-
-          // go up and down the chain from the new ball, pushing
-          // out the balls until they don't collid
-          // if(newBall.previous) moveBackwards(game, newBall.previous);
-          // moveForwards(newBall.next);
 
           freeBalls.splice(i, 1);
           hasCollision = true;
@@ -93,7 +90,7 @@ export function handleCollisions(game: Game) {
   } while (hasCollision);
 }
 
-const ballsCollide = (game: Game) => {
+export const ballsCollide = (game: Game) => {
   const diameter = game.ballRadius * 2;
   return (ball1: Ball, ball2: Ball) => {
     return diameter > distance(ball1.position, ball2.position);

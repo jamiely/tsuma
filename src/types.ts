@@ -40,19 +40,25 @@ export interface FreeBall extends Ball {
   velocity: Point;
 }
 
+interface Insertion {
+  position: Point;
+}
+
 export interface ChainedBall {
   ball: Ball;
   collidable: boolean;
   previous?: ChainedBall;
   next?: ChainedBall;
   waypoint?: Node<Point>;
-  inserting?: boolean;
+  insertion?: Insertion;
 }
 
 export interface Chain {
   path: WaypointPath;
   head: ChainedBall;
   foot: ChainedBall;
+  // positive if we are inserting a ball into the chain
+  inserting: 0;
 }
 
 export interface Game {

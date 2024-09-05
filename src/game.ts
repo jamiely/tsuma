@@ -54,7 +54,7 @@ const createChain = ({
     previous.next = cball;
     previous = cball;
   }
-  return { head, foot: previous, path: waypointPath };
+  return { head, foot: previous, path: waypointPath, inserting: 0 };
 };
 
 export const createGame = (): Game => {
@@ -77,13 +77,13 @@ export const createGame = (): Game => {
     paths: [],
   };
 
-  const waypointPath = createWaypointPathCustom(sinPath(game));
+  const waypointPath = createWaypointPathCustom(sinPath(game, 100));
   game.paths.push(waypointPath);
 
   const chain1 = createChain({
     game,
     headPosition: { x: 200, y: 200 },
-    length: 3,
+    length: 8,
     waypointPath,
   });
 
