@@ -181,7 +181,7 @@ function updatePositionTowardsInsertion(
   }
   
 
-  const DISTANCE_DELTA = 1;
+  const DISTANCE_DELTA = Math.max(1, game.options.launchedBallSpeed / 2);
   const dist = distance(insertAt, position);
   if (dist < DISTANCE_DELTA) {
     // insertion is over once we reach the expected point

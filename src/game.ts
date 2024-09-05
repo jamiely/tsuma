@@ -57,11 +57,12 @@ const createChain = ({
 };
 
 export const createGame = (): Game => {
+  const launchedBallSpeed = 4;
   const game: Game = {
     options: {
       chainedBallSpeed: 1.5,
-      launchedBallSpeed: 2,
-      firingDelay: 600,
+      launchedBallSpeed,
+      firingDelay: 300,
     },
     ballRadius: 10,
     chains: [],
@@ -70,7 +71,7 @@ export const createGame = (): Game => {
       position: { x: 300, y: 300 },
       pointTo: { x: 0, y: 0 },
       color: "purple",
-      launcherSpeed: 2,
+      launcherSpeed: launchedBallSpeed,
     },
     freeBalls: [],
     bounds: {
