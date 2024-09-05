@@ -52,7 +52,7 @@ function setPreviousPosition({ball: {prevPosition, position}}: ChainedBall) {
   prevPosition.y = position.y;
 }
 
-function updatePositionTowardsWaypoint(cball: ChainedBall, game: Game) {
+export function updatePositionTowardsWaypoint(cball: ChainedBall, game: Game) {
   setPreviousPosition(cball);
   
   if(! cball.waypoint) return;

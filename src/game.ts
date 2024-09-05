@@ -1,4 +1,4 @@
-import { stepMovement } from "./movement";
+import { stepMovement, updatePositionTowardsWaypoint } from "./movement";
 import { createWaypointPathCustom, sinPath } from "./path";
 import {
   Ball,
@@ -10,7 +10,7 @@ import {
   SUPER_LIGHT_GRAY,
   WaypointPath,
 } from "./types";
-import { distance, randomColor, scale, subtract, toUnit } from "./util";
+import { distance, getIntersection, randomColor, scale, subtract, toUnit } from "./util";
 
 const HIDDEN_BALL_COLOR = SUPER_LIGHT_GRAY;
 
@@ -24,13 +24,13 @@ const createChain = ({
   headPosition: Point;
   waypointPath: WaypointPath;
 }): Chain => {
-  const startingWaypoint = waypointPath.start.next!
+  const startingWaypoint = waypointPath.start.next!;
   const head: ChainedBall = {
     collidable: false,
     waypoint: startingWaypoint,
     ball: {
-      position: {...waypointPath.start.value},
-      prevPosition: {...waypointPath.start.value},
+      position: { ...waypointPath.start.value },
+      prevPosition: { ...waypointPath.start.value },
       color: HIDDEN_BALL_COLOR,
     },
   };
@@ -39,7 +39,7 @@ const createChain = ({
   for (let i = 0; i <= length; i++) {
     const isFoot = i === length;
     const position = { ...previous.ball.position };
-    subtract(position, { x: game.ballRadius * 2, y: 0 });
+    subtract(position, { x: game.ballRadius * 2 + 2, y: 0 });
     const cball: ChainedBall = {
       collidable: !isFoot,
       waypoint: startingWaypoint,
@@ -76,7 +76,7 @@ export const createGame = (): Game => {
     paths: [],
   };
 
-  const waypointPath = createWaypointPathCustom(sinPath(game))
+  const waypointPath = createWaypointPathCustom(sinPath(game));
   game.paths.push(waypointPath);
 
   const chain1 = createChain({
@@ -147,7 +147,6 @@ function handleCollisions(game: Game) {
         let cball: ChainedBall | undefined = chains[k].head;
 
         while (cball) {
-          // cannot collide with black balls
           if (!cball.collidable || !didCollide(freeBalls[i], cball.ball)) {
             cball = cball.next;
             continue;
@@ -162,7 +161,7 @@ function handleCollisions(game: Game) {
             : undefined;
           const insertPrevious = distPrev && distNext && distPrev < distNext;
 
-          const { position, color } = freeBalls[i];
+          const { position, color, prevPosition } = freeBalls[i];
           const newBall: ChainedBall = {
             collidable: true,
             ball: {
@@ -171,8 +170,12 @@ function handleCollisions(game: Game) {
               prevPosition: position,
             },
             waypoint: cball.waypoint,
+            inserting: true,
           };
+
+          let otherBall = cball.next;
           if (insertPrevious) {
+            otherBall = cball.previous;
             newBall.previous = cball.previous;
             newBall.next = cball;
             cball.previous!.next = newBall;
@@ -182,6 +185,18 @@ function handleCollisions(game: Game) {
             newBall.next = cball.next;
             cball.next!.previous = newBall;
             cball.next = newBall;
+          }
+
+
+          if(otherBall) {
+            const intersection = getIntersection(
+              cball.ball.position, otherBall.ball.position,
+              position, prevPosition,
+            )
+            if(intersection) {
+              newBall.ball.position = intersection;
+              newBall.ball.prevPosition = {...intersection};
+            }
           }
 
           // go up and down the chain from the new ball, pushing

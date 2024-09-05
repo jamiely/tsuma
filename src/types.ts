@@ -46,6 +46,7 @@ export interface ChainedBall {
   previous?: ChainedBall;
   next?: ChainedBall;
   waypoint?: Node<Point>;
+  inserting?: boolean;
 }
 
 export interface Chain {
