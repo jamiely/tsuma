@@ -1,7 +1,7 @@
 import { Ball, ChainedBall, Game } from "./types";
-import { distance, getIntersection } from "./util";
+import { distance } from "./util";
 
-// when a launched ball collides with a chain, 
+// when a launched ball collides with a chain,
 // there are 3 things that happen.
 // 1. the chain stops moving for some period of time
 // 2. if the launched ball enters between two balls
@@ -33,16 +33,7 @@ export function handleCollisions(game: Game) {
 
           chains[k].inserting++;
 
-          // figure out whether the free ball is closer to prev or next
-          const distPrev = cball.previous
-            ? distance(freeBalls[i].position, cball.previous.ball.position)
-            : undefined;
-          const distNext = cball.next
-            ? distance(freeBalls[i].position, cball.next.ball.position)
-            : undefined;
-          const insertPrevious = distPrev && distNext && distPrev < distNext;
-
-          const { position, color, prevPosition } = freeBalls[i];
+          const { position, color } = freeBalls[i];
           const newBall: ChainedBall = {
             collidable: true,
             ball: {
@@ -53,32 +44,19 @@ export function handleCollisions(game: Game) {
             waypoint: cball.waypoint,
             insertion: {
               position,
-            }
+            },
           };
 
           let frontBall = cball.previous;
-            newBall.previous = cball.previous;
-            newBall.next = cball;
-            cball.previous!.next = newBall;
-            cball.previous = newBall
-          // let frontBall = cball.next;
-          // if (insertPrevious) {
-          //   frontBall = cball.previous;
-          //   newBall.previous = cball.previous;
-          //   newBall.next = cball;
-          //   cball.previous!.next = newBall;
-          //   cball.previous = newBall;
-          // } else {
-          //   newBall.previous = cball;
-          //   newBall.next = cball.next;
-          //   cball.next!.previous = newBall;
-          //   cball.next = newBall;
-          // }
+          newBall.previous = cball.previous;
+          newBall.next = cball;
+          cball.previous!.next = newBall;
+          cball.previous = newBall;
 
           if (frontBall) {
             // this is where the ball will end up
             newBall.waypoint = frontBall.waypoint;
-            newBall.insertion!.position = {...frontBall.ball.position};
+            newBall.insertion!.position = { ...frontBall.ball.position };
           }
 
           freeBalls.splice(i, 1);

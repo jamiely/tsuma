@@ -1,8 +1,7 @@
 import { handleCollisions } from "./collision";
-import { stepMovement, updatePositionTowardsWaypoint } from "./movement";
+import { stepMovement } from "./movement";
 import { createWaypointPathCustom, sinPath } from "./path";
 import {
-  Ball,
   Chain,
   ChainedBall,
   Game,
@@ -11,7 +10,7 @@ import {
   SUPER_LIGHT_GRAY,
   WaypointPath,
 } from "./types";
-import { distance, getIntersection, randomColor, scale, subtract, toUnit } from "./util";
+import { randomColor, scale, subtract, toUnit } from "./util";
 
 const HIDDEN_BALL_COLOR = SUPER_LIGHT_GRAY;
 
