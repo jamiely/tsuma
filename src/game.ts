@@ -1,7 +1,7 @@
 import { handleCollisions } from "./collision";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
-import { archimedeanSpiral, createWaypointPathCustom, simplify, sinPath } from "./path";
+import { archimedeanSpiral, createWaypointPathCustom, simplify} from "./path";
 import {
   Chain,
   ChainedBall,
@@ -61,7 +61,6 @@ export const createGame = (): Game => {
     lastFire: 0,
   };
 
-  // const waypointPath = createWaypointPathCustom(simplify(10, sinPath(game, -10)));
   const waypointPath = createWaypointPathCustom(simplify(10, archimedeanSpiral({game})));
   game.paths.push(waypointPath);
 
