@@ -26,7 +26,7 @@ export function handleCollisions(game: Game) {
         let cball: ChainedBall | undefined = chains[k].head;
 
         while (cball) {
-          if (!cball.collidable || !didCollide(freeBalls[i], cball.ball)) {
+          if (!didCollide(freeBalls[i], cball.ball)) {
             cball = cball.next;
             continue;
           }
@@ -35,7 +35,6 @@ export function handleCollisions(game: Game) {
 
           const { position, color } = freeBalls[i];
           const newBall: ChainedBall = {
-            collidable: true,
             ball: {
               color,
               position,

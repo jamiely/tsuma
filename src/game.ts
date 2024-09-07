@@ -8,25 +8,18 @@ import {
   Game,
   Launcher,
   Point,
-  SUPER_LIGHT_GRAY,
   WaypointPath,
 } from "./types";
 import { distance, randomColor, scale, subtract, toUnit } from "./util";
 
 const createChain = ({
-  game,
-  length,
   waypointPath,
 }: {
-  length: number;
-  game: Game;
-  headPosition: Point;
   waypointPath: WaypointPath;
 }): Chain => {
   const startingWaypoint = waypointPath.start.next!;
   const startingPosition = waypointPath.start.value;
   const chainedBall: ChainedBall = {
-    collidable: true,
     waypoint: startingWaypoint,
     ball: {
       position: { ...startingPosition },
@@ -73,9 +66,6 @@ export const createGame = (): Game => {
   game.paths.push(waypointPath);
 
   const chain1 = createChain({
-    game,
-    headPosition: { x: 200, y: 200 },
-    length: 12,
     waypointPath,
   });
 
@@ -132,7 +122,6 @@ function appendToChain(game: Game, chain: Chain) {
   // the last ball has cleared, so create another one
 
   const chainedBall: ChainedBall = {
-    collidable: true,
     waypoint: path.start.next!,
     ball: {
       position: { ...path.start.value },

@@ -18,9 +18,7 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   for (let i = 0; i < chains.length; i++) {
     let current: ChainedBall | undefined = chains[i].head;
     while (current) {
-      // if(current.collidable) {
-        renderBall(context, ballRadius)(current.ball);
-      // }
+      renderBall(context, ballRadius)(current.ball);
       current = current.next;
     }
   }

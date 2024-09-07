@@ -46,7 +46,6 @@ interface Insertion {
 
 export interface ChainedBall {
   ball: Ball;
-  collidable: boolean;
   previous?: ChainedBall;
   next?: ChainedBall;
   waypoint?: Node<Point>;

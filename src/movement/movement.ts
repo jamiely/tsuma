@@ -116,15 +116,6 @@ export function stepNormalChain(game: Game, chain: Chain) {
     current = current.previous;
   }
   
-  // updatePositionTowardsWaypoint(chain.head, game);
-
-  // let current: ChainedBall | undefined = chain.head.next;
-  // while (current) {
-  //   updatePositionTowardsWaypoint(current, game);
-
-  //   current = current.next;
-  // }
-
   if (!inBounds(chain.head.ball.position, game.bounds) || !chain.head.waypoint) {
     const next = chain.head.next;
     if (next) {
