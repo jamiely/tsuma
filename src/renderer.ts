@@ -1,4 +1,4 @@
-import { Ball, Node, ChainedBall, Game, Point, Color } from "./types";
+import { Node, ChainedBall, Game, Point, Color } from "./types";
 import { add, scale, subtract, toUnit } from "./util";
 
 export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {

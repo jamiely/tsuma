@@ -1,13 +1,12 @@
 import { handleCollisions } from "./collision";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
-import { createWaypointPathCustom, sinPath } from "./path";
+import { createWaypointPathCustom, simplify, sinPath } from "./path";
 import {
   Chain,
   ChainedBall,
   Game,
   Launcher,
-  Point,
   WaypointPath,
 } from "./types";
 import { distance, randomColor, scale, subtract, toUnit } from "./util";
@@ -62,7 +61,7 @@ export const createGame = (): Game => {
     lastFire: 0,
   };
 
-  const waypointPath = createWaypointPathCustom(sinPath(game, -10));
+  const waypointPath = createWaypointPathCustom(simplify(10, sinPath(game, -10)));
   game.paths.push(waypointPath);
 
   const chain1 = createChain({
@@ -148,5 +147,4 @@ function nextColor(chain: Chain) {
 
     return nextColor;
   } while(true);
-
 }

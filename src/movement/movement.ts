@@ -27,6 +27,7 @@ export function stepFreeBalls(game: Game) {
     ball.position.y += ball.velocity.y;
   });
 
+  // remove any balls that go out of bounds
   for (let i = game.freeBalls.length - 1; i >= 0; i--) {
     if (inBounds(game.freeBalls[i].position, game.bounds)) continue;
 
@@ -51,7 +52,7 @@ function stepChain(game: Game, chain: Chain) {
 
   if (chain.pauseStepsAfterMatch && chain.pauseStepsAfterMatch > 0) {
     chain.pauseStepsAfterMatch--;
-    if(chain.pauseStepsAfterMatch <= 0) {
+    if (chain.pauseStepsAfterMatch <= 0) {
       chain.pauseStepsAfterMatch = undefined;
     }
     return;
@@ -92,10 +93,9 @@ export function stepInsertingChainBall({
     // now push the chain forward in front of the ball
     let current: ChainedBall | undefined = chainedBall.previous;
     while (current) {
-      updatePositionTowardsWaypoint(current, game);
+      updatePositionTowardsWaypoint({ chainedBall: current, chain, game });
       current = current.previous;
     }
-    console.log("updatePositionTowardsWaypoint");
   }
 
   if (!insertionComplete) return;
@@ -104,24 +104,30 @@ export function stepInsertingChainBall({
 }
 
 export function stepNormalChain(game: Game, chain: Chain) {
-  updatePositionTowardsWaypoint(chain.foot, game);
+  updatePositionTowardsWaypoint({ chainedBall: chain.foot, chain, game });
 
+  // after moving the foot, push along the next ball until it's
+  // not colliding with the foot anymore. Continue the process
+  // until the head.
   const areColliding = ballsCollide(game);
   let current: ChainedBall | undefined = chain.foot.previous;
-  while(current) {
-    while(current && current.next && areColliding(current.ball, current.next.ball)) {
-      updatePositionTowardsWaypoint(current, game);
+  while (current) {
+    while (
+      current &&
+      current.next &&
+      areColliding(current.ball, current.next.ball)
+    ) {
+      const { ballRemoved } = updatePositionTowardsWaypoint({
+        chainedBall: current,
+        chain,
+        game,
+      });
+      if (ballRemoved) {
+        break;
+      }
     }
 
     current = current.previous;
-  }
-  
-  if (!inBounds(chain.head.ball.position, game.bounds) || !chain.head.waypoint) {
-    const next = chain.head.next;
-    if (next) {
-      chain.head = next;
-      chain.head.previous = undefined;
-    }
   }
 }
 
@@ -132,15 +138,26 @@ export function setPreviousPosition({
   prevPosition.y = position.y;
 }
 
-export function updatePositionTowardsWaypoint(cball: ChainedBall, game: Game) {
-  setPreviousPosition(cball);
+export function updatePositionTowardsWaypoint({
+  chainedBall,
+  chain,
+  game,
+}: {
+  chainedBall: ChainedBall;
+  chain: Chain;
+  game: Game;
+}): { ballRemoved: boolean } {
+  setPreviousPosition(chainedBall);
 
-  if (!cball.waypoint) return;
+  if (!chainedBall.waypoint) {
+    removeBall(chain, chainedBall);
+    return { ballRemoved: true };
+  }
 
   const {
     ball: { position },
     waypoint: { value: waypoint },
-  } = cball;
+  } = chainedBall;
   const normalized = { ...waypoint };
 
   subtract(normalized, position);
@@ -153,7 +170,25 @@ export function updatePositionTowardsWaypoint(cball: ChainedBall, game: Game) {
   const DISTANCE_DELTA = 1;
   const dist = distance(waypoint, position);
   if (dist < DISTANCE_DELTA) {
-    cball.waypoint = cball.waypoint.next;
+    chainedBall.waypoint = chainedBall.waypoint.next;
+    if (!chainedBall.waypoint) {
+      removeBall(chain, chainedBall);
+      return { ballRemoved: true };
+    }
+  }
+
+  return { ballRemoved: false };
+}
+
+function removeBall(chain: Chain, chainedBall: ChainedBall) {
+  if (chain.head === chainedBall && chainedBall.next) {
+    chain.head = chainedBall.next;
+  }
+  if (chainedBall.previous) {
+    chainedBall.previous.next = chainedBall.next;
+  }
+  if (chainedBall.next) {
+    chainedBall.next.previous = chainedBall.previous;
   }
 }
 
