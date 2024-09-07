@@ -1,4 +1,4 @@
-import { Node, ChainedBall, Game, Point, Color } from "./types";
+import { Node, ChainedBall, Game, Point } from "./types";
 import { add, scale, subtract, toUnit } from "./util";
 
 export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
@@ -44,6 +44,7 @@ const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) =>
       if (previous) {
         context.beginPath();
         context.setLineDash([5, 15]);
+        context.lineWidth = 1;
         context.moveTo(previous.value.x, previous.value.y);
         context.lineTo(current.value.x, current.value.y);
         context.strokeStyle = "lightgray";
@@ -54,12 +55,23 @@ const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) =>
       current = current.next;
     }
 
-    renderBall(context, game.ballRadius + 5)({position: previous!.value, color: 'black'})
+    if(!previous?.value) return;
+
+    context.beginPath();
+    const {x, y} = previous.value;
+    context.arc(x, y, game.ballRadius + 5, 0, TwoPI);
+    context.fillStyle = 'black';
+    context.fill();
+    context.strokeStyle = 'SlateGray';
+    context.lineWidth = 4;
+    context.setLineDash([]);
+    context.arc(x, y, game.ballRadius + 5, 0, TwoPI);
+    context.stroke();
   });
 
 const renderBall =
   (context: CanvasRenderingContext2D, ballRadius: number) =>
-  ({ position: { x, y }, color }: {position: Point, color: Color}) => {
+  ({ position: { x, y }, color }: {position: Point, color: string}) => {
     context.beginPath();
     context.arc(x, y, ballRadius, 0, TwoPI);
     context.fillStyle = color;
@@ -68,9 +80,8 @@ const renderBall =
 
 
 const renderLauncher = (context: CanvasRenderingContext2D, game: Game) => {
-  const launcherLength = game.ballRadius * 2;
+  const launcherLength = game.ballRadius * 1.5;
   const launcher = game.launcher;
-  renderBall(context, game.ballRadius)(launcher);
 
   const { position, pointTo } = launcher;
   const normalized = { ...pointTo };
@@ -81,8 +92,14 @@ const renderLauncher = (context: CanvasRenderingContext2D, game: Game) => {
 
   context.beginPath();
   context.setLineDash([]);
+  context.lineWidth = 10;
+  context.lineCap = "round";
   context.strokeStyle = "black";
   context.moveTo(position.x, position.y);
   context.lineTo(normalized.x, normalized.y);
   context.stroke();
+
+  renderBall(context, game.ballRadius)(launcher);
+
+  context.lineCap = "butt";
 };

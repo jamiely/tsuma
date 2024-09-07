@@ -52,7 +52,7 @@ export const createGame = (): Game => {
     launcher: {
       position: { x: 0, y: 0 },
       pointTo: { x: 0, y: 0 },
-      color: "purple",
+      color: randomColor(),
       launcherSpeed: launchedBallSpeed,
     },
     freeBalls: [],

@@ -1,6 +1,6 @@
 import { Color, Point, Rectangle } from "./types";
 
-const colors: Color[] = ["red", "green", "blue", "gold", "purple"];
+const colors: Color[] = ["red", "green", "blue", "gold"];
 export const randomColor = () =>
   colors[Math.floor(Math.random() * colors.length)];
 

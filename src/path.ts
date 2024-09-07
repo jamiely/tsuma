@@ -85,7 +85,7 @@ export const archimedeanSpiral = ({bounds}: {bounds: Rectangle}) => {
     },
     startAngle = Math.PI * 8,
     stopAngle = 5,
-    incrementAngle = Math.PI / 8,
+    incrementAngle = Math.PI / 16,
     origin = {
       x: bounds.size.width / 2,
       y: bounds.size.height / 2,
