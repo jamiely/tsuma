@@ -43,7 +43,7 @@ export const createGame = (): Game => {
       launchedBallSpeed,
       firingDelay: 300,
     },
-    ballRadius: 10,
+    ballRadius: 20,
     chains: [],
     launcher: {
       prevPosition: { x: 300, y: 300 },
