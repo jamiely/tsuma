@@ -69,6 +69,7 @@ export interface Game {
     launchedBallSpeed: number;
     firingDelay: number;
   },
+  ballsLeft: number;
   chains: Chain[];
   launcher: Launcher;
   freeBalls: FreeBall[];

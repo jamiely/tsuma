@@ -6,6 +6,8 @@
 4. When there is a gap in a chain, there are two cases. If
    the balls on each end match in color, then pull the more
    forward chain back onto the other chain.
-5. If the balls do not match color, the backmost chain should
+5. ~~If the balls do not match color, the backmost chain should
    continue forward until it comes into contact with the next
-   chain, then start to push it.
+   chain, then start to push it.~~
+1. When balls reach the hole, you have to start the board over.
+2. ~~There is a limit on the number of balls.~~

@@ -43,6 +43,7 @@ export const createGame = (): Game => {
       launchedBallSpeed,
       firingDelay: 300,
     },
+    ballsLeft: 100,
     ballRadius: 20,
     chains: [],
     launcher: {
@@ -112,6 +113,8 @@ export function step(game: Game) {
 }
 
 function appendToChain(game: Game, chain: Chain) {
+  if(game.ballsLeft <= 0) return;
+
   // we want to spawn a new ball when the foot has cleared the first waypoint.
   const { foot, path } = chain;
 
@@ -134,6 +137,8 @@ function appendToChain(game: Game, chain: Chain) {
   
   // the new ball always becomes the foot
   chain.foot = chainedBall;
+
+  game.ballsLeft--;
 }
 
 function nextColor(chain: Chain) {
