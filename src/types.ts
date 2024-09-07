@@ -29,7 +29,7 @@ export interface WaypointPath {
   end: Node<Point>;
 }
 
-export type Color = "red" | "blue" | "green" | "gold" | "purple" | "black" | "#f8f9f9";
+export type Color = "red" | "blue" | "green" | "gold" | "purple" | "black" | "#f8f9f9" | 'none';
 
 export interface Ball extends HasPosition {
   color: Color;
@@ -59,6 +59,7 @@ export interface Chain {
   foot: ChainedBall;
   // positive if we are inserting a ball into the chain
   inserting: 0;
+  pauseStepsAfterMatch?: number;
 }
 
 

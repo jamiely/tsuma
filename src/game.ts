@@ -1,9 +1,11 @@
 import { handleCollisions } from "./collision";
+import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
 import { createWaypointPathCustom, sinPath } from "./path";
 import {
   Chain,
   ChainedBall,
+  Color,
   Game,
   Launcher,
   Point,
@@ -36,17 +38,33 @@ const createChain = ({
   };
   let previous = head;
 
+  let lastColor: Color = 'none';
+  let colorsInRow = 1;
   for (let i = 0; i <= length; i++) {
     const isFoot = i === length;
     const position = { ...previous.ball.position };
     subtract(position, { x: game.ballRadius * 2 + 2, y: 0 });
+    let color = isFoot ? HIDDEN_BALL_COLOR : randomColor();
+    if(color === lastColor) {
+      colorsInRow++;
+    } else {
+      colorsInRow = 1;
+    }
+    if(colorsInRow > 2) {
+      while(color === lastColor) {
+        color = randomColor();
+      }
+    }
+
+    lastColor = color;
+
     const cball: ChainedBall = {
       collidable: !isFoot,
       waypoint: startingWaypoint,
       ball: {
         position,
         prevPosition: position,
-        color: isFoot ? HIDDEN_BALL_COLOR : randomColor(),
+        color,
       },
       previous,
     };
@@ -60,7 +78,7 @@ export const createGame = (): Game => {
   const launchedBallSpeed = 4;
   const game: Game = {
     options: {
-      chainedBallSpeed: 1.5,
+      chainedBallSpeed: 1,
       launchedBallSpeed,
       firingDelay: 300,
     },
@@ -119,12 +137,16 @@ export const launchBall = (game: Game) => {
     position: { ...launcher.position },
     prevPosition: { ...launcher.position },
     velocity: launcherVelocity(launcher),
-    color: randomColor(),
+    color: launcher.color,
   });
+
+  launcher.color = randomColor();
 };
 
 export function step(game: Game) {
   stepMovement(game);
 
   handleCollisions(game);
+
+  game.chains.forEach(resolveMatches);
 }

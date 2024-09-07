@@ -39,13 +39,25 @@ export function stepChains(game: Game) {
 
   // handle regular movement
   for (let i = 0; i < chains.length; i++) {
-    if (chains[i].inserting) {
-      stepInsertingChain(game, chains[i]);
-      continue;
-    }
-
-    stepNormalChain(game, chains[i]);
+    stepChain(game, chains[i]);
   }
+}
+
+function stepChain(game: Game, chain: Chain) {
+  if (chain.inserting) {
+    stepInsertingChain(game, chain);
+    return;
+  }
+
+  if (chain.pauseStepsAfterMatch && chain.pauseStepsAfterMatch > 0) {
+    chain.pauseStepsAfterMatch--;
+    if(chain.pauseStepsAfterMatch <= 0) {
+      chain.pauseStepsAfterMatch = undefined;
+    }
+    return;
+  }
+
+  stepNormalChain(game, chain);
 }
 
 export function stepInsertingChain(game: Game, chain: Chain) {
@@ -164,22 +176,17 @@ export function updatePositionTowardsInsertion(
   scale(normalized, game.options.launchedBallSpeed);
 
   const newPos = { ...position };
-  const newPosCopy = { ...newPos }
+  const newPosCopy = { ...newPos };
   const posCopy = { ...position };
   add(newPos, normalized);
   subtract(newPosCopy, insertAt);
   subtract(posCopy, insertAt);
-  if (
-    magnitude(newPosCopy) >
-    magnitude(posCopy)
-  ) {
+  if (magnitude(newPosCopy) > magnitude(posCopy)) {
     // we overshot the insertion point
     setPoint(position, insertAt);
-  }
-  else {
+  } else {
     setPoint(position, newPos);
   }
-  
 
   const DISTANCE_DELTA = Math.max(1, game.options.launchedBallSpeed / 2);
   const dist = distance(insertAt, position);
