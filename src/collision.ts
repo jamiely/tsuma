@@ -42,22 +42,23 @@ export function handleCollisions(game: Game) {
               prevPosition: position,
             },
             waypoint: cball.waypoint,
-            insertion: {
-              position,
-            },
           };
 
-          let frontBall = cball.previous;
-          newBall.previous = cball.previous;
+          let frontBall = cball.previous || cball;
+          if(cball.previous) {
+            newBall.previous = cball.previous;
+          } else {
+            chains[k].head = newBall;
+          }
           newBall.next = cball;
-          cball.previous!.next = newBall;
+          if(cball.previous) {
+            cball.previous.next = newBall;
+          }
           cball.previous = newBall;
 
-          if (frontBall) {
-            // this is where the ball will end up
-            newBall.waypoint = frontBall.waypoint;
-            newBall.insertion!.position = { ...frontBall.ball.position };
-          }
+          const targetBall = frontBall || cball;
+          newBall.waypoint = targetBall.waypoint;
+          newBall.insertion = { position: {...targetBall.ball.position} };
 
           freeBalls.splice(i, 1);
           hasCollision = true;

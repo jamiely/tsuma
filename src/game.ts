@@ -5,16 +5,13 @@ import { createWaypointPathCustom, sinPath } from "./path";
 import {
   Chain,
   ChainedBall,
-  Color,
   Game,
   Launcher,
   Point,
   SUPER_LIGHT_GRAY,
   WaypointPath,
 } from "./types";
-import { randomColor, scale, subtract, toUnit } from "./util";
-
-const HIDDEN_BALL_COLOR = SUPER_LIGHT_GRAY;
+import { distance, randomColor, scale, subtract, toUnit } from "./util";
 
 const createChain = ({
   game,
@@ -27,51 +24,23 @@ const createChain = ({
   waypointPath: WaypointPath;
 }): Chain => {
   const startingWaypoint = waypointPath.start.next!;
-  const head: ChainedBall = {
-    collidable: false,
+  const startingPosition = waypointPath.start.next!.value;
+  const chainedBall: ChainedBall = {
+    collidable: true,
     waypoint: startingWaypoint,
     ball: {
-      position: { ...waypointPath.start.value },
-      prevPosition: { ...waypointPath.start.value },
-      color: HIDDEN_BALL_COLOR,
+      position: { ...startingPosition },
+      prevPosition: { ...startingPosition },
+      color: randomColor(),
     },
   };
-  let previous = head;
 
-  let lastColor: Color = 'none';
-  let colorsInRow = 1;
-  for (let i = 0; i <= length; i++) {
-    const isFoot = i === length;
-    const position = { ...previous.ball.position };
-    subtract(position, { x: game.ballRadius * 2 + 2, y: 0 });
-    let color = isFoot ? HIDDEN_BALL_COLOR : randomColor();
-    if(color === lastColor) {
-      colorsInRow++;
-    } else {
-      colorsInRow = 1;
-    }
-    if(colorsInRow > 2) {
-      while(color === lastColor) {
-        color = randomColor();
-      }
-    }
-
-    lastColor = color;
-
-    const cball: ChainedBall = {
-      collidable: !isFoot,
-      waypoint: startingWaypoint,
-      ball: {
-        position,
-        prevPosition: position,
-        color,
-      },
-      previous,
-    };
-    previous.next = cball;
-    previous = cball;
-  }
-  return { head, foot: previous, path: waypointPath, inserting: 0 };
+  return {
+    head: chainedBall,
+    foot: chainedBall,
+    path: waypointPath,
+    inserting: 0,
+  };
 };
 
 export const createGame = (): Game => {
@@ -106,7 +75,7 @@ export const createGame = (): Game => {
   const chain1 = createChain({
     game,
     headPosition: { x: 200, y: 200 },
-    length: 8,
+    length: 12,
     waypointPath,
   });
 
@@ -129,7 +98,7 @@ export const launchBall = (game: Game) => {
 
   const now = Date.now();
 
-  if(now - game.lastFire < game.options.firingDelay) return;
+  if (now - game.lastFire < game.options.firingDelay) return;
 
   game.lastFire = now;
 
@@ -149,4 +118,33 @@ export function step(game: Game) {
   handleCollisions(game);
 
   game.chains.forEach(resolveMatches);
+
+  // game.chains.forEach(chain => appendToChain(game, chain));
+}
+
+function appendToChain(game: Game, chain: Chain) {
+  // we want to spawn a new ball when the foot has cleared the first waypoint.
+  const { foot, path } = chain;
+
+  const dist = distance(foot.previous!.ball.position, path.start.value);
+  if (dist < 2 * game.ballRadius) return;
+
+  // the last ball has cleared, so create another one
+
+  const chainedBall: ChainedBall = {
+    collidable: true,
+    waypoint: path.start,
+    ball: {
+      position: { ...path.start.value },
+      prevPosition: { ...path.start.value },
+      color: randomColor(),
+    },
+    previous: foot.previous,
+    next: foot,
+  };
+
+  console.log("created chained ball color " + chainedBall.ball.color);
+
+  foot.previous!.next = chainedBall;
+  foot.previous = chainedBall;
 }
