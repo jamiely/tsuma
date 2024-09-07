@@ -24,7 +24,7 @@ const createChain = ({
   waypointPath: WaypointPath;
 }): Chain => {
   const startingWaypoint = waypointPath.start.next!;
-  const startingPosition = waypointPath.start.next!.value;
+  const startingPosition = waypointPath.start.value;
   const chainedBall: ChainedBall = {
     collidable: true,
     waypoint: startingWaypoint,
@@ -119,32 +119,45 @@ export function step(game: Game) {
 
   game.chains.forEach(resolveMatches);
 
-  // game.chains.forEach(chain => appendToChain(game, chain));
+  game.chains.forEach(chain => appendToChain(game, chain));
 }
 
 function appendToChain(game: Game, chain: Chain) {
   // we want to spawn a new ball when the foot has cleared the first waypoint.
   const { foot, path } = chain;
 
-  const dist = distance(foot.previous!.ball.position, path.start.value);
+  const dist = distance(foot.ball.position, path.start.value);
   if (dist < 2 * game.ballRadius) return;
 
   // the last ball has cleared, so create another one
 
   const chainedBall: ChainedBall = {
     collidable: true,
-    waypoint: path.start,
+    waypoint: path.start.next!,
     ball: {
       position: { ...path.start.value },
       prevPosition: { ...path.start.value },
-      color: randomColor(),
+      color: nextColor(chain),
     },
-    previous: foot.previous,
-    next: foot,
+    previous: foot,
   };
 
-  console.log("created chained ball color " + chainedBall.ball.color);
+  foot.next = chainedBall;
+  
+  // the new ball always becomes the foot
+  chain.foot = chainedBall;
+}
 
-  foot.previous!.next = chainedBall;
-  foot.previous = chainedBall;
+function nextColor(chain: Chain) {
+  const {foot: {ball: {color}, previous}} = chain;
+  if(! previous) return randomColor();
+  if(color !== previous.ball.color) return randomColor();
+
+  do {
+    const nextColor = randomColor();
+    if(nextColor === color) continue;
+
+    return nextColor;
+  } while(true);
+
 }
