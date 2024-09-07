@@ -11,10 +11,11 @@ export const distance = (pt1: Point, pt2: Point) => {
 };
 
 export const inBounds = (pt: Point, {position, size}: Rectangle) => {
-  if(pt.x < position.x) return false;
-  if(pt.x > position.x + size.width) return false;
-  if(pt.y < position.y) return false;
-  if(pt.y > position.y + size.height) return false;
+  const padding = {x: 20, y: 20};
+  if(pt.x < position.x - padding.x) return false;
+  if(pt.x > position.x + size.width + padding.x) return false;
+  if(pt.y < position.y - padding.y) return false;
+  if(pt.y > position.y + size.height + padding.y) return false;
 
   return true;
 }

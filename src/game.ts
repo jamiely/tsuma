@@ -69,7 +69,7 @@ export const createGame = (): Game => {
     lastFire: 0,
   };
 
-  const waypointPath = createWaypointPathCustom(sinPath(game, 100));
+  const waypointPath = createWaypointPathCustom(sinPath(game, -10));
   game.paths.push(waypointPath);
 
   const chain1 = createChain({
