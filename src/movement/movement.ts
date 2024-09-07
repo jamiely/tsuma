@@ -3,8 +3,8 @@
 // that is in front of them, in a chain. The leader of the
 // chain will follow a pre-specified path.
 
-import { ballsCollide } from "./collision";
-import { Chain, ChainedBall, Game } from "./types";
+import { ballsCollide } from "@/collision";
+import { Chain, ChainedBall, Game } from "@/types";
 import {
   add,
   distance,
@@ -14,14 +14,14 @@ import {
   setPoint,
   subtract,
   toUnit,
-} from "./util";
+} from "@/util";
 
 export function stepMovement(game: Game) {
   stepChains(game);
   stepFreeBalls(game);
 }
 
-function stepFreeBalls(game: Game) {
+export function stepFreeBalls(game: Game) {
   game.freeBalls.forEach((ball) => {
     ball.position.x += ball.velocity.x;
     ball.position.y += ball.velocity.y;
@@ -34,7 +34,7 @@ function stepFreeBalls(game: Game) {
   }
 }
 
-function stepChains(game: Game) {
+export function stepChains(game: Game) {
   const { chains } = game;
 
   // handle regular movement
@@ -48,7 +48,7 @@ function stepChains(game: Game) {
   }
 }
 
-function stepInsertingChain(game: Game, chain: Chain) {
+export function stepInsertingChain(game: Game, chain: Chain) {
   let current: ChainedBall | undefined = chain.head;
   while (current) {
     if (current.insertion) {
@@ -59,7 +59,7 @@ function stepInsertingChain(game: Game, chain: Chain) {
   }
 }
 
-function stepInsertingChainBall({
+export function stepInsertingChainBall({
   game,
   chain,
   chainedBall,
@@ -91,7 +91,7 @@ function stepInsertingChainBall({
   chain.inserting--;
 }
 
-function stepNormalChain(game: Game, chain: Chain) {
+export function stepNormalChain(game: Game, chain: Chain) {
   updatePositionTowardsWaypoint(chain.head, game);
 
   let current: ChainedBall | undefined = chain.head.next;
@@ -110,7 +110,7 @@ function stepNormalChain(game: Game, chain: Chain) {
   }
 }
 
-function setPreviousPosition({
+export function setPreviousPosition({
   ball: { prevPosition, position },
 }: ChainedBall) {
   prevPosition.x = position.x;
@@ -142,7 +142,7 @@ export function updatePositionTowardsWaypoint(cball: ChainedBall, game: Game) {
   }
 }
 
-function updatePositionTowardsInsertion(
+export function updatePositionTowardsInsertion(
   game: Game,
   cball: ChainedBall
 ): { insertionComplete: boolean } {
