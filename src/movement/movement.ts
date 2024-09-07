@@ -104,14 +104,26 @@ export function stepInsertingChainBall({
 }
 
 export function stepNormalChain(game: Game, chain: Chain) {
-  updatePositionTowardsWaypoint(chain.head, game);
+  updatePositionTowardsWaypoint(chain.foot, game);
 
-  let current: ChainedBall | undefined = chain.head.next;
-  while (current) {
-    updatePositionTowardsWaypoint(current, game);
+  const areColliding = ballsCollide(game);
+  let current: ChainedBall | undefined = chain.foot.previous;
+  while(current) {
+    while(current && current.next && areColliding(current.ball, current.next.ball)) {
+      updatePositionTowardsWaypoint(current, game);
+    }
 
-    current = current.next;
+    current = current.previous;
   }
+  
+  // updatePositionTowardsWaypoint(chain.head, game);
+
+  // let current: ChainedBall | undefined = chain.head.next;
+  // while (current) {
+  //   updatePositionTowardsWaypoint(current, game);
+
+  //   current = current.next;
+  // }
 
   if (!inBounds(chain.head.ball.position, game.bounds) || !chain.head.waypoint) {
     const next = chain.head.next;
