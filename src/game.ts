@@ -1,3 +1,4 @@
+import { archimedes, buildBoards } from "./boards";
 import { handleCollisions } from "./collision";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
@@ -22,7 +23,6 @@ const createChain = ({
     waypoint: startingWaypoint,
     ball: {
       position: { ...startingPosition },
-      prevPosition: { ...startingPosition },
       color: randomColor(),
     },
   };
@@ -36,7 +36,11 @@ const createChain = ({
 };
 
 export const createGame = (): Game => {
-  const launchedBallSpeed = 4;
+  const launchedBallSpeed = 10;
+  const bounds = {
+      position: { x: 0, y: 0 },
+      size: { width: 1000, height: 600 },
+    }
   const game: Game = {
     options: {
       chainedBallSpeed: 1,
@@ -44,35 +48,33 @@ export const createGame = (): Game => {
       firingDelay: 300,
     },
     ballsLeft: 100,
-    ballRadius: 20,
+    ballRadius: 30,
     chains: [],
     launcher: {
-      prevPosition: { x: 300, y: 300 },
-      position: { x: 450, y: 300 },
+      position: { x: 0, y: 0 },
       pointTo: { x: 0, y: 0 },
       color: "purple",
       launcherSpeed: launchedBallSpeed,
     },
     freeBalls: [],
-    bounds: {
-      position: { x: 0, y: 0 },
-      size: { width: 1000, height: 600 },
-    },
+    bounds,
     paths: [],
     lastFire: 0,
+    boards: buildBoards(bounds),
+    currentBoard: 'archimedes',
   };
 
-  const waypointPath = createWaypointPathCustom(simplify(10, archimedeanSpiral({game})));
-  game.paths.push(waypointPath);
-
-  const chain1 = createChain({
-    waypointPath,
-  });
-
-  game.chains.push(chain1);
+  loadBoard(game);
 
   return game;
 };
+
+const loadBoard = (game: Game) => {
+  const {launcherPosition, paths} = game.boards[game.currentBoard];
+  game.launcher.position = launcherPosition;
+  game.paths = paths;
+  game.chains = paths.map(path => createChain({waypointPath: path}));
+}
 
 const launcherVelocity = ({ pointTo, position, launcherSpeed }: Launcher) => {
   // the un-normalized velocity vector
@@ -94,7 +96,6 @@ export const launchBall = (game: Game) => {
 
   freeBalls.push({
     position: { ...launcher.position },
-    prevPosition: { ...launcher.position },
     velocity: launcherVelocity(launcher),
     color: launcher.color,
   });
@@ -127,7 +128,6 @@ function appendToChain(game: Game, chain: Chain) {
     waypoint: path.start.next!,
     ball: {
       position: { ...path.start.value },
-      prevPosition: { ...path.start.value },
       color: nextColor(chain),
     },
     previous: foot,

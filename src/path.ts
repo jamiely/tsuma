@@ -1,4 +1,4 @@
-import { Game, Node, Point, WaypointPath } from "./types";
+import { Game, Node, Point, Rectangle, WaypointPath } from "./types";
 import { distance } from "./util";
 
 export const createWaypointPath = (
@@ -64,19 +64,19 @@ export const simplify = (minDistance: number, get: () => Generator<Point>) => {
   };
 };
 
-export const sinPath = (game: Game, startX: number) => {
+export const sinWave = ({bounds, origin, frequency, amplitude}: {amplitude: number, frequency: number, bounds: Rectangle, origin: Point}) => {
   const increment = Math.PI;
   return function* () {
-    for (let x = startX; x <= game.bounds.size.width - 50; x += increment) {
+    for (let x = origin.x; x <= bounds.size.width - 50; x += increment) {
       yield {
         x,
-        y: Math.sin(0.02 * x) * 100 + 150,
+        y: Math.sin(frequency * x) * amplitude + origin.y,
       };
     }
   };
 };
 
-export const archimedeanSpiral = ({game}: {game: Game}) => {
+export const archimedeanSpiral = ({bounds}: {bounds: Rectangle}) => {
   const startingRadius = Math.PI / 2,
     turnDistance = 10,
     squash = {
@@ -87,8 +87,8 @@ export const archimedeanSpiral = ({game}: {game: Game}) => {
     stopAngle = 5,
     incrementAngle = Math.PI / 8,
     origin = {
-      x: game.bounds.size.width / 2,
-      y: game.bounds.size.height / 2,
+      x: bounds.size.width / 2,
+      y: bounds.size.height / 2,
     }
 
   return function*() {
@@ -97,6 +97,17 @@ export const archimedeanSpiral = ({game}: {game: Game}) => {
       yield {
         x: squash.x * coefficient * Math.cos(a) + origin.x,
         y: squash.y * coefficient * Math.sin(a) + origin.y,
+      }
+    }
+  }
+}
+
+export const linePath = ({bounds, slope, yIntercept}: {bounds: Rectangle, slope: number, yIntercept: number}) => {
+  return function*() {
+    for(let x = -10; x < bounds.size.width - 50; x+= 10) {
+      yield {
+        x,
+        y: slope * x + yIntercept,
       }
     }
   }

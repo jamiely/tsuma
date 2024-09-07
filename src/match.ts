@@ -19,6 +19,12 @@ export function resolveMatches(game: Game, chain: Chain) {
     } else {
       // we are at a new color, so resolve the last match
       if(length >= 3) {
+        if(chain.head === start) {
+          chain.head = current;
+        }
+        // I think there is a bug where matches at the foot
+        // aren't handled
+
         // disappear balls in chain by changing pointers
         if(start.previous) {
           start.previous.next = current;

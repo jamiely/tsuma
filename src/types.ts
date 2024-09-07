@@ -33,7 +33,6 @@ export type Color = "red" | "blue" | "green" | "gold" | "purple" | "black" | "#f
 
 export interface Ball extends HasPosition {
   color: Color;
-  prevPosition: Point;
 }
 
 export interface FreeBall extends Ball {
@@ -61,7 +60,12 @@ export interface Chain {
   pauseStepsAfterMatch?: number;
 }
 
+export interface Board {
+  launcherPosition: Point;
+  paths: WaypointPath[];
+}
 
+type BoardName = 'shallowWave' | 'wave' | 'archimedes' | 'line';
 
 export interface Game {
   options: {
@@ -77,6 +81,8 @@ export interface Game {
   bounds: Rectangle;
   paths: WaypointPath[];
   lastFire: number;
+  boards: Record<BoardName, Board>;
+  currentBoard: BoardName;
 }
 
 export interface Launcher extends Ball {

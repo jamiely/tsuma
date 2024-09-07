@@ -38,7 +38,6 @@ export function handleCollisions(game: Game) {
             ball: {
               color,
               position,
-              prevPosition: position,
             },
             waypoint: cball.waypoint,
           };

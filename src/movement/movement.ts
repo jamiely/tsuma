@@ -131,13 +131,6 @@ export function stepNormalChain(game: Game, chain: Chain) {
   }
 }
 
-export function setPreviousPosition({
-  ball: { prevPosition, position },
-}: ChainedBall) {
-  prevPosition.x = position.x;
-  prevPosition.y = position.y;
-}
-
 export function updatePositionTowardsWaypoint({
   chainedBall,
   chain,
@@ -147,8 +140,6 @@ export function updatePositionTowardsWaypoint({
   chain: Chain;
   game: Game;
 }): { ballRemoved: boolean } {
-  setPreviousPosition(chainedBall);
-
   if (!chainedBall.waypoint) {
     removeBall(chain, chainedBall);
     return { ballRemoved: true };
@@ -206,7 +197,6 @@ export function updatePositionTowardsInsertion(
 
   const { position: insertAt } = insertion;
 
-  setPreviousPosition(cball);
   const normalized = { ...insertAt };
 
   subtract(normalized, position);

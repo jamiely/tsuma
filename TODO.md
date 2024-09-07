@@ -6,4 +6,8 @@
 1. When balls reach the hole, you have to start the board over.
 1. When balls reach the hole, flush all of the balls into the
    hole by increasing the speed a lot.
-3. ~~There is a limit on the number of balls.~~
+1. ~~There is a limit on the number of balls.~~
+1. Create concept of board, which combines paths with launcher
+   position.
+1. Matches at the chain foot are not handled.
+2. Game freezes when chained ball speed is more than 2.
