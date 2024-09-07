@@ -1,8 +1,7 @@
-import { archimedes, buildBoards } from "./boards";
+import { buildBoards } from "./boards";
 import { handleCollisions } from "./collision";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
-import { archimedeanSpiral, createWaypointPathCustom, simplify} from "./path";
 import {
   Chain,
   ChainedBall,
@@ -47,8 +46,8 @@ export const createGame = (): Game => {
       launchedBallSpeed,
       firingDelay: 300,
     },
-    ballsLeft: 100,
-    ballRadius: 30,
+    ballsLeft: 1000,
+    ballRadius: 20,
     chains: [],
     launcher: {
       position: { x: 0, y: 0 },

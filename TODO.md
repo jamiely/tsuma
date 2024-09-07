@@ -11,3 +11,6 @@
    position.
 1. Matches at the chain foot are not handled.
 2. Game freezes when chained ball speed is more than 2.
+1. There is a bug when a ball gets inserted as a match, it is
+   too far to clear. Problem is that the ball gets inserted too far rather than that the match should be more loose.
+   

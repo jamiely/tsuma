@@ -68,7 +68,7 @@ const renderBall =
 
 
 const renderLauncher = (context: CanvasRenderingContext2D, game: Game) => {
-  const launcherLength = game.ballRadius * 3;
+  const launcherLength = game.ballRadius * 2;
   const launcher = game.launcher;
   renderBall(context, game.ballRadius)(launcher);
 

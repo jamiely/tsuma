@@ -1,4 +1,4 @@
-import { Game, Node, Point, Rectangle, WaypointPath } from "./types";
+import { Node, Point, Rectangle, WaypointPath } from "./types";
 import { distance } from "./util";
 
 export const createWaypointPath = (
