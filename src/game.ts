@@ -106,7 +106,7 @@ export function step(game: Game) {
 
   handleCollisions(game);
 
-  game.chains.forEach(resolveMatches);
+  game.chains.forEach(chain => resolveMatches(game, chain));
 
   game.chains.forEach(chain => appendToChain(game, chain));
 }

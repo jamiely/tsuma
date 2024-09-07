@@ -1,6 +1,7 @@
-import { Chain, ChainedBall } from "./types";
+import { Chain, ChainedBall, Game } from "./types";
+import { distance } from "./util";
 
-export function resolveMatches(chain: Chain) {
+export function resolveMatches(game: Game, chain: Chain) {
   // we want to allow launched balls to fully become part
   // of the chain before resolving matches.
   if(chain.inserting) return;
@@ -11,13 +12,17 @@ export function resolveMatches(chain: Chain) {
   let length = 1;
 
   while(current) {
-    if(last?.ball.color === current.ball.color) {
-      length++;      
+    if(last?.ball && last.ball.color === current.ball.color &&
+      distance(last.ball.position, current.ball.position) < 2 * game.ballRadius + 1
+    ) {
+      length++;   
     } else {
       // we are at a new color, so resolve the last match
       if(length >= 3) {
         // disappear balls in chain by changing pointers
-        start.previous!.next = current;
+        if(start.previous) {
+          start.previous.next = current;
+        }
         current.previous = start.previous;
         chain.pauseStepsAfterMatch = 30;
       }
