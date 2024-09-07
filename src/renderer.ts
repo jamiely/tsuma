@@ -1,4 +1,4 @@
-import { Ball, Node, ChainedBall, Game, Point } from "./types";
+import { Ball, Node, ChainedBall, Game, Point, Color } from "./types";
 import { add, scale, subtract, toUnit } from "./util";
 
 export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
@@ -18,7 +18,9 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   for (let i = 0; i < chains.length; i++) {
     let current: ChainedBall | undefined = chains[i].head;
     while (current) {
-      renderBall(context, ballRadius)(current.ball);
+      if(current.collidable) {
+        renderBall(context, ballRadius)(current.ball);
+      }
       current = current.next;
     }
   }
@@ -30,7 +32,6 @@ const TwoPI = 2 * Math.PI;
 
 const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) =>
   game.paths.forEach((path) => {
-    context.beginPath();
     const { start } = path;
 
     let previous: Node<Point> | undefined = undefined;
@@ -54,16 +55,19 @@ const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) =>
       previous = current;
       current = current.next;
     }
+
+    renderBall(context, game.ballRadius + 5)({position: previous!.value, color: 'black'})
   });
 
 const renderBall =
   (context: CanvasRenderingContext2D, ballRadius: number) =>
-  ({ position: { x, y }, color }: Ball) => {
+  ({ position: { x, y }, color }: {position: Point, color: Color}) => {
     context.beginPath();
     context.arc(x, y, ballRadius, 0, TwoPI);
     context.fillStyle = color;
     context.fill();
   };
+
 
 const renderLauncher = (context: CanvasRenderingContext2D, game: Game) => {
   const launcherLength = 30;

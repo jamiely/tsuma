@@ -113,7 +113,7 @@ export function stepNormalChain(game: Game, chain: Chain) {
     current = current.next;
   }
 
-  if (!inBounds(chain.head.ball.position, game.bounds)) {
+  if (!inBounds(chain.head.ball.position, game.bounds) || !chain.head.waypoint) {
     const next = chain.head.next;
     if (next) {
       chain.head = next;
