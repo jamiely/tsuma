@@ -19,7 +19,8 @@ export const inBounds = (pt: Point, {position, size}: Rectangle) => {
   return true;
 }
 
-export const magnitude = ({ x, y }: Point) => Math.sqrt(x * x + y * y);
+export const magnitude = ({ x, y }: Point) => 
+  x === 0 && y === 0 ? 0 : Math.sqrt(x * x + y * y);
 export const add = (a: Point, b: Point) => {
   a.x += b.x;
   a.y += b.y;
@@ -34,6 +35,8 @@ export const scale = (a: Point, factor: number) => {
 };
 
 export const toUnit = (pt: Point) => {
+  if(pt.x === 0 && pt.y === 0) return pt;
+
   const mag = magnitude(pt);
   pt.x /= mag;
   pt.y /= mag;
