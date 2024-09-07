@@ -1,7 +1,7 @@
 import { handleCollisions } from "./collision";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
-import { createWaypointPathCustom, simplify, sinPath } from "./path";
+import { archimedeanSpiral, createWaypointPathCustom, simplify, sinPath } from "./path";
 import {
   Chain,
   ChainedBall,
@@ -47,7 +47,7 @@ export const createGame = (): Game => {
     chains: [],
     launcher: {
       prevPosition: { x: 300, y: 300 },
-      position: { x: 300, y: 300 },
+      position: { x: 450, y: 300 },
       pointTo: { x: 0, y: 0 },
       color: "purple",
       launcherSpeed: launchedBallSpeed,
@@ -55,13 +55,14 @@ export const createGame = (): Game => {
     freeBalls: [],
     bounds: {
       position: { x: 0, y: 0 },
-      size: { width: 800, height: 400 },
+      size: { width: 1000, height: 600 },
     },
     paths: [],
     lastFire: 0,
   };
 
-  const waypointPath = createWaypointPathCustom(simplify(10, sinPath(game, -10)));
+  // const waypointPath = createWaypointPathCustom(simplify(10, sinPath(game, -10)));
+  const waypointPath = createWaypointPathCustom(simplify(10, archimedeanSpiral({game})));
   game.paths.push(waypointPath);
 
   const chain1 = createChain({

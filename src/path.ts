@@ -75,3 +75,23 @@ export const sinPath = (game: Game, startX: number) => {
     }
   };
 };
+
+export const archimedeanSpiral = ({game}: {game: Game, startX: number, radialDistance: number, angle: number, startingRadius: number, turnDistance: number}) => {
+  const startingRadius = Math.PI / 2,
+    turnDistance = 10,
+    angle = 0,
+    origin = {
+      x: 100,
+      y: 100,
+    };
+
+  return function*() {
+    for(let a = Math.PI * 8; a >= 5; a-= Math.PI / 8) {
+      const coefficient = (startingRadius + turnDistance * a );
+      yield {
+        x: 2 * coefficient * Math.cos(a) + game.bounds.size.width / 2,
+        y: coefficient * Math.sin(a) + game.bounds.size.height / 2,
+      }
+    }
+  }
+}
