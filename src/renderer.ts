@@ -18,7 +18,7 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   for (let i = 0; i < chains.length; i++) {
     let current: Node<ChainedBall> | undefined = chains[i].head;
     while (current) {
-      renderBall(context, ballRadius)(current.value.ball);
+      renderChainedBall(context, game, current.value);
       current = current.next;
     }
   }
@@ -27,8 +27,27 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   renderDebug(context, game);
 };
 
+const renderChainedBall = (
+  context: CanvasRenderingContext2D,
+  game: Game,
+  chainedBall: ChainedBall
+) => {
+  const {
+    ball: {
+      position: { x, y },
+    },
+    insertion,
+  } = chainedBall;
+  renderBall(context, game.ballRadius)(chainedBall.ball);
+  if (!insertion) return;
+
+  context.font = "20pt helvetica";
+  context.fillStyle = 'black';
+  context.fillText("ins", x-game.ballRadius, y + game.ballRadius/2);
+};
+
 const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
-  if(!game.debug.enabled) return;
+  if (!game.debug.enabled) return;
 
   const line = (
     original: Point,
@@ -60,7 +79,7 @@ const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
     line(game.debug.collisionVector, "red");
   }
   if (game.debug.collisionChainedBallPosition && game.debug.movementVector) {
-    const copy = {...game.debug.movementVector};
+    const copy = { ...game.debug.movementVector };
     scale(copy, 10);
     line(copy, "pink", game.debug.collisionChainedBallPosition);
   }

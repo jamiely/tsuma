@@ -71,7 +71,7 @@ export const createGame = (): Game => {
 
 const loadBoard = (game: Game) => {
   const { launcherPosition, paths, ballCount } = game.boards[game.currentBoard];
-  game.ballsLeft = ballCount || 100;
+  game.ballsLeft = ballCount ?? 100;
   game.launcher.position = launcherPosition;
   game.paths = paths;
   game.chains = paths.map((path) => createChain({ waypointPath: path }));
@@ -105,6 +105,8 @@ export const launchBall = (game: Game) => {
 };
 
 export function step(game: Game) {
+  if(game.debug.stop) return;
+  
   stepMovement(game);
 
   handleCollisions(game);

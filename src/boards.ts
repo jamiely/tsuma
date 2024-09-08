@@ -77,7 +77,7 @@ export const shallowWave = (bounds: Rectangle) =>
   });
 
 export const buildBoards = (bounds: Rectangle): Game["boards"] => {
-  const testBallCount = 10;
+  const testBallCount = 0;
 
   const halfHeight = bounds.size.height / 2;
 
@@ -115,7 +115,7 @@ export const buildBoards = (bounds: Rectangle): Game["boards"] => {
       }),
     },
     test: {
-      ballCount: testBallCount,
+      ballCount: 5,
       ...line({
         launcherPosition: {
           x: bounds.size.width / 2,

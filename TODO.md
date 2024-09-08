@@ -16,5 +16,6 @@
 10. There is a bug when a ball gets inserted as a match, it is
    too far to clear. Problem is that the ball gets inserted too far rather than that the match should be more loose.
 11. Balls insert too fast.
-12. Balls shot onto the tail don't stick.
+12. ~~Balls shot onto the tail don't stick.~~
 13. Matches at the chain foot are not handled.
+14. Tail doesn't disappear down hole.
