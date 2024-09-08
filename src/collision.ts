@@ -1,6 +1,6 @@
 import { insertAfter, insertBefore } from "./linkedList";
-import { Ball, ChainedBall, FreeBall, Game, Point } from "./types";
-import { add, distance, dotProduct, normal, scale, subtract, toUnit } from "./util";
+import { Ball, ChainedBall, FreeBall, Game } from "./types";
+import { add, distance, dotProduct, scale, subtract, waypointVector } from "./util";
 import { Node } from "./types";
 
 // when a launched ball collides with a chain,
@@ -53,7 +53,7 @@ export function handleCollisions(game: Game) {
           console.log("collision ball is ", node.value.ball.color);
 
           let targetBall = node;
-          if (shouldInsertPrevious(game, node.value, freeBalls[i])) {
+          if (collisionCalculations(game, node.value, freeBalls[i])) {
             console.log("inserting before");
             targetBall = newNode;
             insertBefore(newNode, node);
@@ -73,8 +73,9 @@ export function handleCollisions(game: Game) {
             position: { ...targetBall.value.ball.position },
           };
 
-          game.debug.enabled = true;
-          // game.debug.stop = true;
+          if(game.debug.enabled && game.debug.stopOnCollision) {
+            game.debug.stop = true;
+          }
 
           freeBalls.splice(i, 1);
           hasCollision = true;
@@ -92,15 +93,7 @@ export const ballsCollide = (game: Game) => {
   };
 };
 
-const waypointVector = (chainedBall: ChainedBall): Point => {
-  if (!chainedBall.waypoint) throw "chained ball waypoint is empty";
-  const vec2 = { ...chainedBall.waypoint.value };
-  subtract(vec2, chainedBall.ball.position);
-  toUnit(vec2);
-  return vec2;
-};
-
-const shouldInsertPrevious = (
+const collisionCalculations = (
   game: Game,
   chainedBall: ChainedBall,
   freeBall: FreeBall

@@ -4,7 +4,7 @@
 // chain will follow a pre-specified path.
 
 import { ballsCollide } from "@/collision";
-import { Chain, ChainedBall, Game, Node } from "@/types";
+import { Chain, ChainedBall, Game, Node, Point } from "@/types";
 import {
   add,
   distance,
@@ -14,6 +14,7 @@ import {
   setPoint,
   subtract,
   toUnit,
+  waypointVector,
 } from "@/util";
 
 export function stepMovement(game: Game) {
@@ -22,10 +23,9 @@ export function stepMovement(game: Game) {
 }
 
 export function stepFreeBalls(game: Game) {
-  game.freeBalls.forEach((ball) => {
-    ball.position.x += ball.velocity.x;
-    ball.position.y += ball.velocity.y;
-  });
+  for (let i = 0; i < game.freeBalls.length; i++) {
+    add(game.freeBalls[i].position, game.freeBalls[i].velocity);
+  }
 
   // remove any balls that go out of bounds
   for (let i = game.freeBalls.length - 1; i >= 0; i--) {
@@ -81,12 +81,27 @@ export function stepInsertingChainBall({
   chain: Chain;
   node: Node<ChainedBall>;
 }) {
-  const {value: chainedBall, previous} = node;
+  const { value: chainedBall, previous, next } = node;
 
-  const { insertionComplete } = updatePositionTowardsInsertion(
-    game,
-    chainedBall
-  );
+  const isCollidingWithNextBall =
+    next && ballsCollide(game)(chainedBall.ball, next.value.ball);
+
+  let insertionComplete = false;
+  if (isCollidingWithNextBall) {
+    const copy = {...chainedBall.ball.position}
+    subtract(copy, next.value.ball.position);
+    toUnit(copy);
+    add(copy, waypointVector(node.value));
+
+    const result = updatePositionTowardsInsertion(game, chainedBall, {
+      adjustmentVector: copy,
+    });
+    insertionComplete = result.insertionComplete;
+  }
+  else {
+    const result = updatePositionTowardsInsertion(game, chainedBall);
+    insertionComplete = result.insertionComplete;
+  }
 
   while (
     previous &&
@@ -142,7 +157,7 @@ export function updatePositionTowardsWaypoint({
   chain: Chain;
   game: Game;
 }): { ballRemoved: boolean } {
-  const {value: chainedBall} = node;
+  const { value: chainedBall } = node;
 
   if (!chainedBall.waypoint) {
     removeBall(chain, node);
@@ -189,7 +204,10 @@ function removeBall(chain: Chain, node: Node<ChainedBall>) {
 
 export function updatePositionTowardsInsertion(
   game: Game,
-  cball: ChainedBall
+  cball: ChainedBall,
+  options: {
+    adjustmentVector?: Point;
+  } = {}
 ): { insertionComplete: boolean } {
   const {
     ball: { position },
@@ -205,7 +223,10 @@ export function updatePositionTowardsInsertion(
 
   subtract(normalized, position);
   toUnit(normalized);
-  scale(normalized, game.options.launchedBallSpeed);
+  if (options.adjustmentVector) {
+    add(normalized, options.adjustmentVector);
+  }
+  scale(normalized, game.options.insertingBallSpeed);
 
   const newPos = { ...position };
   const newPosCopy = { ...newPos };

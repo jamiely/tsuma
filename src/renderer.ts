@@ -39,11 +39,16 @@ const renderChainedBall = (
     insertion,
   } = chainedBall;
   renderBall(context, game.ballRadius)(chainedBall.ball);
-  if (!insertion) return;
+  if (!insertion || !game.debug.enabled) return;
 
   context.font = "20pt helvetica";
   context.fillStyle = 'black';
   context.fillText("ins", x-game.ballRadius, y + game.ballRadius/2);
+
+  context.beginPath();
+  context.arc(insertion.position.x, insertion.position.y, 5, 0, TwoPI);
+  context.fillStyle = "violet";
+  context.fill();
 };
 
 const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {

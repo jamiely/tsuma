@@ -32,7 +32,7 @@ const createChain = ({
   };
 };
 
-export const createGame = (): Game => {
+export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {debug: Partial<Game['debug']>}): Game => {
   const launchedBallSpeed = 10;
   const bounds = {
     position: { x: 0, y: 0 },
@@ -40,10 +40,13 @@ export const createGame = (): Game => {
   };
   const game: Game = {
     debug: {
-
+      ...debug,
+      stopOnCollision: true,
+      debugSteps: 0,
     },
     options: {
       chainedBallSpeed: 1,
+      insertingBallSpeed: 5,
       launchedBallSpeed,
       firingDelay: 300,
     },
@@ -61,7 +64,7 @@ export const createGame = (): Game => {
     paths: [],
     lastFire: 0,
     boards: buildBoards(bounds),
-    currentBoard: new URLSearchParams(window.location.search).get('board') as Game['currentBoard'] || "archimedes",
+    currentBoard,
   };
 
   loadBoard(game);
@@ -105,8 +108,10 @@ export const launchBall = (game: Game) => {
 };
 
 export function step(game: Game) {
-  if(game.debug.stop) return;
-  
+  if(game.debug.stop && game.debug.debugSteps <= 0) return;
+
+  if(game.debug.debugSteps > 0) game.debug.debugSteps--;
+
   stepMovement(game);
 
   handleCollisions(game);

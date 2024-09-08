@@ -1,4 +1,4 @@
-import { Color, Point, Rectangle } from "./types";
+import { ChainedBall, Color, Point, Rectangle } from "./types";
 
 const colors: Color[] = ["red", "green", "blue", "gold"];
 export const randomColor = () =>
@@ -93,3 +93,11 @@ export function radiansToDegrees(radians: number): number {
 export function normal({x, y}: Point): Point {
   return {x: -y, y: x};
 }
+
+export const waypointVector = (chainedBall: ChainedBall): Point => {
+  if (!chainedBall.waypoint) throw "chained ball waypoint is empty";
+  const vec2 = { ...chainedBall.waypoint.value };
+  subtract(vec2, chainedBall.ball.position);
+  toUnit(vec2);
+  return vec2;
+};

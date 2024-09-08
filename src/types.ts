@@ -75,6 +75,8 @@ interface Debug {
   collisionFreeBallPosition?: Point;
   collisionPoint?: Point;
   stop?: boolean;
+  stopOnCollision?: boolean;
+  debugSteps: number;
 }
 
 export interface Game {
@@ -82,6 +84,7 @@ export interface Game {
   options: {
     chainedBallSpeed: number;
     launchedBallSpeed: number;
+    insertingBallSpeed: number;
     firingDelay: number;
   },
   ballsLeft: number;
