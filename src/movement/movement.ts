@@ -4,7 +4,7 @@
 // chain will follow a pre-specified path.
 
 import { ballsCollide } from "@/collision";
-import { Chain, ChainedBall, Game } from "@/types";
+import { Chain, ChainedBall, Game, Node } from "@/types";
 import {
   add,
   distance,
@@ -62,10 +62,10 @@ function stepChain(game: Game, chain: Chain) {
 }
 
 export function stepInsertingChain(game: Game, chain: Chain) {
-  let current: ChainedBall | undefined = chain.head;
+  let current: Node<ChainedBall> | undefined = chain.head;
   while (current) {
-    if (current.insertion) {
-      stepInsertingChainBall({ game, chain, chainedBall: current });
+    if (current.value.insertion) {
+      stepInsertingChainBall({ game, chain, node: current });
     }
 
     current = current.next;
@@ -75,25 +75,27 @@ export function stepInsertingChain(game: Game, chain: Chain) {
 export function stepInsertingChainBall({
   game,
   chain,
-  chainedBall,
+  node,
 }: {
   game: Game;
   chain: Chain;
-  chainedBall: ChainedBall;
+  node: Node<ChainedBall>;
 }) {
+  const {value: chainedBall, previous} = node;
+
   const { insertionComplete } = updatePositionTowardsInsertion(
     game,
     chainedBall
   );
 
   while (
-    chainedBall.previous &&
-    ballsCollide(game)(chainedBall.ball, chainedBall.previous.ball)
+    previous &&
+    ballsCollide(game)(chainedBall.ball, previous.value.ball)
   ) {
     // now push the chain forward in front of the ball
-    let current: ChainedBall | undefined = chainedBall.previous;
+    let current: Node<ChainedBall> | undefined = previous;
     while (current) {
-      updatePositionTowardsWaypoint({ chainedBall: current, chain, game });
+      updatePositionTowardsWaypoint({ node: current, chain, game });
       current = current.previous;
     }
   }
@@ -104,21 +106,21 @@ export function stepInsertingChainBall({
 }
 
 export function stepNormalChain(game: Game, chain: Chain) {
-  updatePositionTowardsWaypoint({ chainedBall: chain.foot, chain, game });
+  updatePositionTowardsWaypoint({ node: chain.foot, chain, game });
 
   // after moving the foot, push along the next ball until it's
   // not colliding with the foot anymore. Continue the process
   // until the head.
   const areColliding = ballsCollide(game);
-  let current: ChainedBall | undefined = chain.foot.previous;
+  let current: Node<ChainedBall> | undefined = chain.foot.previous;
   while (current) {
     while (
       current &&
       current.next &&
-      areColliding(current.ball, current.next.ball)
+      areColliding(current.value.ball, current.next.value.ball)
     ) {
       const { ballRemoved } = updatePositionTowardsWaypoint({
-        chainedBall: current,
+        node: current,
         chain,
         game,
       });
@@ -132,16 +134,18 @@ export function stepNormalChain(game: Game, chain: Chain) {
 }
 
 export function updatePositionTowardsWaypoint({
-  chainedBall,
+  node,
   chain,
   game,
 }: {
-  chainedBall: ChainedBall;
+  node: Node<ChainedBall>;
   chain: Chain;
   game: Game;
 }): { ballRemoved: boolean } {
+  const {value: chainedBall} = node;
+
   if (!chainedBall.waypoint) {
-    removeBall(chain, chainedBall);
+    removeBall(chain, node);
     return { ballRemoved: true };
   }
 
@@ -163,7 +167,7 @@ export function updatePositionTowardsWaypoint({
   if (dist < DISTANCE_DELTA) {
     chainedBall.waypoint = chainedBall.waypoint.next;
     if (!chainedBall.waypoint) {
-      removeBall(chain, chainedBall);
+      removeBall(chain, node);
       return { ballRemoved: true };
     }
   }
@@ -171,15 +175,15 @@ export function updatePositionTowardsWaypoint({
   return { ballRemoved: false };
 }
 
-function removeBall(chain: Chain, chainedBall: ChainedBall) {
-  if (chain.head === chainedBall && chainedBall.next) {
-    chain.head = chainedBall.next;
+function removeBall(chain: Chain, node: Node<ChainedBall>) {
+  if (chain.head === node && node.next) {
+    chain.head = node.next;
   }
-  if (chainedBall.previous) {
-    chainedBall.previous.next = chainedBall.next;
+  if (node.previous) {
+    node.previous.next = node.next;
   }
-  if (chainedBall.next) {
-    chainedBall.next.previous = chainedBall.previous;
+  if (node.next) {
+    node.next.previous = node.previous;
   }
 }
 

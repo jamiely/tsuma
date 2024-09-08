@@ -75,3 +75,17 @@ export function getIntersection(
       return { x, y };
   }
 }
+
+
+function dotProduct(pt1: Point, pt2: Point): number {
+  return pt1.x * pt2.x + pt1.y * pt2.y;
+}
+
+export function angleBetweenVectors(vec1: Point, vec2: Point): number {
+  const magnitudes = magnitude(vec1) * magnitude(vec2);
+  return Math.acos(dotProduct(vec1, vec2) / magnitudes);
+}
+
+export function radiansToDegrees(radians: number): number {
+  return radians * (180 / Math.PI);
+}

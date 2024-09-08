@@ -16,15 +16,41 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   renderWaypoints(context, game);
 
   for (let i = 0; i < chains.length; i++) {
-    let current: ChainedBall | undefined = chains[i].head;
+    let current: Node<ChainedBall> | undefined = chains[i].head;
     while (current) {
-      renderBall(context, ballRadius)(current.ball);
+      renderBall(context, ballRadius)(current.value.ball);
       current = current.next;
     }
   }
   freeBalls.forEach(renderBall(context, ballRadius));
   renderLauncher(context, game);
+  renderDebug(context, game);
 };
+
+const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
+  const line = (original: Point, color: string) => {
+    const pt = {...original}
+    const origin = {x: 50, y: 50};
+    scale(pt, 10);
+    add(pt, origin);
+  
+    context.beginPath();
+    context.setLineDash([]);
+    context.lineWidth = 1;
+    context.lineCap = "square";
+    context.strokeStyle = color;
+    context.moveTo(pt.x, pt.y);
+    context.lineTo(origin.x, origin.y);
+    context.stroke();
+  };
+
+  if(game.debug.collisionVector) {
+    line(game.debug.collisionVector, 'red');
+  }
+  if(game.debug.movementVector) {
+    line(game.debug.movementVector, 'green');
+  }
+}
 
 const TwoPI = 2 * Math.PI;
 

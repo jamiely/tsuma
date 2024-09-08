@@ -45,16 +45,14 @@ interface Insertion {
 
 export interface ChainedBall {
   ball: Ball;
-  previous?: ChainedBall;
-  next?: ChainedBall;
   waypoint?: Node<Point>;
   insertion?: Insertion;
 }
 
 export interface Chain {
   path: WaypointPath;
-  head: ChainedBall;
-  foot: ChainedBall;
+  head: Node<ChainedBall>;
+  foot: Node<ChainedBall>;
   // positive if we are inserting a ball into the chain
   inserting: 0;
   pauseStepsAfterMatch?: number;
@@ -67,7 +65,13 @@ export interface Board {
 
 type BoardName = 'shallowWave' | 'wave' | 'archimedes' | 'line';
 
+interface Debug {
+  collisionVector?: Point;
+  movementVector?: Point;
+}
+
 export interface Game {
+  debug: Debug;
   options: {
     chainedBallSpeed: number;
     launchedBallSpeed: number;

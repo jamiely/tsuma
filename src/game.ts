@@ -1,15 +1,11 @@
 import { buildBoards } from "./boards";
 import { handleCollisions } from "./collision";
+import { insertAfter } from "./linkedList";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
-import {
-  Chain,
-  ChainedBall,
-  Game,
-  Launcher,
-  WaypointPath,
-} from "./types";
+import { Chain, ChainedBall, Game, Launcher, WaypointPath } from "./types";
 import { distance, randomColor, scale, subtract, toUnit } from "./util";
+import { Node } from "./types";
 
 const createChain = ({
   waypointPath,
@@ -26,9 +22,11 @@ const createChain = ({
     },
   };
 
+  const node = { value: chainedBall };
+
   return {
-    head: chainedBall,
-    foot: chainedBall,
+    head: node,
+    foot: node,
     path: waypointPath,
     inserting: 0,
   };
@@ -37,16 +35,19 @@ const createChain = ({
 export const createGame = (): Game => {
   const launchedBallSpeed = 10;
   const bounds = {
-      position: { x: 0, y: 0 },
-      size: { width: 1000, height: 600 },
-    }
+    position: { x: 0, y: 0 },
+    size: { width: 1000, height: 600 },
+  };
   const game: Game = {
+    debug: {
+
+    },
     options: {
       chainedBallSpeed: 1,
       launchedBallSpeed,
       firingDelay: 300,
     },
-    ballsLeft: 1000,
+    ballsLeft: 100,
     ballRadius: 20,
     chains: [],
     launcher: {
@@ -60,7 +61,7 @@ export const createGame = (): Game => {
     paths: [],
     lastFire: 0,
     boards: buildBoards(bounds),
-    currentBoard: 'archimedes',
+    currentBoard: "archimedes",
   };
 
   loadBoard(game);
@@ -69,11 +70,11 @@ export const createGame = (): Game => {
 };
 
 const loadBoard = (game: Game) => {
-  const {launcherPosition, paths} = game.boards[game.currentBoard];
+  const { launcherPosition, paths } = game.boards[game.currentBoard];
   game.launcher.position = launcherPosition;
   game.paths = paths;
-  game.chains = paths.map(path => createChain({waypointPath: path}));
-}
+  game.chains = paths.map((path) => createChain({ waypointPath: path }));
+};
 
 const launcherVelocity = ({ pointTo, position, launcherSpeed }: Launcher) => {
   // the un-normalized velocity vector
@@ -107,48 +108,56 @@ export function step(game: Game) {
 
   handleCollisions(game);
 
-  game.chains.forEach(chain => resolveMatches(game, chain));
+  game.chains.forEach((chain) => resolveMatches(game, chain));
 
-  game.chains.forEach(chain => appendToChain(game, chain));
+  game.chains.forEach((chain) => appendToChain(game, chain));
 }
 
 function appendToChain(game: Game, chain: Chain) {
-  if(game.ballsLeft <= 0) return;
+  if (game.ballsLeft <= 0) return;
 
   // we want to spawn a new ball when the foot has cleared the first waypoint.
   const { foot, path } = chain;
 
-  const dist = distance(foot.ball.position, path.start.value);
+  const dist = distance(foot.value.ball.position, path.start.value);
   if (dist < 2 * game.ballRadius) return;
 
   // the last ball has cleared, so create another one
 
-  const chainedBall: ChainedBall = {
-    waypoint: path.start.next!,
-    ball: {
-      position: { ...path.start.value },
-      color: nextColor(chain),
+  const node: Node<ChainedBall> = {
+    value: {
+      waypoint: path.start.next!,
+      ball: {
+        position: { ...path.start.value },
+        color: nextColor(chain),
+      },
     },
-    previous: foot,
   };
 
-  foot.next = chainedBall;
-  
+  insertAfter(node, foot);
+
   // the new ball always becomes the foot
-  chain.foot = chainedBall;
+  chain.foot = node;
 
   game.ballsLeft--;
 }
 
 function nextColor(chain: Chain) {
-  const {foot: {ball: {color}, previous}} = chain;
-  if(! previous) return randomColor();
-  if(color !== previous.ball.color) return randomColor();
+  const {
+    foot: {
+      value: {
+        ball: { color },
+      },
+      previous,
+    },
+  } = chain;
+  if (!previous) return randomColor();
+  if (color !== previous.value.ball.color) return randomColor();
 
   do {
     const nextColor = randomColor();
-    if(nextColor === color) continue;
+    if (nextColor === color) continue;
 
     return nextColor;
-  } while(true);
+  } while (true);
 }

@@ -1,19 +1,21 @@
 import { Chain, ChainedBall, Game } from "./types";
 import { distance } from "./util";
+import { Node } from "./types";
 
 export function resolveMatches(game: Game, chain: Chain) {
   // we want to allow launched balls to fully become part
   // of the chain before resolving matches.
   if(chain.inserting) return;
 
-  let last: ChainedBall | undefined = undefined;
-  let current: ChainedBall | undefined = chain.head;
-  let start: ChainedBall | undefined = chain.head;
+  let last: Node<ChainedBall> | undefined = undefined;
+  let current: Node<ChainedBall> | undefined = chain.head;
+  let start: Node<ChainedBall> | undefined = chain.head;
   let length = 1;
 
   while(current) {
-    if(last?.ball && last.ball.color === current.ball.color &&
-      distance(last.ball.position, current.ball.position) < 2 * game.ballRadius + 1
+    const lastBall = last?.value.ball;
+    if(lastBall && lastBall.color === current.value.ball.color &&
+      distance(lastBall.position, current.value.ball.position) < 2 * game.ballRadius + 1
     ) {
       length++;   
     } else {
