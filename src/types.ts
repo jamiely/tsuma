@@ -66,6 +66,7 @@ export interface Board {
 type BoardName = 'shallowWave' | 'wave' | 'archimedes' | 'line';
 
 interface Debug {
+  enabled?: boolean;
   collisionVector?: Point;
   movementVector?: Point;
   movementNormalVector?: Point;

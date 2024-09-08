@@ -64,7 +64,6 @@ export function handleCollisions(game: Game) {
           if (!newNode.previous) {
             chains[k].head = newNode;
           }
-          game.debug.stop = true;
 
           newBall.waypoint = targetBall.value.waypoint;
           newBall.insertion = {
@@ -113,20 +112,11 @@ const shouldInsertPrevious = (
   const normalVectorToChain = normal(movementVector);
   game.debug.movementNormalVector = {...normalVectorToChain};
 
-  const relativePosition = { ...pointOfContact };
-  subtract(relativePosition, chainedBall.ball.position);
-  // subtract(relativePosition, freeBall.position);
-  const dp = dotProduct(normalVectorToChain, relativePosition);
+  const collisionPointVec = {...pointOfContact};
+  subtract(collisionPointVec, chainedBall.ball.position);
 
-  console.log('shouldInsertPrevious', {
-    freeBallPosition: freeBall.position,
-    pointOfContact: pointOfContact,
-    normalVectorToChain,
-    relativePosition,
-    movementVector,
-    ball: chainedBall.ball,
-    dotProduct: dp,
-  });
+  const scalarProjection = dotProduct(collisionPointVec, movementVector) /
+    dotProduct(movementVector, movementVector);
 
-  return dp > 0;
+  return scalarProjection > 0;
 };

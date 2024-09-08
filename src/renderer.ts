@@ -28,6 +28,8 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
 };
 
 const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
+  if(!game.debug.enabled) return;
+
   const line = (
     original: Point,
     color: string,
