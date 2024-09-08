@@ -1,11 +1,9 @@
 import { insertAfter, insertBefore } from "./linkedList";
-import { Ball, ChainedBall, FreeBall, Game } from "./types";
+import { Ball, ChainedBall, Game, Point } from "./types";
 import {
-  add,
-  angleBetweenVectors,
   distance,
-  radiansToDegrees,
-  scale,
+  dotProduct,
+  normal,
   subtract,
   toUnit,
 } from "./util";
@@ -41,14 +39,10 @@ export function handleCollisions(game: Game) {
             continue;
           }
 
-          let insertPrevious = false;
-          if(node.next && node.previous) {
-            insertPrevious = chainedBallDistance(node, node.previous) < chainedBallDistance(node, node.next);
-          } else {
-            const angle = collisionAngle(game, freeBalls[i], node.value);
-            console.log("Collision angle is " + radiansToDegrees(angle));
-            insertPrevious = angle > Math.PI / 2;
-          }
+          const normalVectorToChain = normal(waypointVector(node.value));
+          const relativePosition = {...freeBalls[i].position};
+          subtract(relativePosition, node.value.ball.position);
+          const insertPrevious = dotProduct(normalVectorToChain, relativePosition) > 0;
 
           chains[k].inserting++;
 
@@ -101,29 +95,10 @@ export const ballsCollide = (game: Game) => {
   };
 };
 
-export const collisionAngle = (
-  game: Game,
-  freeBall: FreeBall,
-  chainedBall: ChainedBall
-): number => {
-  const vec1 = { ...freeBall.velocity };
-  toUnit(vec1);
-
-  game.debug.collisionVector = { ...vec1 };
-
-  if (!chainedBall.waypoint) {
-    console.error("waypoint should not be undefined");
-    return 0;
-  }
-
+const waypointVector = (chainedBall: ChainedBall): Point => {
+  if(!chainedBall.waypoint) throw 'chained ball waypoint is empty'
   const vec2 = { ...chainedBall.waypoint.value };
   subtract(vec2, chainedBall.ball.position);
   toUnit(vec2);
-
-  game.debug.movementVector = { ...vec2 };
-  
-  return angleBetweenVectors(vec2, vec1);
-};
-
-const chainedBallDistance = (node1: Node<ChainedBall>, node2: Node<ChainedBall>): number =>
-  distance(node1.value.ball.position, node2.value.ball.position);
+  return vec2;
+}

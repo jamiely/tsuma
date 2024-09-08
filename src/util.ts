@@ -77,7 +77,7 @@ export function getIntersection(
 }
 
 
-function dotProduct(pt1: Point, pt2: Point): number {
+export function dotProduct(pt1: Point, pt2: Point): number {
   return pt1.x * pt2.x + pt1.y * pt2.y;
 }
 
@@ -88,4 +88,8 @@ export function angleBetweenVectors(vec1: Point, vec2: Point): number {
 
 export function radiansToDegrees(radians: number): number {
   return radians * (180 / Math.PI);
+}
+
+export function normal({x, y}: Point): Point {
+  return {x: -y, y: x};
 }
