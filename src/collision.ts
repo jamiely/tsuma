@@ -7,6 +7,7 @@ import {
   getIntersection,
   scale,
   subtract,
+  toUnit,
   waypointVector,
   waypointVectorFromPosition,
 } from "./util";
@@ -46,6 +47,15 @@ export function handleCollisions(game: Game) {
           chains[k].inserting++;
 
           const { position, color, velocity } = freeBalls[i];
+
+          // backoff the ball until it is not colliding anymore
+          const unitVelocity = {...velocity}
+          toUnit(unitVelocity);
+          while(distance(position, node.value.ball.position) < game.ballRadius * 2) {
+            subtract(position, unitVelocity);
+          }
+
+          // debugging
           game.debug.collisionChainedBallPosition = {
             ...node.value.ball.position,
           };
