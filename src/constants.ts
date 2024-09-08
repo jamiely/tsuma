@@ -1,0 +1,1 @@
+export const WAYPOINT_DISTANCE_DELTA = 1;

@@ -1,7 +1,17 @@
 import { insertAfter, insertBefore } from "./linkedList";
-import { Ball, ChainedBall, FreeBall, Game } from "./types";
-import { add, distance, dotProduct, scale, subtract, waypointVector } from "./util";
+import { Ball, ChainedBall, FreeBall, Game, Point } from "./types";
+import {
+  add,
+  distance,
+  dotProduct,
+  getIntersection,
+  scale,
+  subtract,
+  waypointVector,
+  waypointVectorFromPosition,
+} from "./util";
 import { Node } from "./types";
+import { WAYPOINT_DISTANCE_DELTA } from "./constants";
 
 // when a launched ball collides with a chain,
 // there are 3 things that happen.
@@ -35,9 +45,11 @@ export function handleCollisions(game: Game) {
 
           chains[k].inserting++;
 
-          const { position, color } = freeBalls[i];
-          game.debug.collisionChainedBallPosition = {...node.value.ball.position}
-          game.debug.collisionFreeBallPosition = {...position}
+          const { position, color, velocity } = freeBalls[i];
+          game.debug.collisionChainedBallPosition = {
+            ...node.value.ball.position,
+          };
+          game.debug.collisionFreeBallPosition = { ...position };
           const newBall: ChainedBall = {
             ball: {
               color,
@@ -52,28 +64,58 @@ export function handleCollisions(game: Game) {
 
           console.log("collision ball is ", node.value.ball.color);
 
-          let targetBall = node;
-          if (collisionCalculations(game, node.value, freeBalls[i])) {
+          let targetBall: Node<ChainedBall> | undefined = undefined;
+          if (shouldInsertBefore(game, node.value, freeBalls[i])) {
+            targetBall = node.next;
             console.log("inserting before");
-            targetBall = newNode;
             insertBefore(newNode, node);
+            targetBall = newNode.previous;
           } else {
             console.log("inserting after");
             insertAfter(newNode, node);
+            targetBall = node;
           }
+
           if (!newNode.previous) {
             chains[k].head = newNode;
           }
-          if(!newNode.next) {
+          if (!newNode.next) {
             chains[k].foot = newNode;
           }
 
-          newBall.waypoint = targetBall.value.waypoint;
-          newBall.insertion = {
-            position: { ...targetBall.value.ball.position },
-          };
+          if (targetBall) {
+            newBall.waypoint = targetBall.value.waypoint;
+            newBall.insertion = {
+              position: { ...targetBall.value.ball.position },
+            };
+          } else {
+            // specify the insertion point to be the previous ball,
+            // and we'll step it along the waypoint until we stop
+            // colliding
+            newBall.insertion = {
+              position: {...node.value.ball.position}
+            };
+            // step this point until it's not colliding
+            let insertionPointCollides = true;
+            let waypoint = newBall.waypoint;
+            const {position: insertionPoint} = newBall.insertion;
+            while(insertionPointCollides && waypoint) {
+              const dist = distance(insertionPoint, node.value.ball.position);
 
-          if(game.debug.enabled && game.debug.stopOnCollision) {
+              const waypointVec = waypointVectorFromPosition(insertionPoint, waypoint.value)
+              add(insertionPoint, waypointVec);
+
+              if(distance(insertionPoint, waypoint.value) < WAYPOINT_DISTANCE_DELTA) {
+                waypoint = waypoint.next;
+              }
+              
+              insertionPointCollides = dist < game.ballRadius * 2;
+            }
+          }
+
+          console.log('insertion', newBall.insertion?.position);
+
+          if (game.debug.enabled && game.debug.stopOnCollision) {
             game.debug.stop = true;
           }
 
@@ -93,13 +135,13 @@ export const ballsCollide = (game: Game) => {
   };
 };
 
-const collisionCalculations = (
+const shouldInsertBefore = (
   game: Game,
   chainedBall: ChainedBall,
   freeBall: FreeBall
 ): boolean => {
   // get the exact point of contact
-  const pointOfContact = { ... chainedBall.ball.position };
+  const pointOfContact = { ...chainedBall.ball.position };
   subtract(pointOfContact, freeBall.position);
   scale(pointOfContact, 0.5);
   add(pointOfContact, freeBall.position);
@@ -107,12 +149,13 @@ const collisionCalculations = (
   game.debug.collisionPoint = pointOfContact;
 
   const movementVector = waypointVector(chainedBall);
-  game.debug.movementVector = {...movementVector};
+  game.debug.movementVector = { ...movementVector };
 
-  const collisionPointVec = {...pointOfContact};
+  const collisionPointVec = { ...pointOfContact };
   subtract(collisionPointVec, chainedBall.ball.position);
 
-  const scalarProjection = dotProduct(collisionPointVec, movementVector) /
+  const scalarProjection =
+    dotProduct(collisionPointVec, movementVector) /
     dotProduct(movementVector, movementVector);
 
   return scalarProjection > 0;

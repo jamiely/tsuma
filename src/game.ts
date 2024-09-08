@@ -46,7 +46,7 @@ export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {
     },
     options: {
       chainedBallSpeed: 1,
-      insertingBallSpeed: 5,
+      insertingBallSpeed: launchedBallSpeed,
       launchedBallSpeed,
       firingDelay: 300,
     },

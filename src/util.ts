@@ -96,8 +96,13 @@ export function normal({x, y}: Point): Point {
 
 export const waypointVector = (chainedBall: ChainedBall): Point => {
   if (!chainedBall.waypoint) throw "chained ball waypoint is empty";
-  const vec2 = { ...chainedBall.waypoint.value };
-  subtract(vec2, chainedBall.ball.position);
+  
+  return waypointVectorFromPosition(chainedBall.ball.position, chainedBall.waypoint.value)
+};
+
+export const waypointVectorFromPosition = (position: Point, waypoint: Point): Point => {
+  const vec2 = { ...waypoint };
+  subtract(vec2, position);
   toUnit(vec2);
   return vec2;
 };

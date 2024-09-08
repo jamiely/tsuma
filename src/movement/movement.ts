@@ -4,6 +4,7 @@
 // chain will follow a pre-specified path.
 
 import { ballsCollide } from "@/collision";
+import { WAYPOINT_DISTANCE_DELTA } from "@/constants";
 import { Chain, ChainedBall, Game, Node, Point } from "@/types";
 import {
   add,
@@ -177,9 +178,8 @@ export function updatePositionTowardsWaypoint({
   position.x += normalized.x;
   position.y += normalized.y;
 
-  const DISTANCE_DELTA = 1;
   const dist = distance(waypoint, position);
-  if (dist < DISTANCE_DELTA) {
+  if (dist < WAYPOINT_DISTANCE_DELTA) {
     chainedBall.waypoint = chainedBall.waypoint.next;
     if (!chainedBall.waypoint) {
       removeBall(chain, node);
@@ -219,19 +219,18 @@ export function updatePositionTowardsInsertion(
 
   const { position: insertAt } = insertion;
 
-  const normalized = { ...insertAt };
-
-  subtract(normalized, position);
-  toUnit(normalized);
+  const insertionVector = { ...insertAt };
+  subtract(insertionVector, position);
+  toUnit(insertionVector);
   if (options.adjustmentVector) {
-    add(normalized, options.adjustmentVector);
+    add(insertionVector, options.adjustmentVector);
   }
-  scale(normalized, game.options.insertingBallSpeed);
+  scale(insertionVector, game.options.insertingBallSpeed);
 
   const newPos = { ...position };
-  const newPosCopy = { ...newPos };
   const posCopy = { ...position };
-  add(newPos, normalized);
+  add(newPos, insertionVector);
+  const newPosCopy = { ...newPos };
   subtract(newPosCopy, insertAt);
   subtract(posCopy, insertAt);
   if (magnitude(newPosCopy) > magnitude(posCopy)) {
@@ -241,7 +240,7 @@ export function updatePositionTowardsInsertion(
     setPoint(position, newPos);
   }
 
-  const DISTANCE_DELTA = Math.max(1, game.options.launchedBallSpeed / 2);
+  const DISTANCE_DELTA = Math.max(1, game.options.launchedBallSpeed / 4);
   const dist = distance(insertAt, position);
   if (dist < DISTANCE_DELTA) {
     // insertion is over once we reach the expected point

@@ -22,14 +22,35 @@ function run() {
     </div>
   `
 
-  document.getElementById('pause')?.addEventListener('click', () => {
-    game.debug.stop = !Boolean(game.debug.stop);
-  });
-  const elementDebug = document.getElementById('debug');
-  elementDebug?.addEventListener('click', () => {
-    game.debug.enabled = !Boolean(game.debug.enabled);
-    elementDebug.innerHTML = game.debug.enabled ? 'Debug ✅' : 'Debug ❌';
-  });
+  function toggler({id, labelTrue, labelFalse, get, set}: {get: () => Boolean | undefined, set: (_: boolean) => void, labelTrue: string, labelFalse: string, id: string}) {
+    const element = document.getElementById(id);
+    if(! element) return;
+
+    const updateLabel = () => element.innerHTML = get() ? labelTrue : labelFalse;
+
+    element.addEventListener('click', () => {
+      set(!Boolean(get()));
+      updateLabel();
+    });
+
+    updateLabel();    
+  }
+
+  toggler({
+    id: 'pause',
+    labelTrue: 'Paused',
+    labelFalse: 'Pause',
+    get: () => game.debug.stop,
+    set: (value) => game.debug.stop = value,
+  })
+  
+  toggler({
+    id: 'debug',
+    labelTrue: 'Debug on',
+    labelFalse: 'Debug off',
+    get: () => game.debug.enabled,
+    set: (value) => game.debug.enabled = value,
+  })
 
   document.getElementById('step')?.addEventListener('click', () => {
     game.debug.debugSteps++;
