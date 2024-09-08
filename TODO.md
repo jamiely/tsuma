@@ -12,9 +12,9 @@
 6. ~~There is a limit on the number of balls.~~
 7. ~~Create concept of board, which combines paths with launcher
    position.~~
-8. Matches at sthe chain foot are not handled.
 9. Game freezes when chained ball speed is more than 2.
 10. There is a bug when a ball gets inserted as a match, it is
    too far to clear. Problem is that the ball gets inserted too far rather than that the match should be more loose.
 11. Balls insert too fast.
 12. Balls shot onto the tail don't stick.
+13. Matches at the chain foot are not handled.

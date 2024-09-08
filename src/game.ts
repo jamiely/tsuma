@@ -61,7 +61,7 @@ export const createGame = (): Game => {
     paths: [],
     lastFire: 0,
     boards: buildBoards(bounds),
-    currentBoard: "archimedes",
+    currentBoard: new URLSearchParams(window.location.search).get('board') as Game['currentBoard'] || "archimedes",
   };
 
   loadBoard(game);
@@ -70,7 +70,8 @@ export const createGame = (): Game => {
 };
 
 const loadBoard = (game: Game) => {
-  const { launcherPosition, paths } = game.boards[game.currentBoard];
+  const { launcherPosition, paths, ballCount } = game.boards[game.currentBoard];
+  game.ballsLeft = ballCount || 100;
   game.launcher.position = launcherPosition;
   game.paths = paths;
   game.chains = paths.map((path) => createChain({ waypointPath: path }));

@@ -102,9 +102,11 @@ export const archimedeanSpiral = ({bounds}: {bounds: Rectangle}) => {
   }
 }
 
-export const linePath = ({bounds, slope, yIntercept}: {bounds: Rectangle, slope: number, yIntercept: number}) => {
+export const linePath = ({bounds, slope, yIntercept, startX = -10, stopX, xIncrement = 10}: {bounds: Rectangle, slope: number, yIntercept: number, startX?: number, stopX?: number, xIncrement?: number}) => {
+  stopX ||= bounds.size.width - 50;
+
   return function*() {
-    for(let x = -10; x < bounds.size.width - 50; x+= 10) {
+    for(let x = startX; x < stopX; x+= xIncrement) {
       yield {
         x,
         y: slope * x + yIntercept,

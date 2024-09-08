@@ -61,9 +61,10 @@ export interface Chain {
 export interface Board {
   launcherPosition: Point;
   paths: WaypointPath[];
+  ballCount?: number;
 }
 
-type BoardName = 'shallowWave' | 'wave' | 'archimedes' | 'line';
+type BoardName = 'shallowWave' | 'wave' | 'archimedes' | 'line' | 'test-tail' | 'test-head' | 'test';
 
 interface Debug {
   enabled?: boolean;
