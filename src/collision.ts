@@ -1,12 +1,6 @@
 import { insertAfter, insertBefore } from "./linkedList";
-import { Ball, ChainedBall, Game, Point } from "./types";
-import {
-  distance,
-  dotProduct,
-  normal,
-  subtract,
-  toUnit,
-} from "./util";
+import { Ball, ChainedBall, FreeBall, Game, Point } from "./types";
+import { add, distance, dotProduct, normal, scale, subtract, toUnit } from "./util";
 import { Node } from "./types";
 
 // when a launched ball collides with a chain,
@@ -39,14 +33,11 @@ export function handleCollisions(game: Game) {
             continue;
           }
 
-          const normalVectorToChain = normal(waypointVector(node.value));
-          const relativePosition = {...freeBalls[i].position};
-          subtract(relativePosition, node.value.ball.position);
-          const insertPrevious = dotProduct(normalVectorToChain, relativePosition) > 0;
-
           chains[k].inserting++;
 
           const { position, color } = freeBalls[i];
+          game.debug.collisionChainedBallPosition = {...node.value.ball.position}
+          game.debug.collisionFreeBallPosition = {...position}
           const newBall: ChainedBall = {
             ball: {
               color,
@@ -62,7 +53,7 @@ export function handleCollisions(game: Game) {
           console.log("collision ball is ", node.value.ball.color);
 
           let targetBall = node;
-          if (insertPrevious) {
+          if (shouldInsertPrevious(game, node.value, freeBalls[i])) {
             console.log("inserting before");
             targetBall = newNode;
             insertBefore(newNode, node);
@@ -73,6 +64,7 @@ export function handleCollisions(game: Game) {
           if (!newNode.previous) {
             chains[k].head = newNode;
           }
+          game.debug.stop = true;
 
           newBall.waypoint = targetBall.value.waypoint;
           newBall.insertion = {
@@ -96,9 +88,45 @@ export const ballsCollide = (game: Game) => {
 };
 
 const waypointVector = (chainedBall: ChainedBall): Point => {
-  if(!chainedBall.waypoint) throw 'chained ball waypoint is empty'
+  if (!chainedBall.waypoint) throw "chained ball waypoint is empty";
   const vec2 = { ...chainedBall.waypoint.value };
   subtract(vec2, chainedBall.ball.position);
   toUnit(vec2);
   return vec2;
-}
+};
+
+const shouldInsertPrevious = (
+  game: Game,
+  chainedBall: ChainedBall,
+  freeBall: FreeBall
+): boolean => {
+  // get the exact point of contact
+  const pointOfContact = { ... chainedBall.ball.position };
+  subtract(pointOfContact, freeBall.position);
+  scale(pointOfContact, 0.5);
+  add(pointOfContact, freeBall.position);
+
+  game.debug.collisionPoint = pointOfContact;
+
+  const movementVector = waypointVector(chainedBall);
+  game.debug.movementVector = {...movementVector};
+  const normalVectorToChain = normal(movementVector);
+  game.debug.movementNormalVector = {...normalVectorToChain};
+
+  const relativePosition = { ...pointOfContact };
+  subtract(relativePosition, chainedBall.ball.position);
+  // subtract(relativePosition, freeBall.position);
+  const dp = dotProduct(normalVectorToChain, relativePosition);
+
+  console.log('shouldInsertPrevious', {
+    freeBallPosition: freeBall.position,
+    pointOfContact: pointOfContact,
+    normalVectorToChain,
+    relativePosition,
+    movementVector,
+    ball: chainedBall.ball,
+    dotProduct: dp,
+  });
+
+  return dp > 0;
+};

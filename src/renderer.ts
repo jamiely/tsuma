@@ -28,12 +28,15 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
 };
 
 const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
-  const line = (original: Point, color: string) => {
-    const pt = {...original}
-    const origin = {x: 50, y: 50};
+  const line = (
+    original: Point,
+    color: string,
+    origin: Point = { x: 50, y: 50 }
+  ) => {
+    const pt = { ...original };
     scale(pt, 10);
     add(pt, origin);
-  
+
     context.beginPath();
     context.setLineDash([]);
     context.lineWidth = 1;
@@ -44,13 +47,43 @@ const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
     context.stroke();
   };
 
-  if(game.debug.collisionVector) {
-    line(game.debug.collisionVector, 'red');
+  const circle = ({ x, y }: Point, color?: string) => {
+    context.beginPath();
+    context.arc(x, y, 2, 0, TwoPI);
+    context.fillStyle = color || "lime";
+    context.fill();
+  };
+
+  if (game.debug.collisionVector) {
+    line(game.debug.collisionVector, "red");
   }
-  if(game.debug.movementVector) {
-    line(game.debug.movementVector, 'green');
+  if (game.debug.collisionChainedBallPosition && game.debug.movementVector) {
+    const copy = {...game.debug.movementVector};
+    scale(copy, 10);
+    line(copy, "pink", game.debug.collisionChainedBallPosition);
   }
-}
+
+  if (
+    game.debug.collisionChainedBallPosition &&
+    game.debug.movementNormalVector
+  ) {
+    const copy = { ...game.debug.movementNormalVector };
+    scale(copy, 10);
+    line(copy, "yellow", game.debug.collisionChainedBallPosition);
+  }
+
+  if (game.debug.collisionChainedBallPosition) {
+    circle(game.debug.collisionChainedBallPosition);
+  }
+
+  if (game.debug.collisionFreeBallPosition) {
+    circle(game.debug.collisionFreeBallPosition);
+  }
+
+  if (game.debug.collisionPoint) {
+    circle(game.debug.collisionPoint, "CornSilk");
+  }
+};
 
 const TwoPI = 2 * Math.PI;
 
@@ -81,14 +114,14 @@ const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) =>
       current = current.next;
     }
 
-    if(!previous?.value) return;
+    if (!previous?.value) return;
 
     context.beginPath();
-    const {x, y} = previous.value;
+    const { x, y } = previous.value;
     context.arc(x, y, game.ballRadius + 5, 0, TwoPI);
-    context.fillStyle = 'black';
+    context.fillStyle = "black";
     context.fill();
-    context.strokeStyle = 'SlateGray';
+    context.strokeStyle = "SlateGray";
     context.lineWidth = 4;
     context.setLineDash([]);
     context.arc(x, y, game.ballRadius + 5, 0, TwoPI);
@@ -97,13 +130,12 @@ const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) =>
 
 const renderBall =
   (context: CanvasRenderingContext2D, ballRadius: number) =>
-  ({ position: { x, y }, color }: {position: Point, color: string}) => {
+  ({ position: { x, y }, color }: { position: Point; color: string }) => {
     context.beginPath();
     context.arc(x, y, ballRadius, 0, TwoPI);
     context.fillStyle = color;
     context.fill();
   };
-
 
 const renderLauncher = (context: CanvasRenderingContext2D, game: Game) => {
   const launcherLength = game.ballRadius * 1.5;

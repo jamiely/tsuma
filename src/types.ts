@@ -68,6 +68,11 @@ type BoardName = 'shallowWave' | 'wave' | 'archimedes' | 'line';
 interface Debug {
   collisionVector?: Point;
   movementVector?: Point;
+  movementNormalVector?: Point;
+  collisionChainedBallPosition?: Point;
+  collisionFreeBallPosition?: Point;
+  collisionPoint?: Point;
+  stop?: boolean;
 }
 
 export interface Game {
