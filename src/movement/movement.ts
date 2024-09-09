@@ -5,6 +5,7 @@
 
 import { ballsCollide } from "@/collision";
 import { WAYPOINT_DISTANCE_DELTA } from "@/constants";
+import { iterateToHead, iterateToTail } from "@/linkedList";
 import { Chain, ChainedBall, Game, Node, Point } from "@/types";
 import {
   add,
@@ -51,25 +52,40 @@ function stepChain(game: Game, chain: Chain) {
     return;
   }
 
-  if (chain.pauseStepsAfterMatch && chain.pauseStepsAfterMatch > 0) {
-    chain.pauseStepsAfterMatch--;
-    if (chain.pauseStepsAfterMatch <= 0) {
-      chain.pauseStepsAfterMatch = undefined;
-    }
-    return;
-  }
+  const { shouldContinue } = pauseSteppingAfterMatch(chain);
+  if (!shouldContinue) return;
 
   stepNormalChain(game, chain);
 }
 
-export function stepInsertingChain(game: Game, chain: Chain) {
-  let current: Node<ChainedBall> | undefined = chain.head;
-  while (current) {
-    if (current.value.insertion) {
-      stepInsertingChainBall({ game, chain, node: current });
-    }
+const PAUSE_CONTINUE = { shouldContinue: true };
+const PAUSE_NO_CONTINUE = { shouldContinue: false };
 
-    current = current.next;
+function pauseSteppingAfterMatch(chain: Chain) {
+  if (!chain.pauseStepsAfterMatch) return PAUSE_CONTINUE;
+  if (chain.pauseStepsAfterMatch <= 0) return PAUSE_CONTINUE;
+
+  chain.pauseStepsAfterMatch--;
+  if (chain.pauseStepsAfterMatch <= 0) {
+    chain.pauseStepsAfterMatch = undefined;
+  }
+
+  return PAUSE_NO_CONTINUE;
+}
+
+export function stepInsertingChain(game: Game, chain: Chain) {
+  for (const { node } of iterateToTail(chain.head)) {
+    if (!node.value.insertion) continue;
+
+    const { insertionComplete } = stepInsertingChainBall({
+      game,
+      chain,
+      node: node,
+    });
+
+    if (!insertionComplete) continue;
+
+    chain.inserting--;
   }
 }
 
@@ -85,42 +101,65 @@ export function stepInsertingChainBall({
   const { value: chainedBall, previous, next } = node;
 
   const isCollidingWithNextBall =
-    next && ballsCollide(game)(chainedBall.ball, next.value.ball);
+    next && ballsCollide(game, chainedBall.ball, next.value.ball);
 
-  let insertionComplete = false;
-  if (isCollidingWithNextBall) {
-    const copy = {...chainedBall.ball.position}
-    subtract(copy, next.value.ball.position);
-    toUnit(copy);
-    add(copy, waypointVector(node.value));
+  const adjustmentVector = isCollidingWithNextBall
+    ? // when the ball is colliding with the next ball (closer to the
+      // tail), since the tail-side doesn't move, we need to nudge
+      // our inserting ball away from the tail-side ball.
+      nudgeAwayVector(node)
+    : undefined;
+  const { insertionComplete } = updatePositionTowardsInsertion(
+    game,
+    chainedBall,
+    {
+      adjustmentVector,
+    }
+  );
 
-    const result = updatePositionTowardsInsertion(game, chainedBall, {
-      adjustmentVector: copy,
+  const isTail = node.next === chain.foot;
+  if (!isTail && previous) {
+    insertionPushChainForward({
+      game,
+      chain,
+      chainedBall,
+      previous,
     });
-    insertionComplete = result.insertionComplete;
-  }
-  else {
-    const result = updatePositionTowardsInsertion(game, chainedBall);
-    insertionComplete = result.insertionComplete;
   }
 
-  const isTail = node === chain.foot;
-  while (
-    !isTail &&
-    previous &&
-    ballsCollide(game)(chainedBall.ball, previous.value.ball)
-  ) {
+  return { insertionComplete };
+}
+
+function nudgeAwayVector(node: Node<ChainedBall>) {
+  const { next, value: chainedBall } = node;
+  if (!next) {
+    throw "next node required for nudge away";
+  }
+
+  const copy = { ...chainedBall.ball.position };
+  subtract(copy, next.value.ball.position);
+  toUnit(copy);
+  add(copy, waypointVector(node.value));
+  return copy;
+}
+
+function insertionPushChainForward({
+  game,
+  chain,
+  chainedBall,
+  previous,
+}: {
+  game: Game;
+  chain: Chain;
+  chainedBall: ChainedBall;
+  previous: Node<ChainedBall>;
+}) {
+  while (ballsCollide(game, chainedBall.ball, previous.value.ball)) {
     // now push the chain forward in front of the ball
-    let current: Node<ChainedBall> | undefined = previous;
-    while (current) {
-      updatePositionTowardsWaypoint({ node: current, chain, game });
-      current = current.previous;
+    for (const { node } of iterateToHead(previous)) {
+      updatePositionTowardsWaypoint({ node, chain, game });
     }
   }
-
-  if (!insertionComplete) return;
-
-  chain.inserting--;
 }
 
 export function stepNormalChain(game: Game, chain: Chain) {
@@ -129,25 +168,22 @@ export function stepNormalChain(game: Game, chain: Chain) {
   // after moving the foot, push along the next ball until it's
   // not colliding with the foot anymore. Continue the process
   // until the head.
-  const areColliding = ballsCollide(game);
-  let current: Node<ChainedBall> | undefined = chain.foot.previous;
-  while (current) {
+  if (!chain.foot.previous) return;
+
+  for (const { node } of iterateToHead(chain.foot.previous)) {
     while (
-      current &&
-      current.next &&
-      areColliding(current.value.ball, current.next.value.ball)
+      node &&
+      node.next &&
+      ballsCollide(game, node.value.ball, node.next.value.ball)
     ) {
       const { ballRemoved } = updatePositionTowardsWaypoint({
-        node: current,
+        node,
         chain,
         game,
       });
-      if (ballRemoved) {
-        break;
-      }
+      
+      if (ballRemoved) break;
     }
-
-    current = current.previous;
   }
 }
 

@@ -1,4 +1,4 @@
-import { insertAfter, insertBefore } from "./linkedList";
+import { insertAfter, insertBefore, iterateToTail } from "./linkedList";
 import { Ball, ChainedBall, FreeBall, Game } from "./types";
 import {
   add,
@@ -25,8 +25,6 @@ import { WAYPOINT_DISTANCE_DELTA } from "./constants";
 export function handleCollisions(game: Game) {
   const { chains, freeBalls } = game;
 
-  const didCollide = ballsCollide(game);
-
   // this is not quite what we want later,
   // since we don't want to balls to disappear
   let hasCollision = false;
@@ -35,11 +33,9 @@ export function handleCollisions(game: Game) {
     // slow
     outer: for (let i = freeBalls.length - 1; i >= 0; i--) {
       for (let k = chains.length - 1; k >= 0; k--) {
-        let node: Node<ChainedBall> | undefined = chains[k].head;
 
-        while (node) {
-          if (!didCollide(freeBalls[i], node.value.ball)) {
-            node = node.next;
+        for (const {node} of iterateToTail(chains[k].head)) {
+          if (!ballsCollide(game, freeBalls[i], node.value.ball)) {
             continue;
           }
 
@@ -138,11 +134,9 @@ export function handleCollisions(game: Game) {
   } while (hasCollision);
 }
 
-export const ballsCollide = (game: Game) => {
+export const ballsCollide = (game: Game, ball1: Ball, ball2: Ball) => {
   const diameter = game.ballRadius * 2;
-  return (ball1: Ball, ball2: Ball) => {
-    return diameter > distance(ball1.position, ball2.position);
-  };
+  return diameter > distance(ball1.position, ball2.position);
 };
 
 const shouldInsertBefore = (

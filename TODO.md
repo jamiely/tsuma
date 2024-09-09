@@ -7,10 +7,13 @@
 4. When balls reach the hole, flush all of the balls into the
    hole by increasing the speed a lot.
 5. Game freezes when chained ball speed is more than 2.
-6.  Tail doesn't disappear down hole.
-7.  ~~If we are inserting before a ball, never just take the
-    position of the ball in front of it in the chain. This is
-    because there might be a gap between a ball and the one in
-    front due to math.~~
-8.  ~~Bug when launching a new ball that hits the tail. The ball
-    pushes the entire chain up as it is inserted.~~
+6. Tail doesn't disappear down hole.
+7. ~~If we are inserting before a ball, never just take the
+   position of the ball in front of it in the chain. This is
+   because there might be a gap between a ball and the one in
+   front due to math.~~
+8. ~~Bug when launching a new ball that hits the tail. The ball
+   pushes the entire chain up as it is inserted.~~
+9. New bug sometimes when hitting tail. The tail will continue
+   forward without the other parts of the chain.
+10. Inserting at the head is broken. See the board test-head.

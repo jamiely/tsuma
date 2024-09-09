@@ -1,3 +1,4 @@
+import { iterateToTail } from "./linkedList";
 import { Node, ChainedBall, Game, Point } from "./types";
 import { add, scale, subtract, toUnit } from "./util";
 
@@ -16,10 +17,8 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   renderWaypoints(context, game);
 
   for (let i = 0; i < chains.length; i++) {
-    let current: Node<ChainedBall> | undefined = chains[i].head;
-    while (current) {
-      renderChainedBall(context, game, current.value);
-      current = current.next;
+    for(const {value} of iterateToTail(chains[i].head)) {
+      renderChainedBall(context, game, value);
     }
   }
   freeBalls.forEach(renderBall(context, ballRadius));
@@ -111,16 +110,13 @@ const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
   }
 
   for (let i = 0; i < game.chains.length; i++) {
-    let current: Node<ChainedBall> | undefined = game.chains[i].head;
-    while (current) {
+    for (const { value } of iterateToTail(game.chains[i].head)) {
       const {
-        value: {
-          ball: {
-            position: { x, y },
-          },
-          insertion,
+        ball: {
+          position: { x, y },
         },
-      } = current;
+        insertion,
+      } = value;
 
       if (insertion) {
         context.font = "20pt helvetica";
@@ -132,8 +128,6 @@ const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
         context.fillStyle = "violet";
         context.fill();
       }
-
-      current = current.next;
     }
   }
 };

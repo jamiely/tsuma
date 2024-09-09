@@ -39,3 +39,22 @@ export const replace = <T>(replacement: Node<T>, toReplace: Node<T>) => {
   if(toReplace.previous) toReplace.previous.next = replacement;
   if(toReplace.next) toReplace.next.previous = replacement;
 }
+
+export function iterateToTail<T>(head: Node<T>) {
+  return iterateWithTransform(head, (current) => current.next);
+}
+
+export function iterateToHead<T>(tail: Node<T>) {
+  return iterateWithTransform(tail, (current) => current.previous);
+}
+
+export function* iterateWithTransform<T>(node: Node<T>, transformer: (node: Node<T>) => Node<T> | undefined) {
+  let current: Node<T> | undefined = node;
+  while(current) {
+    yield {
+      ...current,
+      node: current, 
+    };
+    current = transformer(current);
+  }
+}
