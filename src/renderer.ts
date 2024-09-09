@@ -42,8 +42,8 @@ const renderChainedBall = (
   if (!insertion || !game.debug.enabled) return;
 
   context.font = "20pt helvetica";
-  context.fillStyle = 'black';
-  context.fillText("ins", x-game.ballRadius, y + game.ballRadius/2);
+  context.fillStyle = "black";
+  context.fillText("ins", x - game.ballRadius, y + game.ballRadius / 2);
 
   context.beginPath();
   context.arc(insertion.position.x, insertion.position.y, 5, 0, TwoPI);
@@ -108,6 +108,33 @@ const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
 
   if (game.debug.collisionPoint) {
     circle(game.debug.collisionPoint, "CornSilk");
+  }
+
+  for (let i = 0; i < game.chains.length; i++) {
+    let current: Node<ChainedBall> | undefined = game.chains[i].head;
+    while (current) {
+      const {
+        value: {
+          ball: {
+            position: { x, y },
+          },
+          insertion,
+        },
+      } = current;
+
+      if (insertion) {
+        context.font = "20pt helvetica";
+        context.fillStyle = "black";
+        context.fillText("ins", x - game.ballRadius, y + game.ballRadius / 2);
+
+        context.beginPath();
+        context.arc(insertion.position.x, insertion.position.y, 5, 0, TwoPI);
+        context.fillStyle = "violet";
+        context.fill();
+      }
+
+      current = current.next;
+    }
   }
 };
 

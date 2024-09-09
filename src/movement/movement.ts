@@ -104,7 +104,9 @@ export function stepInsertingChainBall({
     insertionComplete = result.insertionComplete;
   }
 
+  const isTail = node === chain.foot;
   while (
+    !isTail &&
     previous &&
     ballsCollide(game)(chainedBall.ball, previous.value.ball)
   ) {

@@ -1,10 +1,9 @@
 import { insertAfter, insertBefore } from "./linkedList";
-import { Ball, ChainedBall, FreeBall, Game, Point } from "./types";
+import { Ball, ChainedBall, FreeBall, Game } from "./types";
 import {
   add,
   distance,
   dotProduct,
-  getIntersection,
   scale,
   subtract,
   toUnit,
@@ -44,14 +43,19 @@ export function handleCollisions(game: Game) {
             continue;
           }
 
+          const isTail = chains[k].foot === node;
+
           chains[k].inserting++;
 
           const { position, color, velocity } = freeBalls[i];
 
           // backoff the ball until it is not colliding anymore
-          const unitVelocity = {...velocity}
+          const unitVelocity = { ...velocity };
           toUnit(unitVelocity);
-          while(distance(position, node.value.ball.position) < game.ballRadius * 2) {
+          while (
+            distance(position, node.value.ball.position) <
+            game.ballRadius * 2
+          ) {
             subtract(position, unitVelocity);
           }
 
@@ -74,16 +78,13 @@ export function handleCollisions(game: Game) {
 
           console.log("collision ball is ", node.value.ball.color);
 
-          let targetBall: Node<ChainedBall> | undefined = undefined;
-          if (shouldInsertBefore(game, node.value, freeBalls[i])) {
-            targetBall = node.next;
+          const insertingBefore = shouldInsertBefore(game, node.value, freeBalls[i]);
+          if (insertingBefore) {
             console.log("inserting before");
             insertBefore(newNode, node);
-            targetBall = newNode.previous;
           } else {
             console.log("inserting after");
             insertAfter(newNode, node);
-            targetBall = node;
           }
 
           if (!newNode.previous) {
@@ -93,37 +94,36 @@ export function handleCollisions(game: Game) {
             chains[k].foot = newNode;
           }
 
-          if (targetBall) {
-            newBall.waypoint = targetBall.value.waypoint;
-            newBall.insertion = {
-              position: { ...targetBall.value.ball.position },
-            };
-          } else {
-            // specify the insertion point to be the previous ball,
-            // and we'll step it along the waypoint until we stop
-            // colliding
-            newBall.insertion = {
-              position: {...node.value.ball.position}
-            };
-            // step this point until it's not colliding
-            let insertionPointCollides = true;
-            let waypoint = newBall.waypoint;
-            const {position: insertionPoint} = newBall.insertion;
-            while(insertionPointCollides && waypoint) {
-              const dist = distance(insertionPoint, node.value.ball.position);
+          // specify the insertion point to be the previous ball,
+          // and we'll step it along the waypoint until we stop
+          // colliding
+          newBall.insertion = {
+            position: { ...node.value.ball.position },
+          };
+          // step this point until it's not colliding
+          let insertionPointCollides = true;
+          let waypoint = newBall.waypoint;
+          const { position: insertionPoint } = newBall.insertion;
+          
+          while ((insertingBefore || isTail) && insertionPointCollides && waypoint) {
+            const dist = distance(insertionPoint, node.value.ball.position);
 
-              const waypointVec = waypointVectorFromPosition(insertionPoint, waypoint.value)
-              add(insertionPoint, waypointVec);
+            const waypointVec = waypointVectorFromPosition(
+              insertionPoint,
+              waypoint.value
+            );
+            add(insertionPoint, waypointVec);
 
-              if(distance(insertionPoint, waypoint.value) < WAYPOINT_DISTANCE_DELTA) {
-                waypoint = waypoint.next;
-              }
-              
-              insertionPointCollides = dist < game.ballRadius * 2;
+            if (
+              distance(insertionPoint, waypoint.value) < WAYPOINT_DISTANCE_DELTA
+            ) {
+              waypoint = isTail ? waypoint.previous : waypoint.next;
             }
+
+            insertionPointCollides = dist < game.ballRadius * 2;
           }
 
-          console.log('insertion', newBall.insertion?.position);
+          console.log("insertion", newBall.insertion?.position);
 
           if (game.debug.enabled && game.debug.stopOnCollision) {
             game.debug.stop = true;
