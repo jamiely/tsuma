@@ -129,6 +129,7 @@ export function stepInsertingChainBall({
   
   const isCollidingWithPreviousBall =
     previous && ballsCollide(game, chainedBall.ball, previous.value.ball);
+  console.log('TODO isCollidingWithPreviousBall', isCollidingWithPreviousBall);
 
   const adjustmentVector = isCollidingWithNextBall
     ? // when the ball is colliding with the next ball (closer to the
