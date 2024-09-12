@@ -24,8 +24,28 @@ import {
 } from "@/util";
 
 export function stepMovement(game: Game) {
+  if(game.boardOver) {
+    stepBoardOver(game);
+    return;
+  }
   stepChains(game);
   stepFreeBalls(game);
+}
+
+function stepBoardOver(game: Game) {
+  for(const chain of game.chains) {
+    for(const {node, value: {waypoint}} of iterateToTail(chain.head)) {
+      const steps = game.boardOverSteps * .4 + 1;
+      for(let i=0; i<steps; i++) {
+        updatePositionTowardsWaypoint({node, game, chain});
+        if(!waypoint) removeBall(chain, node);
+      }
+    }
+  }
+
+  for(let i=game.freeBalls.length-1; i >= 0; i++) {
+    game.freeBalls.splice(i, 1);
+  }
 }
 
 export function stepFreeBalls(game: Game) {
@@ -241,6 +261,9 @@ export function updatePositionTowardsWaypoint({
     if (!chainedBall.waypoint) {
       // we have reached the last waypoint, so remove
       // the ball from the game.
+      game.boardOver = 'lost';
+      console.log('game.boardOver=', game.boardOver);
+    
       removeBall(chain, node);
       return { ballRemoved: true };
     }

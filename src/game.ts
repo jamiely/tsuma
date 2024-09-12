@@ -51,7 +51,8 @@ export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {
       firingDelay: 600,
     },
     ballsLeft: 100,
-    ballRadius: 20,
+    ballRadius: 20, 
+    boardOverSteps: 0,
     chains: [],
     launcher: {
       position: { x: 0, y: 0 },
@@ -90,6 +91,8 @@ const launcherVelocity = ({ pointTo, position, launcherSpeed }: Launcher) => {
 };
 
 export const launchBall = (game: Game) => {
+  if(game.boardOver) return;
+
   const { launcher, freeBalls } = game;
 
   const now = Date.now();
@@ -112,6 +115,11 @@ export function step(game: Game) {
 
   if(game.debug.debugSteps > 0) game.debug.debugSteps--;
 
+  if(game.boardOver) {
+    stepBoardOver(game);
+    return
+  }
+
   stepMovement(game);
 
   handleCollisions(game);
@@ -119,6 +127,11 @@ export function step(game: Game) {
   game.chains.forEach((chain) => resolveMatches(game, chain));
 
   game.chains.forEach((chain) => appendToChain(game, chain));
+}
+
+function stepBoardOver(game: Game) {
+  game.boardOverSteps++;
+  stepMovement(game);
 }
 
 function appendToChain(game: Game, chain: Chain) {

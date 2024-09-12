@@ -80,6 +80,8 @@ interface Debug {
 }
 
 export interface Game {
+  boardOver?: 'won' | 'lost';
+  boardOverSteps: number;
   debug: Debug;
   options: {
     chainedBallSpeed: number;

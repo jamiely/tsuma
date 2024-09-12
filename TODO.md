@@ -11,3 +11,4 @@
 7.  There is still a bug inserting if the free ball is very aligned to the normal.
 8.  ~~When there is a gap in the chain, and a ball is inserted into the tailward piece, between two existing balls, then the headward piece will also get pushed up.~~
 9.  Sometimes balls don't quite touch, especially when increasing speeds, leading to situations where a match doesn't clear.
+s
