@@ -82,6 +82,11 @@ const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
   if (game.debug.collisionVector) {
     line(game.debug.collisionVector, "red");
   }
+
+  if(game.debug.collisionChainedBallPosition) {
+    circle(game.debug.collisionChainedBallPosition, "cyan")
+  }
+
   if (game.debug.collisionChainedBallPosition && game.debug.movementVector) {
     const copy = { ...game.debug.movementVector };
     scale(copy, 10);

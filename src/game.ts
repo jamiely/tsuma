@@ -45,10 +45,10 @@ export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {
       debugSteps: 0,
     },
     options: {
-      chainedBallSpeed: 1,
-      insertingBallSpeed: launchedBallSpeed,
+      chainedBallSpeed: 1.1,
+      insertingBallSpeed: launchedBallSpeed/3,
       launchedBallSpeed,
-      firingDelay: 300,
+      firingDelay: 600,
     },
     ballsLeft: 100,
     ballRadius: 20,

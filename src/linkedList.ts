@@ -2,43 +2,51 @@ import { Node } from "./types";
 
 /**
  * Before:
- *     v new node               
+ *     v new node
  * A - B - insertAt - D
- * 
+ *
  * After:
  * A - B - newNode - insertAt - D
  */
 export const insertBefore = <T>(newNode: Node<T>, insertAt: Node<T>) => {
   newNode.previous = insertAt.previous;
   newNode.next = insertAt;
-  if(insertAt.previous) insertAt.previous.next = newNode;
+  if (insertAt.previous) insertAt.previous.next = newNode;
   insertAt.previous = newNode;
-}
-
+};
 
 /**
  * Before:
  *                    v new node
  * A - B - insertAt - D
- * 
+ *
  * After:
- * 
+ *
  * A - B - insertAt - newNode - D
  */
 export const insertAfter = <T>(newNode: Node<T>, insertAt: Node<T>) => {
   newNode.previous = insertAt;
   newNode.next = insertAt.next;
-  if(insertAt.next) insertAt.next.previous = newNode;
+  if (insertAt.next) insertAt.next.previous = newNode;
   insertAt.next = newNode;
-}
+};
 
 export const replace = <T>(replacement: Node<T>, toReplace: Node<T>) => {
   replacement.next = toReplace.next;
   replacement.previous = toReplace.previous;
 
-  if(toReplace.previous) toReplace.previous.next = replacement;
-  if(toReplace.next) toReplace.next.previous = replacement;
-}
+  if (toReplace.previous) toReplace.previous.next = replacement;
+  if (toReplace.next) toReplace.next.previous = replacement;
+};
+
+export const remove = <T>(node: Node<T>) => {
+  if (node.previous) {
+    node.previous.next = node.next;
+  }
+  if (node.next) {
+    node.next.previous = node.previous;
+  }
+};
 
 export function iterateToTail<T>(head: Node<T>) {
   return iterateWithTransform(head, (current) => current.next);
@@ -48,12 +56,15 @@ export function iterateToHead<T>(tail: Node<T>) {
   return iterateWithTransform(tail, (current) => current.previous);
 }
 
-export function* iterateWithTransform<T>(node: Node<T>, transformer: (node: Node<T>) => Node<T> | undefined) {
+export function* iterateWithTransform<T>(
+  node: Node<T>,
+  transformer: (node: Node<T>) => Node<T> | undefined
+) {
   let current: Node<T> | undefined = node;
-  while(current) {
+  while (current) {
     yield {
       ...current,
-      node: current, 
+      node: current,
     };
     current = transformer(current);
   }

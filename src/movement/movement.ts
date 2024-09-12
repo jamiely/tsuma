@@ -5,7 +5,11 @@
 
 import { ballsCollide } from "@/collision";
 import { WAYPOINT_DISTANCE_DELTA } from "@/constants";
-import { iterateToHead, iterateToTail } from "@/linkedList";
+import {
+  remove as removeNode,
+  iterateToHead,
+  iterateToTail,
+} from "@/linkedList";
 import { Chain, ChainedBall, Game, Node, Point } from "@/types";
 import {
   add,
@@ -102,6 +106,9 @@ export function stepInsertingChainBall({
 
   const isCollidingWithNextBall =
     next && ballsCollide(game, chainedBall.ball, next.value.ball);
+  
+  const isCollidingWithPreviousBall =
+    previous && ballsCollide(game, chainedBall.ball, previous.value.ball);
 
   const adjustmentVector = isCollidingWithNextBall
     ? // when the ball is colliding with the next ball (closer to the
@@ -117,7 +124,7 @@ export function stepInsertingChainBall({
     }
   );
 
-  const isTail = node.next === chain.foot;
+  const isTail = node === chain.foot;
   if (!isTail && previous) {
     insertionPushChainForward({
       game,
@@ -156,7 +163,19 @@ function insertionPushChainForward({
 }) {
   while (ballsCollide(game, chainedBall.ball, previous.value.ball)) {
     // now push the chain forward in front of the ball
-    for (const { node } of iterateToHead(previous)) {
+    for (const {
+      node,
+      value: {
+        ball: { position },
+      },
+      next,
+    } of iterateToHead(previous)) {
+      if (next) {
+        const dist = distance(position, next.value.ball.position);
+        const gapExists = game.ballRadius * 2 + 1 < dist;
+        if (gapExists) break;
+      }
+
       updatePositionTowardsWaypoint({ node, chain, game });
     }
   }
@@ -181,7 +200,7 @@ export function stepNormalChain(game: Game, chain: Chain) {
         chain,
         game,
       });
-      
+
       if (ballRemoved) break;
     }
   }
@@ -207,19 +226,21 @@ export function updatePositionTowardsWaypoint({
     ball: { position },
     waypoint: { value: waypoint },
   } = chainedBall;
-  const normalized = { ...waypoint };
 
-  subtract(normalized, position);
-  toUnit(normalized);
-  scale(normalized, game.options.chainedBallSpeed);
+  add(
+    position,
+    waypointVector(chainedBall, { scale: game.options.chainedBallSpeed })
+  );
 
-  position.x += normalized.x;
-  position.y += normalized.y;
-
+  // check if we have reached the next waypoint. there
+  // is the potential for bugs here if we step too far
+  // at once and go past the waypoint.
   const dist = distance(waypoint, position);
   if (dist < WAYPOINT_DISTANCE_DELTA) {
     chainedBall.waypoint = chainedBall.waypoint.next;
     if (!chainedBall.waypoint) {
+      // we have reached the last waypoint, so remove
+      // the ball from the game.
       removeBall(chain, node);
       return { ballRemoved: true };
     }
@@ -232,17 +253,12 @@ function removeBall(chain: Chain, node: Node<ChainedBall>) {
   if (chain.head === node && node.next) {
     chain.head = node.next;
   }
-  if (node.previous) {
-    node.previous.next = node.next;
-  }
-  if (node.next) {
-    node.next.previous = node.previous;
-  }
+  removeNode(node);
 }
 
 export function updatePositionTowardsInsertion(
   game: Game,
-  cball: ChainedBall,
+  chainedBall: ChainedBall,
   options: {
     adjustmentVector?: Point;
   } = {}
@@ -250,13 +266,39 @@ export function updatePositionTowardsInsertion(
   const {
     ball: { position },
     insertion,
-  } = cball;
+  } = chainedBall;
 
-  if (!insertion)
-    throw "do not call updatePositionTowardsInsertion unless inserting";
+  if (!insertion) throw new FailedInsertionPrerequisite();
+
+  const insertionVector = getInsertionVector(game, chainedBall, options);
+
+  setPoint(position, getInsertionPoint(chainedBall, insertionVector));
+
+  const DISTANCE_DELTA = Math.max(1, game.options.launchedBallSpeed / 4);
+  if (distance(insertion.position, position) < DISTANCE_DELTA) {
+    // insertion is over once we reach the expected point
+    chainedBall.insertion = undefined;
+    return { insertionComplete: true };
+  }
+
+  return { insertionComplete: false };
+}
+
+function getInsertionVector(
+  game: Game,
+  chainedBall: ChainedBall,
+  options: {
+    adjustmentVector?: Point;
+  } = {}
+) {
+  const {
+    ball: { position },
+    insertion,
+  } = chainedBall;
+
+  if (!insertion) throw new FailedInsertionPrerequisite();
 
   const { position: insertAt } = insertion;
-
   const insertionVector = { ...insertAt };
   subtract(insertionVector, position);
   toUnit(insertionVector);
@@ -264,6 +306,18 @@ export function updatePositionTowardsInsertion(
     add(insertionVector, options.adjustmentVector);
   }
   scale(insertionVector, game.options.insertingBallSpeed);
+
+  return insertionVector;
+}
+
+function getInsertionPoint(chainedBall: ChainedBall, insertionVector: Point) {
+  const {
+    ball: { position },
+    insertion,
+  } = chainedBall;
+  if (!insertion) throw new FailedInsertionPrerequisite();
+
+  const { position: insertAt } = insertion;
 
   const newPos = { ...position };
   const posCopy = { ...position };
@@ -273,18 +327,14 @@ export function updatePositionTowardsInsertion(
   subtract(posCopy, insertAt);
   if (magnitude(newPosCopy) > magnitude(posCopy)) {
     // we overshot the insertion point
-    setPoint(position, insertAt);
-  } else {
-    setPoint(position, newPos);
+    return insertAt;
   }
 
-  const DISTANCE_DELTA = Math.max(1, game.options.launchedBallSpeed / 4);
-  const dist = distance(insertAt, position);
-  if (dist < DISTANCE_DELTA) {
-    // insertion is over once we reach the expected point
-    cball.insertion = undefined;
-    return { insertionComplete: true };
-  }
+  return newPos;
+}
 
-  return { insertionComplete: false };
+class FailedInsertionPrerequisite extends Error {
+  constructor() {
+    super("Cannot call method without insertion property");
+  }
 }
