@@ -129,7 +129,9 @@ export function stepInsertingChainBall({
   
   const isCollidingWithPreviousBall =
     previous && ballsCollide(game, chainedBall.ball, previous.value.ball);
-  console.log('TODO isCollidingWithPreviousBall', isCollidingWithPreviousBall);
+  if(isCollidingWithPreviousBall) {
+    console.log('TODO isCollidingWithPreviousBall', isCollidingWithPreviousBall);
+  }
 
   const adjustmentVector = isCollidingWithNextBall
     ? // when the ball is colliding with the next ball (closer to the
@@ -276,6 +278,8 @@ export function updatePositionTowardsWaypoint({
 function removeBall(chain: Chain, node: Node<ChainedBall>) {
   if (chain.head === node && node.next) {
     chain.head = node.next;
+  } else if(chain.head === node ) {  
+    chain.head.value.ball.color = 'black';
   }
   removeNode(node);
 }
