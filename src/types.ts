@@ -31,6 +31,8 @@ export interface WaypointPath {
 
 export type Color = "red" | "blue" | "green" | "gold" | "purple" | "black" | "#f8f9f9" | 'none';
 
+export type WaypointDirection = 'forwards' | 'backwards';
+
 export interface Ball extends HasPosition {
   color: Color;
 }

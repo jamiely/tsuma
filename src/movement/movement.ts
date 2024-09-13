@@ -10,7 +10,14 @@ import {
   iterateToHead,
   iterateToTail,
 } from "@/linkedList";
-import { Chain, ChainedBall, Game, Node, Point } from "@/types";
+import {
+  Chain,
+  ChainedBall,
+  Game,
+  Node,
+  Point,
+  WaypointDirection,
+} from "@/types";
 import {
   add,
   distance,
@@ -24,7 +31,7 @@ import {
 } from "@/util";
 
 export function stepMovement(game: Game) {
-  if(game.boardOver) {
+  if (game.boardOver) {
     stepBoardOver(game);
     return;
   }
@@ -33,17 +40,20 @@ export function stepMovement(game: Game) {
 }
 
 function stepBoardOver(game: Game) {
-  for(const chain of game.chains) {
-    for(const {node, value: {waypoint}} of iterateToTail(chain.head)) {
-      const steps = game.boardOverSteps * .4 + 1;
-      for(let i=0; i<steps; i++) {
-        updatePositionTowardsWaypoint({node, game, chain});
-        if(!waypoint) removeBall(chain, node);
+  for (const chain of game.chains) {
+    for (const {
+      node,
+      value: { waypoint },
+    } of iterateToTail(chain.head)) {
+      const steps = game.boardOverSteps * 0.4 + 1;
+      for (let i = 0; i < steps; i++) {
+        updatePositionTowardsWaypoint({ node, game, chain });
+        if (!waypoint) removeBall(chain, node);
       }
     }
   }
 
-  for(let i=game.freeBalls.length-1; i >= 0; i++) {
+  for (let i = game.freeBalls.length - 1; i >= 0; i++) {
     game.freeBalls.splice(i, 1);
   }
 }
@@ -79,6 +89,10 @@ function stepChain(game: Game, chain: Chain) {
   const { shouldContinue } = pauseSteppingAfterMatch(chain);
   if (!shouldContinue) return;
 
+  const {didMove} = magneticCheck(game, chain);
+  // don't move the chain when something moved magnetically
+  if(didMove) return;
+
   stepNormalChain(game, chain);
 }
 
@@ -113,6 +127,55 @@ export function stepInsertingChain(game: Game, chain: Chain) {
   }
 }
 
+function gapExists(game: Game, ball1: ChainedBall, ball2: ChainedBall, {buffer = 1}: {buffer?: number} | undefined = {}) {
+  const dist = distance(ball1.ball.position, ball2.ball.position);
+  return dist > 2 * game.ballRadius + buffer;
+}
+
+function magneticCheck(game: Game, chain: Chain): {didMove: boolean} {
+  let didMove = false;
+  for (const { node, value, next } of iterateToTail(chain.head)) {
+    if (!next) continue;
+    if(value.ball.color !== next.value.ball.color) continue;
+
+    const maxSteps = 3;
+    outer:
+    for(let step = 0; step < maxSteps; step++) {
+      // gap exists between current node and previous
+      if (!gapExists(game, value, next.value)) break outer;
+
+      // pull the node towards the previous waypoint and everything after it
+      let current: Node<ChainedBall> | undefined = node;
+      while(current) {
+        // this is not quite working right
+        // if(!current.previous) break outer;
+        // if(gapExists(game, current.value, current.previous.value, {buffer: 2})) {
+        //   break outer;
+        // }
+        didMove = true;
+        
+        const {ballRemoved} = updatePositionTowardsWaypoint({
+          game,
+          chain,
+          node: current,
+          waypointDirection: 'backwards',
+        });
+        
+        if(ballRemoved) {
+          throw 'Do not remove a ball in this method';
+        }
+
+        // iterate towards head
+        current = current.previous;
+      }
+    }
+
+    // TODO: it's possible that the balls collide now
+    
+  }
+  return {didMove};
+}
+
 export function stepInsertingChainBall({
   game,
   chain,
@@ -126,11 +189,14 @@ export function stepInsertingChainBall({
 
   const isCollidingWithNextBall =
     next && ballsCollide(game, chainedBall.ball, next.value.ball);
-  
+
   const isCollidingWithPreviousBall =
     previous && ballsCollide(game, chainedBall.ball, previous.value.ball);
-  if(isCollidingWithPreviousBall) {
-    console.log('TODO isCollidingWithPreviousBall', isCollidingWithPreviousBall);
+  if (isCollidingWithPreviousBall) {
+    console.log(
+      "TODO isCollidingWithPreviousBall",
+      isCollidingWithPreviousBall
+    );
   }
 
   const adjustmentVector = isCollidingWithNextBall
@@ -222,6 +288,7 @@ export function stepNormalChain(game: Game, chain: Chain) {
         node,
         chain,
         game,
+        waypointDirection: "forwards",
       });
 
       if (ballRemoved) break;
@@ -233,10 +300,12 @@ export function updatePositionTowardsWaypoint({
   node,
   chain,
   game,
+  waypointDirection = 'forwards',
 }: {
   node: Node<ChainedBall>;
   chain: Chain;
   game: Game;
+  waypointDirection?: WaypointDirection;
 }): { ballRemoved: boolean } {
   const { value: chainedBall } = node;
 
@@ -247,12 +316,24 @@ export function updatePositionTowardsWaypoint({
 
   const {
     ball: { position },
-    waypoint: { value: waypoint },
   } = chainedBall;
+
+  let waypoint = chainedBall.waypoint.value;
+  let nextWaypoint = chainedBall.waypoint.next;
+  let boardOverPossible = waypointDirection === 'forwards';
+  if (waypointDirection === "backwards") {
+    if (!chainedBall.waypoint.previous) {
+      console.warn("No previous waypoint available.");
+      return {ballRemoved: false};
+    }
+    waypoint = chainedBall.waypoint.previous.value;
+    nextWaypoint = chainedBall.waypoint.previous;
+    boardOverPossible = false;
+  }
 
   add(
     position,
-    waypointVector(chainedBall, { scale: game.options.chainedBallSpeed })
+    waypointVector(chainedBall, { scale: game.options.chainedBallSpeed, waypointDirection })
   );
 
   // check if we have reached the next waypoint. there
@@ -260,13 +341,14 @@ export function updatePositionTowardsWaypoint({
   // at once and go past the waypoint.
   const dist = distance(waypoint, position);
   if (dist < WAYPOINT_DISTANCE_DELTA) {
-    chainedBall.waypoint = chainedBall.waypoint.next;
-    if (!chainedBall.waypoint) {
+    chainedBall.waypoint = nextWaypoint;
+
+    if (!chainedBall.waypoint && boardOverPossible) {
       // we have reached the last waypoint, so remove
       // the ball from the game.
-      game.boardOver = 'lost';
-      console.log('game.boardOver=', game.boardOver);
-    
+      game.boardOver = "lost";
+      console.log("game.boardOver=", game.boardOver);
+
       removeBall(chain, node);
       return { ballRemoved: true };
     }
@@ -278,8 +360,8 @@ export function updatePositionTowardsWaypoint({
 function removeBall(chain: Chain, node: Node<ChainedBall>) {
   if (chain.head === node && node.next) {
     chain.head = node.next;
-  } else if(chain.head === node ) {  
-    chain.head.value.ball.color = 'black';
+  } else if (chain.head === node) {
+    chain.head.value.ball.color = "black";
   }
   removeNode(node);
 }
