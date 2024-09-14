@@ -107,3 +107,7 @@ export interface Launcher extends Ball {
   pointTo: Point;
   launcherSpeed: number;
 }
+
+export interface AppConfig {
+  stepsPerFrame: number;
+}

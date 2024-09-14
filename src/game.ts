@@ -33,7 +33,7 @@ const createChain = ({
 };
 
 export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {debug: Partial<Game['debug']>}): Game => {
-  const launchedBallSpeed = 10;
+  const launchedBallSpeed = 5;
   const bounds = {
     position: { x: 0, y: 0 },
     size: { width: 1000, height: 600 },
@@ -45,10 +45,10 @@ export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {
       debugSteps: 0,
     },
     options: {
-      chainedBallSpeed: 1.1,
+      chainedBallSpeed: 0.6,
       insertingBallSpeed: launchedBallSpeed/3,
       launchedBallSpeed,
-      firingDelay: 600,
+      firingDelay: 400,
     },
     ballsLeft: 100,
     ballRadius: 20, 

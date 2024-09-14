@@ -2,10 +2,14 @@ import './style.css'
 import { renderGame } from './renderer.ts'
 import { createGame, step } from './game.ts'
 import { createInterface } from './interface.ts'
-import { Game } from './types.ts';
+import { AppConfig, Game } from './types.ts';
 
 function run() {
   const params = new URLSearchParams(window.location.search);
+  const appConfig: AppConfig = {
+    stepsPerFrame: 2
+  }
+
   const game = createGame({
     debug: {
       enabled: Boolean(params.get('debug')),
@@ -62,7 +66,10 @@ function run() {
 
   function render() {
     requestAnimationFrame(() => {
-      step(game);
+      for(let i=0; i<appConfig.stepsPerFrame; i++) {
+        step(game);
+      }
+      
       renderGame(canvas)(game)
 
       render();
