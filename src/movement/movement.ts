@@ -149,9 +149,9 @@ function magneticCheck(game: Game, chain: Chain): {didMove: boolean} {
       while(current) {
         // this is not quite working right
         // if(!current.previous) break outer;
-        // if(gapExists(game, current.value, current.previous.value, {buffer: 2})) {
-        //   break outer;
-        // }
+        if(current.previous && gapExists(game, current.value, current.previous.value, {buffer: 2})) {
+          break outer;
+        }
         didMove = true;
         
         const {ballRemoved} = updatePositionTowardsWaypoint({

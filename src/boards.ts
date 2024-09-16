@@ -115,7 +115,7 @@ export const buildBoards = (bounds: Rectangle): Game["boards"] => {
       }),
     },
     test: {
-      ballCount: 10,
+      ballCount: 2,
       ...line({
         launcherPosition: {
           x: bounds.size.width / 2,

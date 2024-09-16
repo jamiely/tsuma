@@ -15,3 +15,4 @@
     problems. Two options.
     a. Get better with the math.
     b. Eschew the math for more specific flags, like 'isTouchingPrevious'.
+11. ~~There is a bug inserting before the tail~~

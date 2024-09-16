@@ -39,9 +39,9 @@ export function handleCollisions(game: Game) {
           }
 
           // need this check BEFORE we add the new node
-          const isTail = chains[k].foot === collisionNode;
+          const isCollisionNodeTail = chains[k].foot === collisionNode;
           // this might need to be a special case
-          const isHeadAndTail = isTail && chains[k].head === collisionNode;
+          const isCollisionNodeHeadAndTail = isCollisionNodeTail && chains[k].head === collisionNode;
 
           chains[k].inserting++;
 
@@ -74,7 +74,7 @@ export function handleCollisions(game: Game) {
 
           let waypointAdjustmentDirection: "toHead" | "toTail" = "toHead";
 
-          if (isHeadAndTail) {
+          if (isCollisionNodeHeadAndTail) {
             const comparisonPoint = position;
             const distanceToNextWaypoint = waypoint?.next
               ? distance(waypoint.next.value, comparisonPoint)
@@ -90,12 +90,19 @@ export function handleCollisions(game: Game) {
               distanceToPrevWaypoint,
             });
             waypointAdjustmentDirection = closerToHead ? "toHead" : "toTail";
-          } else if (isTail) {
+          } else if (isCollisionNodeTail && !insertingBefore) {
             waypointAdjustmentDirection = "toTail";
           }
 
+          console.log('handleCollisions', {
+            insertingBefore, 
+            isCollisionNodeTail,
+            insertionPointCollides,
+            waypoint,
+          })
+
           while (
-            (insertingBefore || isTail) &&
+            (insertingBefore || isCollisionNodeTail) &&
             insertionPointCollides &&
             waypoint
           ) {
@@ -161,6 +168,13 @@ const shouldInsertBefore = (
   const scalarProjection =
     dotProduct(collisionPointVec, movementVector) /
     dotProduct(movementVector, movementVector);
+
+  console.log('shouldInsertBefore', {
+    pointOfContact,
+    movementVector,
+    collisionPointVec,
+    scalarProjection,
+  })
 
   return scalarProjection > 0;
 };
