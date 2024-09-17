@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      jsfxr:
+        specifier: ^1.2.2
+        version: 1.2.2
     devDependencies:
       '@types/node':
         specifier: ^22.5.4
@@ -354,6 +358,10 @@ packages:
 
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
+
+  jsfxr@1.2.2:
+    resolution: {integrity: sha512-aBtNHZ/eJVZ3Q12HLj6F0eF20bRJTar6fjHf14zZ/Co5GzcVsEBujJO7IKwAhZS3Pe0xIvUOD3O1BoZ6ij0xhA==}
+    hasBin: true
 
   loupe@3.1.1:
     resolution: {integrity: sha512-edNu/8D5MKVfGVFRhFf8aAxiTM6Wumfz5XsaatSxlD3w4R1d/WEKUTydCdPGbl9K7QG/Ca3GnDV2sIKIpXRQcw==}
@@ -794,6 +802,8 @@ snapshots:
   is-stream@3.0.0: {}
 
   isexe@2.0.0: {}
+
+  jsfxr@1.2.2: {}
 
   loupe@3.1.1:
     dependencies:

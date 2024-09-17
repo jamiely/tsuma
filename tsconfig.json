@@ -22,6 +22,7 @@
     "paths": {
       "@/*": ["src/*"]
     },
+    "types": ["./src/global.d.ts"]
   },
   "include": ["src"]
 }

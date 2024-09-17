@@ -3,9 +3,11 @@ import { handleCollisions } from "./collision";
 import { insertAfter } from "./linkedList";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
-import { Chain, ChainedBall, Game, Launcher, WaypointPath } from "./types";
+import { Chain, ChainedBall, Game, GameOverEvent, LaunchedBall, Launcher, MatchedBalls, WaypointPath } from "./types";
 import { distance, randomColor, scale, subtract, toUnit } from "./util";
 import { Node } from "./types";
+import { createEventManager } from "./events";
+import { createSoundManager } from "./sounds";
 
 const createChain = ({
   waypointPath,
@@ -38,6 +40,8 @@ export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {
     position: { x: 0, y: 0 },
     size: { width: 1000, height: 600 },
   };
+  const events = createEventManager();
+  createSoundManager(events);
   const game: Game = {
     debug: {
       ...debug,
@@ -66,6 +70,7 @@ export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {
     lastFire: 0,
     boards: buildBoards(bounds),
     currentBoard,
+    events,
   };
 
   loadBoard(game);
@@ -108,6 +113,8 @@ export const launchBall = (game: Game) => {
   });
 
   launcher.color = randomColor();
+
+  game.events.dispatchEvent(new LaunchedBall());
 };
 
 export function step(game: Game) {
@@ -124,13 +131,21 @@ export function step(game: Game) {
 
   handleCollisions(game);
 
-  game.chains.forEach((chain) => resolveMatches(game, chain));
+  game.chains.forEach((chain) => {
+    const {matches} = resolveMatches(game, chain)
+    if(! matches) return;
+
+    game.events.dispatchEvent(new MatchedBalls());
+  });
 
   game.chains.forEach((chain) => appendToChain(game, chain));
 }
 
 function stepBoardOver(game: Game) {
   game.boardOverSteps++;
+  if(game.boardOverSteps === 1) {
+    game.events.dispatchEvent(new GameOverEvent())
+  }
   stepMovement(game);
 }
 

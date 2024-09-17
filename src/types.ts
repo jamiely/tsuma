@@ -81,6 +81,9 @@ interface Debug {
   debugSteps: number;
 }
 
+export interface EventManager extends EventTarget {
+}
+
 export interface Game {
   boardOver?: 'won' | 'lost';
   boardOverSteps: number;
@@ -101,6 +104,7 @@ export interface Game {
   lastFire: number;
   boards: Record<BoardName, Board>;
   currentBoard: BoardName;
+  events: EventManager;
 }
 
 export interface Launcher extends Ball {
@@ -110,4 +114,36 @@ export interface Launcher extends Ball {
 
 export interface AppConfig {
   stepsPerFrame: number;
+}
+
+export type GameEventType = 'launchedBall' | 'matchedBalls' | 'gameOver';
+
+export class GameEvent extends Event {
+  constructor(type: GameEventType) {
+    super(type)
+  }
+}
+
+export class LaunchedBall extends GameEvent {
+  constructor() {
+    super('launchedBall');
+  }
+}
+
+export class MatchedBalls extends GameEvent {
+  constructor() {
+    super('matchedBalls')
+  }
+}
+
+export class GameOverEvent extends GameEvent {
+  constructor() {
+    super('gameOver')
+  }
+}
+
+export interface EventManager {
+  dispatchEvent(event: GameEvent): boolean;
+  removeEventListener: (type: GameEventType, callback: (event: GameEvent) => void) => void;
+  addEventListener: (type: GameEventType, callback: (event: GameEvent) => void) => void;
 }

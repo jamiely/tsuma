@@ -2,16 +2,17 @@ import { Chain, ChainedBall, Game } from "./types";
 import { distance } from "./util";
 import { Node } from "./types";
 
-export function resolveMatches(game: Game, chain: Chain) {
+export function resolveMatches(game: Game, chain: Chain): {matches: boolean} {
   // we want to allow launched balls to fully become part
   // of the chain before resolving matches.
-  if(chain.inserting) return;
+  if(chain.inserting) return {matches: false};
 
   let last: Node<ChainedBall> | undefined = undefined;
   let current: Node<ChainedBall> | undefined = chain.head;
   let start: Node<ChainedBall> | undefined = chain.head;
   let length = 1;
 
+  let matches = false;
   while(current) {
     const lastBall = last?.value.ball;
     if(lastBall && lastBall.color === current.value.ball.color &&
@@ -24,6 +25,8 @@ export function resolveMatches(game: Game, chain: Chain) {
         if(chain.head === start) {
           chain.head = current;
         }
+
+        matches = true;
         // I think there is a bug where matches at the foot
         // aren't handled
 
@@ -42,4 +45,6 @@ export function resolveMatches(game: Game, chain: Chain) {
     last = current;
     current = current.next;
   }
+
+  return {matches};
 }
