@@ -3,7 +3,7 @@ import { handleCollisions } from "./collision";
 import { insertAfter } from "./linkedList";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
-import { Chain, ChainedBall, Game, GameOverEvent, LaunchedBall, Launcher, MatchedBalls, WaypointPath } from "./types";
+import { BallCollisionEvent, Chain, ChainedBall, Game, GameOverEvent, LaunchedBall, Launcher, MatchedBalls, WaypointPath } from "./types";
 import { distance, randomColor, scale, subtract, toUnit } from "./util";
 import { Node } from "./types";
 import { createEventManager } from "./events";
@@ -129,7 +129,10 @@ export function step(game: Game) {
 
   stepMovement(game);
 
-  handleCollisions(game);
+  const {hasCollision} = handleCollisions(game);
+  if(hasCollision) {
+    game.events.dispatchEvent(new BallCollisionEvent());
+  }
 
   game.chains.forEach((chain) => {
     const {matches} = resolveMatches(game, chain)

@@ -116,7 +116,7 @@ export interface AppConfig {
   stepsPerFrame: number;
 }
 
-export type GameEventType = 'launchedBall' | 'matchedBalls' | 'gameOver';
+export type GameEventType = 'launchedBall' | 'matchedBalls' | 'gameOver' | 'ballCollision';
 
 export class GameEvent extends Event {
   constructor(type: GameEventType) {
@@ -139,6 +139,12 @@ export class MatchedBalls extends GameEvent {
 export class GameOverEvent extends GameEvent {
   constructor() {
     super('gameOver')
+  }
+}
+
+export class BallCollisionEvent extends GameEvent {
+  constructor() {
+    super('ballCollision')
   }
 }
 

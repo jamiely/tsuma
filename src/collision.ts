@@ -22,11 +22,12 @@ import { WAYPOINT_DISTANCE_DELTA } from "./constants";
 // 3. if the launched ball enters at the beginning or end
 //    the line, nothing gets pushed.
 
-export function handleCollisions(game: Game) {
+export function handleCollisions(game: Game): {hasCollision: boolean} {
   const { chains, freeBalls } = game;
 
   // this is not quite what we want later,
   // since we don't want to balls to disappear
+  let hasAnyCollision = false;
   let hasCollision = false;
   do {
     hasCollision = false;
@@ -134,11 +135,14 @@ export function handleCollisions(game: Game) {
 
           freeBalls.splice(i, 1);
           hasCollision = true;
+          hasAnyCollision = true;
           break outer;
         }
       }
     }
   } while (hasCollision);
+
+  return {hasCollision: hasAnyCollision};
 }
 
 export const ballsCollide = (game: Game, ball1: Ball, ball2: Ball) => {
