@@ -5,7 +5,8 @@ import {
   simplify,
   sinWave,
 } from "./path";
-import { Board, Game, Point, Rectangle } from "./types";
+import { Board, Color, Game, Point, Rectangle } from "./types";
+import { defaultColors } from "./util";
 
 const line = ({
   launcherPosition,
@@ -16,6 +17,7 @@ const line = ({
 }: { bounds: Rectangle; launcherPosition?: Point } & Partial<
   Parameters<typeof linePath>[0]
 >): Board => ({
+  colors: defaultColors,
   launcherPosition: launcherPosition || {
     x: bounds.size.width / 2,
     y: (bounds.size.height * 5) / 6,
@@ -40,9 +42,11 @@ export const archimedes = (bounds: Rectangle): Board => ({
   paths: [
     createWaypointPathCustom(simplify(10, archimedeanSpiral({ bounds }))),
   ],
+  colors: defaultColors,
 });
 
 const waveBoard = ({ bounds, ...rest }: Parameters<typeof sinWave>[0]) => ({
+  colors: defaultColors,
   launcherPosition: {
     x: bounds.size.width / 2,
     y: (bounds.size.height * 5) / 6,
@@ -77,7 +81,8 @@ export const shallowWave = (bounds: Rectangle) =>
   });
 
 export const buildBoards = (bounds: Rectangle): Game["boards"] => {
-  const testBallCount = 0;
+  const testBallCount = 1;
+  const testColors: Color[] = ['red', 'green'];
 
   const halfHeight = bounds.size.height / 2;
 
@@ -99,6 +104,7 @@ export const buildBoards = (bounds: Rectangle): Game["boards"] => {
         slope: 0,
         yIntercept: halfHeight,
       }),
+      colors: testColors,
     },
     "test-head": {
       ballCount: testBallCount,
@@ -113,6 +119,7 @@ export const buildBoards = (bounds: Rectangle): Game["boards"] => {
         slope: 0,
         yIntercept: halfHeight,
       }),
+      colors: testColors,
     },
     test: {
       ballCount: 2,
@@ -127,6 +134,7 @@ export const buildBoards = (bounds: Rectangle): Game["boards"] => {
         slope: 0,
         yIntercept: bounds.size.height * 0.4,
       }),
+      colors: testColors,
     },
   };
 };

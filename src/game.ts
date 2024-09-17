@@ -3,15 +3,17 @@ import { handleCollisions } from "./collision";
 import { insertAfter } from "./linkedList";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
-import { BallCollisionEvent, Chain, ChainedBall, Game, GameOverEvent, LaunchedBall, Launcher, MatchedBalls, WaypointPath } from "./types";
-import { distance, randomColor, scale, subtract, toUnit } from "./util";
+import { BallCollisionEvent, BoardName, Chain, ChainedBall, Game, GameOverEvent, LaunchedBall, Launcher, MatchedBalls, WaypointPath } from "./types";
+import { distance, randomColor as utilRandomColor, scale, subtract, toUnit } from "./util";
 import { Node } from "./types";
 import { createEventManager } from "./events";
 import { createSoundManager } from "./sounds";
 
 const createChain = ({
+  game,
   waypointPath,
 }: {
+  game: Game;
   waypointPath: WaypointPath;
 }): Chain => {
   const startingWaypoint = waypointPath.start.next!;
@@ -20,7 +22,7 @@ const createChain = ({
     waypoint: startingWaypoint,
     ball: {
       position: { ...startingPosition },
-      color: randomColor(),
+      color: randomColor(game),
     },
   };
 
@@ -61,7 +63,7 @@ export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {
     launcher: {
       position: { x: 0, y: 0 },
       pointTo: { x: 0, y: 0 },
-      color: randomColor(),
+      color: 'red',
       launcherSpeed: launchedBallSpeed,
     },
     freeBalls: [],
@@ -73,17 +75,20 @@ export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {
     events,
   };
 
+  game.launcher.color = randomColor(game);
+
   loadBoard(game);
 
   return game;
 };
 
 const loadBoard = (game: Game) => {
+  console.log('loading board', game.currentBoard);
   const { launcherPosition, paths, ballCount } = game.boards[game.currentBoard];
   game.ballsLeft = ballCount ?? 100;
   game.launcher.position = launcherPosition;
   game.paths = paths;
-  game.chains = paths.map((path) => createChain({ waypointPath: path }));
+  game.chains = paths.map((path) => createChain({game, waypointPath: path }));
 };
 
 const launcherVelocity = ({ pointTo, position, launcherSpeed }: Launcher) => {
@@ -112,7 +117,7 @@ export const launchBall = (game: Game) => {
     color: launcher.color,
   });
 
-  launcher.color = randomColor();
+  launcher.color = randomColor(game);
 
   game.events.dispatchEvent(new LaunchedBall());
 };
@@ -125,6 +130,11 @@ export function step(game: Game) {
   if(game.boardOver) {
     stepBoardOver(game);
     return
+  }
+
+  if(chainsEmpty(game)) {
+    game.boardOver = 'won';
+    return;
   }
 
   stepMovement(game);
@@ -145,6 +155,23 @@ export function step(game: Game) {
 }
 
 function stepBoardOver(game: Game) {
+  if(game.boardOver === 'lost') return stepBoardOverLost(game);
+
+  // choose another board
+  nextBoard(game);
+  loadBoard(game);
+  game.boardOver = undefined;
+  game.boardOverSteps = 0;
+}
+
+function nextBoard(game: Game) {
+  const boardNames = Object.keys(game.boards);
+  const index = boardNames.indexOf(game.currentBoard);
+  const nextIndex = (index + 1) % boardNames.length;
+  game.currentBoard = boardNames[nextIndex] as BoardName;
+}
+
+function stepBoardOverLost(game: Game) {
   game.boardOverSteps++;
   if(game.boardOverSteps === 1) {
     game.events.dispatchEvent(new GameOverEvent())
@@ -158,6 +185,7 @@ function appendToChain(game: Game, chain: Chain) {
   // we want to spawn a new ball when the foot has cleared the first waypoint.
   const { foot, path } = chain;
 
+  if(! foot) return;
   const dist = distance(foot.value.ball.position, path.start.value);
   if (dist < 2 * game.ballRadius) return;
 
@@ -168,7 +196,7 @@ function appendToChain(game: Game, chain: Chain) {
       waypoint: path.start.next!,
       ball: {
         position: { ...path.start.value },
-        color: nextColor(chain),
+        color: nextColor(game, chain),
       },
     },
   };
@@ -181,22 +209,33 @@ function appendToChain(game: Game, chain: Chain) {
   game.ballsLeft--;
 }
 
-function nextColor(chain: Chain) {
+function chainsEmpty(game: Game) {
+  for(const chain of game.chains) {
+    if(chain.foot || chain.head) return false;
+  }
+  return true;
+}
+
+function nextColor(game: Game, chain: Chain) {
+  if(!chain.foot) return randomColor(game);
+
   const {
-    foot: {
-      value: {
-        ball: { color },
-      },
-      previous,
+    value: {
+      ball: { color },
     },
-  } = chain;
-  if (!previous) return randomColor();
-  if (color !== previous.value.ball.color) return randomColor();
+    previous,
+  } = chain.foot;
+  if (!previous) return randomColor(game);
+  if (color !== previous.value.ball.color) return randomColor(game);
 
   do {
-    const nextColor = randomColor();
+    const nextColor = randomColor(game);
     if (nextColor === color) continue;
 
     return nextColor;
   } while (true);
+}
+
+function randomColor(game: Game) {
+  return utilRandomColor(game.boards[game.currentBoard].colors);
 }

@@ -53,8 +53,8 @@ export interface ChainedBall {
 
 export interface Chain {
   path: WaypointPath;
-  head: Node<ChainedBall>;
-  foot: Node<ChainedBall>;
+  head: Node<ChainedBall> | undefined;
+  foot: Node<ChainedBall> | undefined;
   // positive if we are inserting a ball into the chain
   inserting: 0;
   pauseStepsAfterMatch?: number;
@@ -64,9 +64,10 @@ export interface Board {
   launcherPosition: Point;
   paths: WaypointPath[];
   ballCount?: number;
+  colors: Color[];
 }
 
-type BoardName = 'shallowWave' | 'wave' | 'archimedes' | 'line' | 'test-tail' | 'test-head' | 'test';
+export type BoardName = 'shallowWave' | 'wave' | 'archimedes' | 'line' | 'test-tail' | 'test-head' | 'test';
 
 interface Debug {
   enabled?: boolean;

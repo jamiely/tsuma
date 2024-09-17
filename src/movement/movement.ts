@@ -271,6 +271,8 @@ function insertionPushChainForward({
 }
 
 export function stepNormalChain(game: Game, chain: Chain) {
+  if(!chain.foot) return;
+  
   updatePositionTowardsWaypoint({ node: chain.foot, chain, game });
 
   // after moving the foot, push along the next ball until it's

@@ -48,16 +48,16 @@ export const remove = <T>(node: Node<T>) => {
   }
 };
 
-export function iterateToTail<T>(head: Node<T>) {
+export function iterateToTail<T>(head: Node<T> | undefined) {
   return iterateWithTransform(head, (current) => current.next);
 }
 
-export function iterateToHead<T>(tail: Node<T>) {
+export function iterateToHead<T>(tail: Node<T> | undefined) {
   return iterateWithTransform(tail, (current) => current.previous);
 }
 
 export function* iterateWithTransform<T>(
-  node: Node<T>,
+  node: Node<T> | undefined,
   transformer: (node: Node<T>) => Node<T> | undefined
 ) {
   let current: Node<T> | undefined = node;

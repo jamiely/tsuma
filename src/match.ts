@@ -15,15 +15,25 @@ export function resolveMatches(game: Game, chain: Chain): {matches: boolean} {
   let matches = false;
   while(current) {
     const lastBall = last?.value.ball;
-    if(lastBall && lastBall.color === current.value.ball.color &&
-      distance(lastBall.position, current.value.ball.position) < 2 * game.ballRadius + 1
-    ) {
-      length++;   
-    } else {
+    const didMatch = lastBall && lastBall.color === current.value.ball.color &&
+    distance(lastBall.position, current.value.ball.position) < 2 * game.ballRadius + 1;
+    if(didMatch) {
+      length++;
+    }
+    
+    const isFoot = current == chain.foot;
+    if(!didMatch || isFoot) {
       // we are at a new color, so resolve the last match
       if(length >= 3) {
         if(chain.head === start) {
-          chain.head = current;
+          if(didMatch && isFoot) {
+            chain.head = undefined;
+          } else {
+            chain.head = current;
+          }
+        }
+        if(isFoot && didMatch) {
+          chain.foot = start?.previous;
         }
 
         matches = true;
@@ -31,10 +41,10 @@ export function resolveMatches(game: Game, chain: Chain): {matches: boolean} {
         // aren't handled
 
         // disappear balls in chain by changing pointers
-        if(start.previous) {
+        if(start?.previous) {
           start.previous.next = current;
         }
-        current.previous = start.previous;
+        current.previous = start?.previous;
         chain.pauseStepsAfterMatch = 30;
       }
   

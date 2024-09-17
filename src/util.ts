@@ -6,8 +6,8 @@ import {
   WaypointDirection,
 } from "./types";
 
-const colors: Color[] = ["red", "green", "blue", "gold"];
-export const randomColor = () =>
+export const defaultColors: Color[] = ["red", "green", "blue", "gold"];
+export const randomColor = (colors: Color[] = defaultColors) =>
   colors[Math.floor(Math.random() * colors.length)];
 
 export const distance = (pt1: Point, pt2: Point) => {

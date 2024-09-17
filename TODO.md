@@ -9,10 +9,5 @@
 5. Game freezes when chained ball speed is more than 2.
 6. Tail doesn't disappear down hole.
 7.  There is still a bug inserting if the free ball is very aligned to the normal.
-8.  ~~When there is a gap in the chain, and a ball is inserted into the tailward piece, between two existing balls, then the headward piece will also get pushed up.~~
 9.  Sometimes balls don't quite touch, especially when increasing speeds, leading to situations where a match doesn't clear.
-10. ~~After implementing magnetic, there are some weird collision
-    problems. Two options.
-    a. Get better with the math.
-    b. Eschew the math for more specific flags, like 'isTouchingPrevious'.~~ Addressed this by decreasing step size and having 2 steps for each frame.
-12. There is some problem matching at the tail.
+12. ~~There is some problem matching at the tail.~~
