@@ -132,7 +132,7 @@ export function step(game: Game) {
     return
   }
 
-  if(chainsEmpty(game)) {
+  if(boardWon(game)) {
     game.boardOver = 'won';
     return;
   }
@@ -185,13 +185,7 @@ function appendToChain(game: Game, chain: Chain) {
   // we want to spawn a new ball when the foot has cleared the first waypoint.
   const { foot, path } = chain;
 
-  if(! foot) return;
-  const dist = distance(foot.value.ball.position, path.start.value);
-  if (dist < 2 * game.ballRadius) return;
-
-  // the last ball has cleared, so create another one
-
-  const node: Node<ChainedBall> = {
+  const nextBall = (): Node<ChainedBall> => ({
     value: {
       waypoint: path.start.next!,
       ball: {
@@ -199,9 +193,26 @@ function appendToChain(game: Game, chain: Chain) {
         color: nextColor(game, chain),
       },
     },
-  };
+  });
 
-  insertAfter(node, foot);
+  let node: Node<ChainedBall> | undefined;
+
+  if(foot) {
+    const dist = distance(foot.value.ball.position, path.start.value);
+    if (dist < 2 * game.ballRadius) return;
+
+    // the last ball has cleared, so create another one
+
+    node = nextBall();
+    insertAfter(node, foot);
+  } else if(!chain.head) {
+    // we cleared all the balls that have spawned
+    // but we still have balls left to spawn.
+    node = nextBall();
+    chain.head = node;
+  }
+
+  if(! node) return;
 
   // the new ball always becomes the foot
   chain.foot = node;
@@ -209,7 +220,9 @@ function appendToChain(game: Game, chain: Chain) {
   game.ballsLeft--;
 }
 
-function chainsEmpty(game: Game) {
+function boardWon(game: Game) {
+  if(game.ballsLeft > 0) return false;
+
   for(const chain of game.chains) {
     if(chain.foot || chain.head) return false;
   }
