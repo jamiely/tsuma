@@ -16,4 +16,5 @@
 15. Power ups: slow down ball
 16. Power ups: accuracy ball (quicker shots + arrow target)
 17. Power ups: explosion ball, sounds.
-18. 
+18. ~~multichain~~
+19. only launch balls that are still in the chain

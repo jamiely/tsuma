@@ -9,6 +9,8 @@ import {
 import { Board, Color, Game, Point, Rectangle } from "./types";
 import { chaikinSmoothing, defaultColors } from "./util";
 
+const testColors: Color[] = ["red", "green"];
+
 const line = ({
   launcherPosition,
   yIntercept = 400,
@@ -83,11 +85,12 @@ export const shallowWave = (bounds: Rectangle) =>
 
 export const buildBoards = (bounds: Rectangle): Game["boards"] => {
   const testBallCount = 1;
-  const testColors: Color[] = ["red", "green"];
 
   const halfHeight = bounds.size.height / 2;
 
   return {
+    'test-chains-cross': testChainsCross(bounds),
+    'test-chains': testChains(bounds),
     board11: board11(bounds),
     board12: board12(bounds),
     board13: board13(bounds),
@@ -283,4 +286,66 @@ const board13 = (bounds: Rectangle): Board => {
     paths: [createWaypointPathCustom(points)],
     colors: defaultColors,
   };
+};
+
+const testChains = (bounds: Rectangle): Board => {
+  const line1 = line({
+      bounds,
+      startX: bounds.size.width * 0.25,
+      stopX: bounds.size.width * 0.75,
+      slope: 0,
+      yIntercept: bounds.size.height * 0.2,
+    }),
+    line2 = line({
+      bounds,
+      startX: bounds.size.width * 0.25,
+      stopX: bounds.size.width * 0.75,
+      slope: 0,
+      yIntercept: bounds.size.height * 0.8,
+    });
+
+  return {
+    ballCount: 2,
+    colors: testColors,
+    paths: [
+      ...line1.paths,
+      ...line2.paths,
+    ],
+      launcherPosition: {
+        x: bounds.size.width / 2,
+        y: bounds.size.height / 2,
+      },
+  }
+}
+
+const testChainsCross = (bounds: Rectangle): Board => {
+  const line1 = line({
+      bounds,
+      startX: bounds.size.width * 0.25,
+      stopX: bounds.size.width * 0.75,
+      slope: .5,
+      yIntercept: 0,
+    }),
+    line2 = line({
+      bounds,
+      startX: bounds.size.width * 0.25,
+      stopX: bounds.size.width * 0.75,
+      slope: -.5,
+      yIntercept: bounds.size.height * 0.8,
+    });
+
+    console.log(line1.paths);
+
+  return {
+    ballCount: 2,
+    colors: testColors,
+    paths: [
+      ...line1.paths,
+      ...line2.paths,
+    ],
+      launcherPosition: {
+        x: bounds.size.width / 2,
+        y: bounds.size.height *  4/5,
+      },
+  }
 };
