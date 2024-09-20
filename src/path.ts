@@ -16,6 +16,18 @@ export const createWaypointPath = (
   };
 };
 
+export const createWaypointPathFromArray = (
+  points: Point[],
+): WaypointPath => {
+  function* gen() {
+    for(const pt of points) {
+      yield pt
+    }
+  }
+
+  return createWaypointPathCustom(gen)
+}
+
 export const createWaypointPathCustom = (
   get: () => Generator<Point>
 ): WaypointPath => {
@@ -64,7 +76,17 @@ export const simplify = (minDistance: number, get: () => Generator<Point>) => {
   };
 };
 
-export const sinWave = ({bounds, origin, frequency, amplitude}: {amplitude: number, frequency: number, bounds: Rectangle, origin: Point}) => {
+export const sinWave = ({
+  bounds,
+  origin,
+  frequency,
+  amplitude,
+}: {
+  amplitude: number;
+  frequency: number;
+  bounds: Rectangle;
+  origin: Point;
+}) => {
   const increment = Math.PI;
   return function* () {
     for (let x = origin.x; x <= bounds.size.width - 50; x += increment) {
@@ -76,41 +98,70 @@ export const sinWave = ({bounds, origin, frequency, amplitude}: {amplitude: numb
   };
 };
 
-export const archimedeanSpiral = ({bounds}: {bounds: Rectangle}) => {
-  const startingRadius = Math.PI / 2,
-    turnDistance = 10,
-    squash = {
-      x: 2,
-      y: 1,
-    },
-    startAngle = Math.PI * 8,
+export const archimedeanSpiral = ({
+  bounds,
+  startingRadius = Math.PI / 2,
+  turnDistance = 10,
+  squash = {
+    x: 2,
+    y: 1,
+  },
+  startAngle = Math.PI * 8,
     stopAngle = 5,
     incrementAngle = Math.PI / 16,
     origin = {
       x: bounds.size.width / 2,
       y: bounds.size.height / 2,
-    }
+    },
+    predicate,
+}: {
+  bounds: Rectangle;
+  startingRadius?: number;
+  turnDistance?: number;
+  squash?: Point,
+  startAngle?: number;
+  stopAngle?: number;
+  incrementAngle?: number;
+  origin?: Point;
+  predicate?: (angle: number) => boolean,
+}) => {
+  const resolvedPredicate = predicate ||
+    ((angle) => angle >= stopAngle);
 
-  return function*() {
-    for(let a = startAngle; a >= stopAngle; a-= incrementAngle) {
-      const coefficient = (startingRadius + turnDistance * a );
+  return function* () {
+    for (let a = startAngle; resolvedPredicate(a); a -= incrementAngle) {
+      const coefficient = startingRadius + turnDistance * a;
       yield {
         x: squash.x * coefficient * Math.cos(a) + origin.x,
         y: squash.y * coefficient * Math.sin(a) + origin.y,
-      }
+      };
     }
-  }
-}
+  };
+};
 
-export const linePath = ({bounds, slope, yIntercept, startX = -10, stopX, xIncrement = 10}: {bounds: Rectangle, slope: number, yIntercept: number, startX?: number, stopX?: number, xIncrement?: number}) => {
+export const linePath = ({
+  bounds,
+  slope,
+  yIntercept,
+  startX = -10,
+  stopX,
+  xIncrement = 10,
+}: {
+  bounds: Rectangle;
+  slope: number;
+  yIntercept: number;
+  startX?: number;
+  stopX?: number;
+  xIncrement?: number;
+}) => {
   stopX ||= bounds.size.width - 50;
 
-  return function*() {
-    for(let x = startX; x < stopX; x+= xIncrement) {
+  return function* () {
+    for (let x = startX; x < stopX; x += xIncrement) {
       yield {
         x,
         y: slope * x + yIntercept,
-      }
+      };
     }
-  }
-}
+  };
+};

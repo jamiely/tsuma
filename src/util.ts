@@ -134,3 +134,41 @@ export const waypointVectorFromPosition = (
   toUnit(vec2);
   return vec2;
 };
+
+
+// Linear interpolation between two points (lerp function)
+function lerp(p0: Point, p1: Point, t: number): Point {
+  return {
+      x: p0.x + t * (p1.x - p0.x),
+      y: p0.y + t * (p1.y - p0.y)
+  };
+}
+
+// Chaikin's algorithm for smoothing a curve
+export function chaikinSmoothing(
+  points: Point[], 
+  iterations: number = 3, 
+  smoothingFactor: number = 0.25
+): Point[] {
+  let smoothedPoints = [...points]; // Start with the original points
+
+  for (let iter = 0; iter < iterations; iter++) {
+      const newPoints: Point[] = [];
+      for (let i = 0; i < smoothedPoints.length - 1; i++) {
+          const p0 = smoothedPoints[i];
+          const p1 = smoothedPoints[i + 1];
+
+          // Calculate new points along the segment
+          const q = lerp(p0, p1, smoothingFactor);       // New point closer to p0
+          const r = lerp(p0, p1, 1 - smoothingFactor);   // New point closer to p1
+
+          // Add the new points to the new list
+          newPoints.push(q);
+          newPoints.push(r);
+      }
+
+      smoothedPoints = newPoints;
+  }
+
+  return smoothedPoints;
+}

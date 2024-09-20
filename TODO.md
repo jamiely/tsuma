@@ -4,10 +4,16 @@
    forward chain back onto the other chain, as if they are
    magnetically attracted.~~
 3. When balls reach the hole, you have to start the board over.
-4. When balls reach the hole, flush all of the balls into the
-   hole by increasing the speed a lot.
+4. ~~When balls reach the hole, flush all of the balls into the
+   hole by increasing the speed a lot.~~
 5. Game freezes when chained ball speed is more than 2.
-6. Tail doesn't disappear down hole.
-7.  There is still a bug inserting if the free ball is very aligned to the normal.
-9.  Sometimes balls don't quite touch, especially when increasing speeds, leading to situations where a match doesn't clear.
+6. ~~Tail doesn't disappear down hole.~~
+7. ~~There is still a bug inserting if the free ball is very aligned to the normal.~~
+9.  ~~Sometimes balls don't quite touch, especially when increasing speeds, leading to situations where a match doesn't clear.~~
 12. ~~There is some problem matching at the tail.~~
+13. Replicate boards from Zuma
+14. Power ups: backwards ball
+15. Power ups: slow down ball
+16. Power ups: accuracy ball (quicker shots + arrow target)
+17. Power ups: explosion ball, sounds.
+18. 
