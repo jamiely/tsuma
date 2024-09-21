@@ -1,5 +1,6 @@
 import {
   archimedeanSpiral,
+  archimedeanSpiral2,
   createWaypointPathCustom,
   createWaypointPathFromArray,
   linePath,
@@ -89,11 +90,13 @@ export const buildBoards = (bounds: Rectangle): Game["boards"] => {
   const halfHeight = bounds.size.height / 2;
 
   return {
-    'test-chains-cross': testChainsCross(bounds),
-    'test-chains': testChains(bounds),
+    "test-chains-cross": testChainsCross(bounds),
+    "test-chains": testChains(bounds),
     board11: board11(bounds),
     board12: board12(bounds),
     board13: board13(bounds),
+    board14: board14(bounds),
+    board15: board15(bounds),
     shallowWave: shallowWave(bounds),
     wave: wave(bounds),
     archimedes: archimedes(bounds),
@@ -181,13 +184,53 @@ const board11 = (bounds: Rectangle): Board => {
       x: bounds.size.width / 2 + 20,
       y: bounds.size.height / 2,
     },
-    ballCount: 100,
+    ballCount: 30,
     paths: [createWaypointPathCustom(points)],
     colors: defaultColors,
   };
 };
 
 const board12 = ({ size: { width, height } }: Rectangle): Board => {
+  function points() {
+    function pt(x: number, y: number) {
+      return { x, y };
+    }
+
+    const keyPoints = [
+      pt(-10, height * 4/20),
+      pt(-10, height * 4/20),
+      pt(width / 2, height * 1/20),
+      pt(width * 16/ 20, height * 4/20),
+      pt(width * 19/ 20, height /2),
+      pt(width * 16/ 20, height * 12/ 20),
+      pt(width * 13/ 20, height * 6/ 20),
+      pt(width * 3/ 20, height * 6/ 20),
+      pt(width * 1/ 20, height * 12/ 20),
+      pt(width * 3/ 20, height * 18/ 20),
+      pt(width * 10/ 20, height * 18/ 20),
+      pt(width * 18/ 20, height * 16/ 20),
+      pt(width * 15/ 20, height * 14/ 20),
+      pt(width * 13/ 20, height * 12/ 20),
+      pt(width * 10/ 20, height * 14/ 20),
+      pt(width * 6/ 20, height * 14/ 20),
+      pt(width * 4/ 20, height * 10/ 20),
+      
+      
+    ];
+
+    return chaikinSmoothing(keyPoints);
+  }
+
+  return {
+    launcherPosition: { x: (width * 4.5) / 10, y: height / 2 },
+    ballCount: 30,
+    paths: [createWaypointPathFromArray(points())],
+    colors: defaultColors,
+  };
+};
+
+
+const board13 = ({ size: { width, height } }: Rectangle): Board => {
   function points() {
     function pt(x: number, y: number) {
       return { x, y };
@@ -213,13 +256,13 @@ const board12 = ({ size: { width, height } }: Rectangle): Board => {
 
   return {
     launcherPosition: { x: (width * 4.5) / 10, y: height / 2 },
-    ballCount: 100,
+    ballCount: 30,
     paths: [createWaypointPathFromArray(points())],
     colors: defaultColors,
   };
 };
 
-const board13 = (bounds: Rectangle): Board => {
+const board14 = (bounds: Rectangle): Board => {
   function* points() {
     const spiral = archimedeanSpiral({
       bounds,
@@ -238,7 +281,7 @@ const board13 = (bounds: Rectangle): Board => {
     yield {
       x: bounds.size.width + 20,
       y: (bounds.size.height * 9) / 10,
-    }
+    };
 
     const keyPoints = [
       {
@@ -267,10 +310,9 @@ const board13 = (bounds: Rectangle): Board => {
       },
     ];
 
-    for(const pt of chaikinSmoothing(keyPoints)) {
+    for (const pt of chaikinSmoothing(keyPoints)) {
       yield pt;
     }
-
 
     for (const { x, y } of spiral) {
       yield { x: bounds.size.width - x, y: bounds.size.height - y };
@@ -279,11 +321,102 @@ const board13 = (bounds: Rectangle): Board => {
 
   return {
     launcherPosition: {
-      x: bounds.size.width * 9 / 20,
+      x: (bounds.size.width * 9) / 20,
       y: bounds.size.height / 2,
     },
-    ballCount: 100,
+    ballCount: 30,
     paths: [createWaypointPathCustom(points)],
+    colors: defaultColors,
+  };
+};
+
+const board15 = (bounds: Rectangle): Board => {
+  const common = {
+    squash: {
+      x: 2,
+      y: 1,
+    },
+    stopAngle: Math.PI * 3.5,
+    turnDistance: {
+      x: 20,
+      y: 20,
+    }
+  };
+  function* points1() {
+    const spiral = archimedeanSpiral2({
+      ...common,
+      bounds,
+    })();
+
+    const { done, value } = spiral.next();
+
+    if (done) return;
+
+    yield {
+      x: 0,
+      y: bounds.size.height - value.y,
+    };
+
+    yield {
+      x: value.x,
+      y: bounds.size.height - value.y,
+    };
+
+    for (const { x, y } of spiral) {
+      yield { x: x, y: bounds.size.height - y };
+    }
+  }
+  function* points2() {
+    const spiral = archimedeanSpiral2({
+      ...common,
+      bounds,
+    })();
+
+    const { done, value } = spiral.next();
+
+    if (done) return;
+
+    yield {
+      x: bounds.size.width,
+      y: value.y,
+    };
+
+    yield {
+      x: value.x,
+      y: value.y,
+    };
+
+    for (const { x, y } of spiral) {
+      yield { x: bounds.size.width - x, y };
+    }
+  }
+
+  function* process(startOn: 'left' | 'right', gen: Generator<Point>) {
+    const allPoints = Array.from(gen).reverse();
+    const spiral = allPoints.slice(0, allPoints.length - 17)
+    const padding = 50;
+
+    spiral.unshift({
+      x: startOn === 'left' ? -padding : bounds.size.width + padding,
+      y: spiral[0].y,
+    })
+
+    const points = spiral;
+    for(const pt of points) {
+      yield pt;
+    }
+  }
+
+  return {
+    launcherPosition: {
+      x: bounds.size.width / 2 + 20,
+      y: bounds.size.height / 2,
+    },
+    ballCount: 30,
+    paths: [
+      createWaypointPathCustom(() => process('right', points1())),
+      createWaypointPathCustom(() => process('left', points2())),
+    ],
     colors: defaultColors,
   };
 };
@@ -307,45 +440,39 @@ const testChains = (bounds: Rectangle): Board => {
   return {
     ballCount: 2,
     colors: testColors,
-    paths: [
-      ...line1.paths,
-      ...line2.paths,
-    ],
-      launcherPosition: {
-        x: bounds.size.width / 2,
-        y: bounds.size.height / 2,
-      },
-  }
-}
+    paths: [...line1.paths, ...line2.paths],
+    launcherPosition: {
+      x: bounds.size.width / 2,
+      y: bounds.size.height / 2,
+    },
+  };
+};
 
 const testChainsCross = (bounds: Rectangle): Board => {
   const line1 = line({
       bounds,
       startX: bounds.size.width * 0.25,
       stopX: bounds.size.width * 0.75,
-      slope: .5,
+      slope: 0.5,
       yIntercept: 0,
     }),
     line2 = line({
       bounds,
       startX: bounds.size.width * 0.25,
       stopX: bounds.size.width * 0.75,
-      slope: -.5,
+      slope: -0.5,
       yIntercept: bounds.size.height * 0.8,
     });
 
-    console.log(line1.paths);
+  console.log(line1.paths);
 
   return {
     ballCount: 2,
     colors: testColors,
-    paths: [
-      ...line1.paths,
-      ...line2.paths,
-    ],
-      launcherPosition: {
-        x: bounds.size.width / 2,
-        y: bounds.size.height *  4/5,
-      },
-  }
+    paths: [...line1.paths, ...line2.paths],
+    launcherPosition: {
+      x: bounds.size.width / 2,
+      y: (bounds.size.height * 4) / 5,
+    },
+  };
 };

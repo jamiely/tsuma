@@ -16,17 +16,15 @@ export const createWaypointPath = (
   };
 };
 
-export const createWaypointPathFromArray = (
-  points: Point[],
-): WaypointPath => {
+export const createWaypointPathFromArray = (points: Point[]): WaypointPath => {
   function* gen() {
-    for(const pt of points) {
-      yield pt
+    for (const pt of points) {
+      yield pt;
     }
   }
 
-  return createWaypointPathCustom(gen)
-}
+  return createWaypointPathCustom(gen);
+};
 
 export const createWaypointPathCustom = (
   get: () => Generator<Point>
@@ -101,39 +99,48 @@ export const sinWave = ({
 export const archimedeanSpiral = ({
   bounds,
   startingRadius = Math.PI / 2,
-  turnDistance = 10,
+  turnDistance = { x: 10, y: 10 },
   squash = {
     x: 2,
     y: 1,
   },
   startAngle = Math.PI * 8,
-    stopAngle = 5,
-    incrementAngle = Math.PI / 16,
-    origin = {
-      x: bounds.size.width / 2,
-      y: bounds.size.height / 2,
-    },
-    predicate,
+  stopAngle = 5,
+  incrementAngle = Math.PI / 16,
+  origin = {
+    x: bounds.size.width / 2,
+    y: bounds.size.height / 2,
+  },
+  predicate,
+  angleCoefficient = 1,
 }: {
   bounds: Rectangle;
   startingRadius?: number;
-  turnDistance?: number;
-  squash?: Point,
+  turnDistance?: Point;
+  squash?: Point;
   startAngle?: number;
   stopAngle?: number;
   incrementAngle?: number;
   origin?: Point;
-  predicate?: (angle: number) => boolean,
+  predicate?: (angle: number) => boolean;
+  angleCoefficient?: number;
+  rawCoefficient?: number;
 }) => {
-  const resolvedPredicate = predicate ||
-    ((angle) => angle >= stopAngle);
+  const resolvedPredicate = predicate || ((angle) => angle >= stopAngle);
 
   return function* () {
     for (let a = startAngle; resolvedPredicate(a); a -= incrementAngle) {
-      const coefficient = startingRadius + turnDistance * a;
       yield {
-        x: squash.x * coefficient * Math.cos(a) + origin.x,
-        y: squash.y * coefficient * Math.sin(a) + origin.y,
+        x:
+          squash.x *
+            (startingRadius + turnDistance.x * a) *
+            Math.cos(angleCoefficient * a) +
+          origin.x,
+        y:
+          squash.y *
+            (startingRadius + turnDistance.y * a) *
+            Math.sin(angleCoefficient * a) +
+          origin.y,
       };
     }
   };
@@ -161,6 +168,52 @@ export const linePath = ({
       yield {
         x,
         y: slope * x + yIntercept,
+      };
+    }
+  };
+};
+
+export const archimedeanSpiral2 = ({
+  bounds,
+  startingRadius = Math.PI / 2,
+  turnDistance = { x: 10, y: 10 },
+  squash = {
+    x: 2,
+    y: 1,
+  },
+  startAngle = 0,
+  stopAngle = Math.PI * 2,
+  incrementAngle = Math.PI / 16,
+  origin = {
+    x: bounds.size.width / 2,
+    y: bounds.size.height / 2,
+  },
+  angleCoefficient = 1,
+}: {
+  bounds: Rectangle;
+  startingRadius?: number;
+  turnDistance?: Point;
+  squash?: Point;
+  startAngle?: number;
+  stopAngle?: number;
+  incrementAngle?: number;
+  origin?: Point;
+  angleCoefficient?: number;
+  rawCoefficient?: number;
+}) => {
+  return function* () {
+    for (let a = startAngle; a <= stopAngle; a += incrementAngle) {
+      yield {
+        x:
+          squash.x *
+            (startingRadius + turnDistance.x * a) *
+            Math.cos(angleCoefficient * a) +
+          origin.x,
+        y:
+          squash.y *
+            (startingRadius + turnDistance.y * a) *
+            Math.sin(angleCoefficient * a) +
+          origin.y,
       };
     }
   };

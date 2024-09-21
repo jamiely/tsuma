@@ -178,6 +178,13 @@ function stepBoardOver(game: Game) {
 }
 
 function nextBoard(game: Game) {
+  if(game.currentBoard.startsWith('board1')) {
+    const number = parseInt(game.currentBoard.substring(6));
+    if(! isNaN(number)) {
+      game.currentBoard = `board1${number % 5 + 1}` as BoardName;
+      return;
+    }
+  }
   const boardNames = Object.keys(game.boards);
   const index = boardNames.indexOf(game.currentBoard);
   const nextIndex = (index + 1) % boardNames.length;

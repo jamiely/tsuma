@@ -67,7 +67,7 @@ export interface Board {
   colors: Color[];
 }
 
-export type BoardName = 'shallowWave' | 'wave' | 'archimedes' | 'line' | 'test-tail' | 'test-head' | 'test' | 'board11' | 'board12' | 'board13' | 'test-chains' | 'test-chains-cross';
+export type BoardName = 'shallowWave' | 'wave' | 'archimedes' | 'line' | 'test-tail' | 'test-head' | 'test' | 'board11' | 'board12' | 'board13' | 'board14' | 'board15' | 'test-chains' | 'test-chains-cross';
 
 interface Debug {
   enabled?: boolean;

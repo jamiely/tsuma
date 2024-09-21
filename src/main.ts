@@ -14,7 +14,7 @@ function run() {
     debug: {
       enabled: Boolean(params.get('debug')),
     },
-    currentBoard: params.get('board') as Game['currentBoard'] || "archimedes",
+    currentBoard: params.get('board') as Game['currentBoard'] || "board11",
   });
 
   document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
