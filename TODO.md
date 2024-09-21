@@ -9,3 +9,6 @@
 9.  ~~only launch balls that are still in the chain~~
 10. Bug when pushing/matching ball that falls into sink.
 11. Start the level over when you lose.
+12. mobile support, specifically landscape mode, hide panel,
+    use full screen.
+13. There is some bug clearing a match where the match happens right before the tail. Might happen after a magnetic. The tail will also get erroneously cleared.

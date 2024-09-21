@@ -16,8 +16,9 @@ export const distance = (pt1: Point, pt2: Point) => {
   return Math.sqrt(dx * dx + dy * dy);
 };
 
-export const inBounds = (pt: Point, { position, size }: Rectangle) => {
-  const padding = { x: 20, y: 20 };
+export const inBounds = (pt: Point, { position, size }: Rectangle, {padding = { x: 20, y: 20 }}: {
+  padding?: Point,
+} = {}) => {
   if (pt.x < position.x - padding.x) return false;
   if (pt.x > position.x + size.width + padding.x) return false;
   if (pt.y < position.y - padding.y) return false;

@@ -96,6 +96,7 @@ export const sinWave = ({
   };
 };
 
+// Goes from outside in
 export const archimedeanSpiral = ({
   bounds,
   startingRadius = Math.PI / 2,
@@ -173,6 +174,7 @@ export const linePath = ({
   };
 };
 
+// Goes from inside out
 export const archimedeanSpiral2 = ({
   bounds,
   startingRadius = Math.PI / 2,
