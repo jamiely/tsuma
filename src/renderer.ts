@@ -2,8 +2,16 @@ import { iterateToTail } from "./linkedList";
 import { Node, ChainedBall, Game, Point } from "./types";
 import { add, scale, subtract, toUnit } from "./util";
 
-interface RenderOptions {
-  renderWaypoints: boolean;
+export interface RenderOptions {
+  waypoints: {
+    enabled: boolean;
+    color: string;
+    radius: number;
+  },
+  paths: {
+    color: string;
+    width: number;
+  }
 }
 
 export const renderGame = (canvas: HTMLCanvasElement) => (game: Game, options: RenderOptions) => {
@@ -151,19 +159,19 @@ const renderWaypoints = (context: CanvasRenderingContext2D, game: Game, options:
     let current: Node<Point> | undefined = start;
 
     while (current) {
-      if(options.renderWaypoints) {
+      if(options.waypoints.enabled) {
         context.beginPath();
-        context.arc(current.value.x, current.value.y, 2, 0, TwoPI);
-        context.fillStyle = "lightgray";
+        context.arc(current.value.x, current.value.y, options.waypoints.radius, 0, TwoPI);
+        context.fillStyle = options.waypoints.color;
         context.fill();
       }
 
       if (previous) {
         context.beginPath();
-        context.lineWidth = 10;
+        context.lineWidth = options.paths.width;
         context.moveTo(previous.value.x, previous.value.y);
         context.lineTo(current.value.x, current.value.y);
-        context.strokeStyle = "lightgray";
+        context.strokeStyle = options.paths.color;
         context.stroke();
       }
 

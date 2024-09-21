@@ -166,7 +166,7 @@ const board11 = (bounds: Rectangle): Board => {
 
     yield {
       x: value.x,
-      y: 0,
+      y: -30,
     };
 
     yield {
@@ -197,25 +197,23 @@ const board12 = ({ size: { width, height } }: Rectangle): Board => {
     }
 
     const keyPoints = [
-      pt(-10, height * 4/20),
-      pt(-10, height * 4/20),
-      pt(width / 2, height * 1/20),
-      pt(width * 16/ 20, height * 4/20),
-      pt(width * 19/ 20, height /2),
-      pt(width * 16/ 20, height * 12/ 20),
-      pt(width * 13/ 20, height * 6/ 20),
-      pt(width * 3/ 20, height * 6/ 20),
-      pt(width * 1/ 20, height * 12/ 20),
-      pt(width * 3/ 20, height * 18/ 20),
-      pt(width * 10/ 20, height * 18/ 20),
-      pt(width * 18/ 20, height * 16/ 20),
-      pt(width * 15/ 20, height * 14/ 20),
-      pt(width * 13/ 20, height * 12/ 20),
-      pt(width * 10/ 20, height * 14/ 20),
-      pt(width * 6/ 20, height * 14/ 20),
-      pt(width * 4/ 20, height * 10/ 20),
-      
-      
+      pt(-30, (height * 4) / 20),
+      pt(-30, (height * 4) / 20),
+      pt(width / 2, (height * 1) / 20),
+      pt((width * 16) / 20, (height * 4) / 20),
+      pt((width * 19) / 20, height / 2),
+      pt((width * 16) / 20, (height * 12) / 20),
+      pt((width * 13) / 20, (height * 6) / 20),
+      pt((width * 3) / 20, (height * 6) / 20),
+      pt((width * 1) / 20, (height * 12) / 20),
+      pt((width * 3) / 20, (height * 18) / 20),
+      pt((width * 10) / 20, (height * 18) / 20),
+      pt((width * 18) / 20, (height * 16) / 20),
+      pt((width * 15) / 20, (height * 14) / 20),
+      pt((width * 13) / 20, (height * 12) / 20),
+      pt((width * 10) / 20, (height * 14) / 20),
+      pt((width * 6) / 20, (height * 14) / 20),
+      pt((width * 4) / 20, (height * 10) / 20),
     ];
 
     return chaikinSmoothing(keyPoints);
@@ -228,7 +226,6 @@ const board12 = ({ size: { width, height } }: Rectangle): Board => {
     colors: defaultColors,
   };
 };
-
 
 const board13 = ({ size: { width, height } }: Rectangle): Board => {
   function points() {
@@ -251,7 +248,10 @@ const board13 = ({ size: { width, height } }: Rectangle): Board => {
       pt((width * 5.7) / 10, (height * 3) / 5),
     ];
 
-    return chaikinSmoothing(keyPoints);
+    return [
+      pt((width * 9) / 10, height + 30), 
+      ...chaikinSmoothing(keyPoints),
+    ];
   }
 
   return {
@@ -340,7 +340,7 @@ const board15 = (bounds: Rectangle): Board => {
     turnDistance: {
       x: 20,
       y: 20,
-    }
+    },
   };
   function* points1() {
     const spiral = archimedeanSpiral2({
@@ -391,18 +391,18 @@ const board15 = (bounds: Rectangle): Board => {
     }
   }
 
-  function* process(startOn: 'left' | 'right', gen: Generator<Point>) {
+  function* process(startOn: "left" | "right", gen: Generator<Point>) {
     const allPoints = Array.from(gen).reverse();
-    const spiral = allPoints.slice(0, allPoints.length - 17)
+    const spiral = allPoints.slice(0, allPoints.length - 17);
     const padding = 50;
 
     spiral.unshift({
-      x: startOn === 'left' ? -padding : bounds.size.width + padding,
+      x: startOn === "left" ? -padding : bounds.size.width + padding,
       y: spiral[0].y,
-    })
+    });
 
     const points = spiral;
-    for(const pt of points) {
+    for (const pt of points) {
       yield pt;
     }
   }
@@ -414,8 +414,8 @@ const board15 = (bounds: Rectangle): Board => {
     },
     ballCount: 30,
     paths: [
-      createWaypointPathCustom(() => process('right', points1())),
-      createWaypointPathCustom(() => process('left', points2())),
+      createWaypointPathCustom(() => process("right", points1())),
+      createWaypointPathCustom(() => process("left", points2())),
     ],
     colors: defaultColors,
   };

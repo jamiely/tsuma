@@ -1,11 +1,19 @@
 import './style.css'
-import { renderGame } from './renderer.ts'
+import { RenderOptions, renderGame } from './renderer.ts'
 import { createGame, step } from './game.ts'
 import { createInterface } from './interface.ts'
 import { AppConfig, Game } from './types.ts';
 
-const renderOptions = {
-  renderWaypoints: false,
+const renderOptions: RenderOptions = {
+  waypoints: {
+    enabled: false,
+    color: "lightgray",
+    radius: 10,
+  },
+  paths: {
+    color: "lightgray",
+    width: 10,
+  }
 }
 
 function run() {
