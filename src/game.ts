@@ -1,9 +1,9 @@
 import { buildBoards } from "./boards";
 import { handleCollisions } from "./collision";
-import { insertAfter } from "./linkedList";
+import { insertAfter, iterateToTail } from "./linkedList";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
-import { BallCollisionEvent, BoardName, Chain, ChainedBall, Game, GameOverEvent, LaunchedBall, Launcher, MatchedBalls, WaypointPath } from "./types";
+import { BallCollisionEvent, BoardName, Chain, ChainedBall, Color, Game, GameOverEvent, LaunchedBall, Launcher, MatchedBalls, WaypointPath } from "./types";
 import { distance, randomColor as utilRandomColor, scale, subtract, toUnit } from "./util";
 import { Node } from "./types";
 import { createEventManager } from "./events";
@@ -152,6 +152,19 @@ export function step(game: Game) {
   });
 
   game.chains.forEach((chain) => appendToChain(game, chain));
+
+  stepLauncher(game);
+}
+
+function stepLauncher(game: Game) {
+  const {launcher} = game;
+  const colorsLeft = remainingColors(game);
+
+  if(colorsLeft.has(launcher.color)) {
+    return;
+  }
+
+  launcher.color = utilRandomColor(Array.from(colorsLeft));
 }
 
 function stepBoardOver(game: Game) {
@@ -250,5 +263,19 @@ function nextColor(game: Game, chain: Chain) {
 }
 
 function randomColor(game: Game) {
-  return utilRandomColor(game.boards[game.currentBoard].colors);
+  const baseColors = game.boards[game.currentBoard].colors;
+  if(game.ballsLeft > 0) return utilRandomColor(baseColors);
+
+  return utilRandomColor(Array.from(remainingColors(game)));
+}
+
+function remainingColors(game: Game): Set<Color> {
+  const remainingColors = new Set<Color>();
+  for(const c of game.chains) {
+    for(const {value: {ball: {color}}} of iterateToTail(c.head)) {
+      remainingColors.add(color);
+    }
+  }
+
+  return remainingColors;
 }
