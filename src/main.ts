@@ -4,6 +4,10 @@ import { createGame, step } from './game.ts'
 import { createInterface } from './interface.ts'
 import { AppConfig, Game } from './types.ts';
 
+const renderOptions = {
+  renderWaypoints: false,
+}
+
 function run() {
   const params = new URLSearchParams(window.location.search);
   const appConfig: AppConfig = {
@@ -70,7 +74,7 @@ function run() {
         step(game);
       }
       
-      renderGame(canvas)(game)
+      renderGame(canvas)(game, renderOptions)
 
       render();
     })

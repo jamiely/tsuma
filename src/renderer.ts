@@ -2,7 +2,11 @@ import { iterateToTail } from "./linkedList";
 import { Node, ChainedBall, Game, Point } from "./types";
 import { add, scale, subtract, toUnit } from "./util";
 
-export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
+interface RenderOptions {
+  renderWaypoints: boolean;
+}
+
+export const renderGame = (canvas: HTMLCanvasElement) => (game: Game, options: RenderOptions) => {
   const { chains, freeBalls, ballRadius } = game;
   const context = canvas.getContext("2d");
   if (!context) {
@@ -14,7 +18,7 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game) => {
   context.fillStyle = "white";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  renderWaypoints(context, game);
+    renderWaypoints(context, game, options);
 
   for (let i = 0; i < chains.length; i++) {
     for(const {value} of iterateToTail(chains[i].head)) {
@@ -139,7 +143,7 @@ const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
 
 const TwoPI = 2 * Math.PI;
 
-const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) =>
+const renderWaypoints = (context: CanvasRenderingContext2D, game: Game, options: RenderOptions) =>
   game.paths.forEach((path) => {
     const { start } = path;
 
@@ -147,15 +151,16 @@ const renderWaypoints = (context: CanvasRenderingContext2D, game: Game) =>
     let current: Node<Point> | undefined = start;
 
     while (current) {
-      context.beginPath();
-      context.arc(current.value.x, current.value.y, 2, 0, TwoPI);
-      context.fillStyle = "lightgray";
-      context.fill();
+      if(options.renderWaypoints) {
+        context.beginPath();
+        context.arc(current.value.x, current.value.y, 2, 0, TwoPI);
+        context.fillStyle = "lightgray";
+        context.fill();
+      }
 
       if (previous) {
         context.beginPath();
-        context.setLineDash([5, 15]);
-        context.lineWidth = 1;
+        context.lineWidth = 10;
         context.moveTo(previous.value.x, previous.value.y);
         context.lineTo(current.value.x, current.value.y);
         context.strokeStyle = "lightgray";
