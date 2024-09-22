@@ -1,9 +1,9 @@
 import { buildBoards } from "./boards";
 import { handleCollisions } from "./collision";
-import { insertAfter, iterateToTail } from "./linkedList";
+import { insertAfter, iterateToTail, remove } from "./linkedList";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
-import { BallCollisionEvent, BoardName, Chain, ChainedBall, Color, Game, GameOverEvent, LaunchedBall, Launcher, MatchedBalls, WaypointPath } from "./types";
+import { BallCollisionEvent, BoardName, Chain, ChainedBall, Color, Effect, Explosion, Game, GameOverEvent, LaunchedBall, Launcher, MatchedBalls, WaypointPath } from "./types";
 import { distance, randomColor as utilRandomColor, scale, subtract, toUnit } from "./util";
 import { Node } from "./types";
 import { createEventManager } from "./events";
@@ -50,6 +50,7 @@ export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {
       stopOnCollision: true,
       debugSteps: 0,
     },
+    effects: [],
     options: {
       chainedBallSpeed: 0.6,
       insertingBallSpeed: launchedBallSpeed/3,
@@ -154,6 +155,68 @@ export function step(game: Game) {
   game.chains.forEach((chain) => appendToChain(game, chain));
 
   stepLauncher(game);
+
+  game.effects.forEach(effect => stepEffect(game, effect))
+  for(let i=game.effects.length-1; i>=0; i--) {
+    const {shouldRemove} = stepEffect(game, game.effects[i]);
+    if(!shouldRemove) continue;
+    game.effects.splice(i, 1);
+  }
+}
+
+function stepEffect(game: Game, effect: Effect): {shouldRemove: boolean} {
+  if(effect.type === 'explosion') {
+    return stepEffectExplosion(game, effect);
+  }
+
+  return {shouldRemove: false};
+}
+
+function stepEffectExplosion(game: Game, effect: Explosion): {shouldRemove: boolean} {
+  effect.step++;
+
+  if(effect.step < 150) {
+    effect.radius++;
+    removeBallsFromExplosion();
+  } else if(effect.radius > 0) {
+    effect.radius--;
+  } else {
+    return {shouldRemove: true}
+  }
+
+  return {shouldRemove: false};
+
+  function removeBallsFromExplosion() {
+    for(const chain of game.chains) {
+      for(const {node} of iterateToTail(chain.head)) {
+        const {value: {ball: {position}}} = node;
+        const dist = distance(position, effect.center);
+        if(dist < effect.radius) {
+          // remove ball
+          if(node === chain.head) {
+            chain.head = node.next;
+          }
+          if(node === chain.foot) {
+            chain.foot = node.previous;
+          }
+
+          remove(node);
+
+          if(node.value.effect) {
+            if(node.value.effect === 'explosion') {
+              game.effects.push({
+                type: 'explosion',
+                center: position,
+                radius: 1,
+                step: 0,
+              })
+            }
+          }
+        }
+      }
+    }
+
+  }
 }
 
 function stepLauncher(game: Game) {
@@ -205,6 +268,11 @@ function appendToChain(game: Game, chain: Chain) {
   // we want to spawn a new ball when the foot has cleared the first waypoint.
   const { foot, path } = chain;
 
+  let effect: ChainedBall['effect'];
+  if(!foot?.value.effect && Math.random() < .15) {
+    effect = 'explosion';
+  }
+
   const nextBall = (): Node<ChainedBall> => ({
     value: {
       waypoint: path.start.next!,
@@ -212,6 +280,7 @@ function appendToChain(game: Game, chain: Chain) {
         position: { ...path.start.value },
         color: nextColor(game, chain),
       },
+      effect,
     },
   });
 

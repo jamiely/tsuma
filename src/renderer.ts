@@ -1,5 +1,5 @@
 import { iterateToTail } from "./linkedList";
-import { Node, ChainedBall, Game, Point } from "./types";
+import { Node, ChainedBall, Game, Point, Explosion } from "./types";
 import { add, scale, subtract, toUnit } from "./util";
 
 export interface RenderOptions {
@@ -35,8 +35,24 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game, options: R
   }
   freeBalls.forEach(renderBall(context, ballRadius));
   renderLauncher(context, game);
+  renderEffects(context, game);
   renderDebug(context, game);
 };
+
+const renderEffects = (context: CanvasRenderingContext2D, game: Game) => {
+  for(const effect of game.effects) {
+    if(effect.type === 'explosion') {
+      renderEffectExplosion(context, game, effect);
+    }
+  }
+}
+
+const renderEffectExplosion = (context: CanvasRenderingContext2D, _game: Game, {radius, center}: Explosion) => {
+  context.beginPath();
+  context.arc(center.x, center.y, radius, 0, TwoPI);
+  context.fillStyle = "orange";
+  context.fill();
+}
 
 const renderChainedBall = (
   context: CanvasRenderingContext2D,
@@ -50,6 +66,14 @@ const renderChainedBall = (
     insertion,
   } = chainedBall;
   renderBall(context, game.ballRadius)(chainedBall.ball);
+
+  if(chainedBall.effect) {
+    const text = '💣'; // for explosion
+    context.font = "16pt helvetica";
+    context.fillStyle = "white";
+    context.fillText(text, x - game.ballRadius/2, y + game.ballRadius / 2);
+  }
+
   if (!insertion || !game.debug.enabled) return;
 
   context.font = "20pt helvetica";

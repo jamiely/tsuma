@@ -1,6 +1,7 @@
 import { Chain, ChainedBall, Game } from "./types";
 import { distance } from "./util";
 import { Node } from "./types";
+import { iterateToTail } from "./linkedList";
 
 export function resolveMatches(game: Game, chain: Chain): {matches: boolean} {
   // we want to allow launched balls to fully become part
@@ -25,6 +26,19 @@ export function resolveMatches(game: Game, chain: Chain): {matches: boolean} {
     if(!didMatch || isFoot) {
       // we are at a new color, so resolve the last match
       if(length >= 3) {
+        for(const {value: {effect, ball}} of iterateToTail(start, (node) => node !== current)) {
+          if(!effect) continue;
+
+          if(effect === 'explosion') {
+            game.effects.push({
+              type: 'explosion',
+              center: ball.position,
+              step: 0,
+              radius: 0,
+            });
+          }
+        }
+
         if(chain.head === start) {
           if(didMatch && isFoot) {
             chain.head = undefined;

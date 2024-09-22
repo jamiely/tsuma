@@ -48,8 +48,8 @@ export const remove = <T>(node: Node<T>) => {
   }
 };
 
-export function iterateToTail<T>(head: Node<T> | undefined) {
-  return iterateWithTransform(head, (current) => current.next);
+export function iterateToTail<T>(head: Node<T> | undefined, predicate?: (node: Node<T>) => boolean) {
+  return iterateWithTransform(head, (current) => current.next, predicate);
 }
 
 export function iterateToHead<T>(tail: Node<T> | undefined) {
@@ -58,10 +58,11 @@ export function iterateToHead<T>(tail: Node<T> | undefined) {
 
 export function* iterateWithTransform<T>(
   node: Node<T> | undefined,
-  transformer: (node: Node<T>) => Node<T> | undefined
+  transformer: (node: Node<T>) => Node<T> | undefined,
+  predicate: (node: Node<T>) => boolean = (node) => Boolean(node),
 ) {
   let current: Node<T> | undefined = node;
-  while (current) {
+  while (current && predicate(current)) {
     yield {
       ...current,
       node: current,

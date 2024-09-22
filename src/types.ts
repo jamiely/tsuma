@@ -47,6 +47,7 @@ interface Insertion {
 
 export interface ChainedBall {
   ball: Ball;
+  effect?: 'explosion';
   waypoint?: Node<Point>;
   insertion?: Insertion;
 }
@@ -85,7 +86,17 @@ interface Debug {
 export interface EventManager extends EventTarget {
 }
 
+export interface Explosion {
+  type: 'explosion',
+  center: Point;
+  step: number;
+  radius: number;
+}
+
+export type Effect = Explosion;
+
 export interface Game {
+  effects: Effect[],
   boardOver?: 'won' | 'lost';
   boardOverSteps: number;
   debug: Debug;
