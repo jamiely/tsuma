@@ -209,6 +209,7 @@ const board12 = ({ size: { width, height } }: Rectangle): Board => {
       pt((width * 3) / 20, (height * 18) / 20),
       pt((width * 10) / 20, (height * 18) / 20),
       pt((width * 18) / 20, (height * 16) / 20),
+      pt((width * 18) / 20, (height * 13) / 20),
       pt((width * 15) / 20, (height * 14) / 20),
       pt((width * 13) / 20, (height * 12) / 20),
       pt((width * 10) / 20, (height * 14) / 20),
