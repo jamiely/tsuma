@@ -45,6 +45,25 @@ const renderEffects = (context: CanvasRenderingContext2D, game: Game) => {
       renderEffectExplosion(context, game, effect);
     }
   }
+
+  renderEffectAccuracy(context, game);
+}
+
+const renderEffectAccuracy  = (context: CanvasRenderingContext2D, game: Game) => {
+  if(!game.appliedEffects.accuracy) return;
+  
+  const start = game.launcher.position;
+  const end = game.launcher.pointTo;
+  context.beginPath();
+  context.setLineDash([]);
+  context.lineWidth = 20;
+  context.lineCap = "square";
+  context.strokeStyle = 'cyan';
+  context.moveTo(start.x, start.y);
+  context.lineTo(end.x, end.y);
+  context.globalAlpha = 0.5;
+  context.stroke();
+  context.globalAlpha = 1;
 }
 
 const renderEffectExplosion = (context: CanvasRenderingContext2D, _game: Game, {radius, center}: Explosion) => {
@@ -70,7 +89,8 @@ const renderChainedBall = (
   if(chainedBall.effect) {
     let text = {
       'explosion': '💣',
-      'slowEffect': '⏸️'
+      'slowEffect': '⏸️',
+      'accuracyEffect': '🎯',
     }[chainedBall.effect];
     context.font = "16pt helvetica";
     context.fillStyle = "white";

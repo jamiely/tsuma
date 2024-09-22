@@ -113,24 +113,34 @@ export interface Explosion {
 }
 
 export interface SlowEffect {
-  type: 'slowEffect',
+  type: "slowEffect";
   step: number;
 }
 
-export type Effect = Explosion | SlowEffect;
+export interface AccuracyEffect {
+  type: "accuracyEffect";
+  step: number;
+}
+
+export type Effect = Explosion | SlowEffect | AccuracyEffect;
 
 export interface Game {
+  appliedEffects: {
+    slowDown: boolean,
+    accuracy: boolean,
+  },
   effects: Effect[];
   boardOver?: "won" | "lost";
   boardOverSteps: number;
   debug: Debug;
   chainedBallSpeed: number;
+  firingDelay: number,
   options: {
     defaultChainedBallSpeed: number;
     magneticBallSpeed: number;
     launchedBallSpeed: number;
     insertingBallSpeed: number;
-    firingDelay: number;
+    defaultFiringDelay: number;
   };
   ballsLeft: number;
   chains: Chain[];
@@ -154,13 +164,14 @@ export interface AppConfig {
   stepsPerFrame: number;
 }
 
+export type EffectType = "explosion" | "slowEffect" | "accuracyEffect";
+
 export type GameEventType =
   | "launchedBall"
   | "matchedBalls"
   | "gameOver"
   | "ballCollision"
-  | "slowEffect"
-  | "explosion";
+  | EffectType;
 
 export class BaseGameEvent extends Event {
   constructor(type: GameEventType) {
@@ -208,11 +219,9 @@ export interface BallCollisionEvent extends BaseGameEvent {
   type: "ballCollision";
 }
 
-type EffectType = 'explosion'| 'slowEffect';
-
 class EffectEvent extends BaseGameEvent {
   constructor(effectType: EffectType) {
-    super(effectType)
+    super(effectType);
   }
 }
 
@@ -227,7 +236,7 @@ export class SlowEffectEvent extends EffectEvent {
 }
 
 export interface SlowEffectEvent extends EffectEvent {
-  type: 'slowEffect';
+  type: "slowEffect";
 }
 
 export class ExplosionEffectEvent extends BaseGameEvent {
@@ -241,9 +250,20 @@ export interface ExplosionEffectEvent extends BaseGameEvent {
   center: Point;
 }
 
+export class AccuracyEffectEvent extends BaseGameEvent {
+  constructor() {
+    super('accuracyEffect');
+  }
+}
+
+export interface AccuracyEffectEvent extends BaseGameEvent {
+  type: 'accuracyEffect';
+}
+
 export type GameEvent =
   | ExplosionEffectEvent
   | SlowEffectEvent
+  | AccuracyEffectEvent
   | BallCollisionEvent
   | GameOverEvent
   | MatchedBallsEvent

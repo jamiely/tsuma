@@ -1,4 +1,4 @@
-import { Chain, ChainedBall, ExplosionEffectEvent, Game, SlowEffectEvent } from "./types";
+import { AccuracyEffectEvent, Chain, ChainedBall, ExplosionEffectEvent, Game, SlowEffectEvent } from "./types";
 import { distance } from "./util";
 import { Node } from "./types";
 import { iterateToTail } from "./linkedList";
@@ -33,6 +33,8 @@ export function resolveMatches(game: Game, chain: Chain): {matches: boolean} {
             game.events.dispatchEvent(new ExplosionEffectEvent(ball.position));
           } else if(effect === 'slowEffect') {
             game.events.dispatchEvent(new SlowEffectEvent());
+          } else if(effect === 'accuracyEffect') {
+            game.events.dispatchEvent(new AccuracyEffectEvent())
           }
         }
 
