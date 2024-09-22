@@ -83,9 +83,6 @@ interface Debug {
   debugSteps: number;
 }
 
-export interface EventManager extends EventTarget {
-}
-
 export interface Explosion {
   type: 'explosion',
   center: Point;
@@ -128,37 +125,67 @@ export interface AppConfig {
   stepsPerFrame: number;
 }
 
-export type GameEventType = 'launchedBall' | 'matchedBalls' | 'gameOver' | 'ballCollision';
+export type GameEventType = 'launchedBall' | 'matchedBalls' | 'gameOver' | 'ballCollision' | 'explosion';
 
-export class GameEvent extends Event {
+export class BaseGameEvent extends Event {
   constructor(type: GameEventType) {
     super(type)
   }
 }
 
-export class LaunchedBall extends GameEvent {
+export class LaunchedBallEvent extends BaseGameEvent {
   constructor() {
     super('launchedBall');
   }
 }
 
-export class MatchedBalls extends GameEvent {
+export interface LaunchedBallEvent extends BaseGameEvent {
+  type: 'launchedBall'
+}
+
+export class MatchedBallsEvent extends BaseGameEvent {
   constructor() {
     super('matchedBalls')
   }
 }
 
-export class GameOverEvent extends GameEvent {
+export interface MatchedBallsEvent extends BaseGameEvent {
+  type: 'matchedBalls';
+}
+
+export class GameOverEvent extends BaseGameEvent {
   constructor() {
     super('gameOver')
   }
 }
 
-export class BallCollisionEvent extends GameEvent {
+export interface GameOverEvent extends BaseGameEvent {
+  type: 'gameOver';
+}
+
+export class BallCollisionEvent extends BaseGameEvent {
   constructor() {
     super('ballCollision')
   }
 }
+
+export interface BallCollisionEvent extends BaseGameEvent {
+  type: 'ballCollision';
+}
+
+export class ExplosionEvent extends BaseGameEvent {
+  constructor(public center: Point) {
+    super('explosion')
+  } 
+}
+
+export interface ExplosionEvent extends BaseGameEvent {
+  type: 'explosion';
+  center: Point;
+}
+
+export type GameEvent = ExplosionEvent | BallCollisionEvent | GameOverEvent | MatchedBallsEvent | LaunchedBallEvent;
+
 
 export interface EventManager {
   dispatchEvent(event: GameEvent): boolean;

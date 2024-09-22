@@ -3,7 +3,7 @@ import { handleCollisions } from "./collision";
 import { insertAfter, iterateToTail, remove } from "./linkedList";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
-import { BallCollisionEvent, BoardName, Chain, ChainedBall, Color, Effect, Explosion, Game, GameOverEvent, LaunchedBall, Launcher, MatchedBalls, WaypointPath } from "./types";
+import { BallCollisionEvent, BoardName, Chain, ChainedBall, Color, Effect, Explosion, ExplosionEvent, Game, GameOverEvent, LaunchedBallEvent, Launcher, MatchedBallsEvent, WaypointPath } from "./types";
 import { distance, randomColor as utilRandomColor, scale, subtract, toUnit } from "./util";
 import { Node } from "./types";
 import { createEventManager } from "./events";
@@ -75,6 +75,7 @@ export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {
     currentBoard,
     events,
   };
+  handleEvents(game);
 
   game.launcher.color = randomColor(game);
 
@@ -120,7 +121,7 @@ export const launchBall = (game: Game) => {
 
   launcher.color = randomColor(game);
 
-  game.events.dispatchEvent(new LaunchedBall());
+  game.events.dispatchEvent(new LaunchedBallEvent());
 };
 
 export function step(game: Game) {
@@ -149,7 +150,7 @@ export function step(game: Game) {
     const {matches} = resolveMatches(game, chain)
     if(! matches) return;
 
-    game.events.dispatchEvent(new MatchedBalls());
+    game.events.dispatchEvent(new MatchedBallsEvent());
   });
 
   game.chains.forEach((chain) => appendToChain(game, chain));
@@ -204,12 +205,7 @@ function stepEffectExplosion(game: Game, effect: Explosion): {shouldRemove: bool
 
           if(node.value.effect) {
             if(node.value.effect === 'explosion') {
-              game.effects.push({
-                type: 'explosion',
-                center: position,
-                radius: 1,
-                step: 0,
-              })
+              game.events.dispatchEvent(new ExplosionEvent(position));
             }
           }
         }
@@ -354,4 +350,17 @@ function remainingColors(game: Game): Set<Color> {
   }
 
   return remainingColors;
+}
+
+function handleEvents(game: Game) {
+  game.events.addEventListener('explosion', (event) => {
+    if(event.type === 'explosion') {
+      game.effects.push({
+        type: 'explosion',
+        center: event.center,
+        radius: 1,
+        step: 0,
+      })
+    }
+  })
 }

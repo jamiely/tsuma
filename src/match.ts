@@ -1,4 +1,4 @@
-import { Chain, ChainedBall, Game } from "./types";
+import { Chain, ChainedBall, ExplosionEvent, Game } from "./types";
 import { distance } from "./util";
 import { Node } from "./types";
 import { iterateToTail } from "./linkedList";
@@ -30,12 +30,7 @@ export function resolveMatches(game: Game, chain: Chain): {matches: boolean} {
           if(!effect) continue;
 
           if(effect === 'explosion') {
-            game.effects.push({
-              type: 'explosion',
-              center: ball.position,
-              step: 0,
-              radius: 0,
-            });
+            game.events.dispatchEvent(new ExplosionEvent(ball.position));
           }
         }
 
