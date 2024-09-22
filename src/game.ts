@@ -5,6 +5,7 @@ import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
 import {
   AccuracyEffect,
+  BackwardsEffect,
   BallCollisionEvent,
   BoardName,
   Chain,
@@ -81,6 +82,7 @@ export const createGame = ({
     appliedEffects: {
       slowDown: false,
       accuracy: false,
+      backwards: false,
     },
     effects: [],
     chainedBallSpeed: 0.6,
@@ -209,6 +211,36 @@ function stepEffect(game: Game, effect: Effect): { shouldRemove: boolean } {
     return stepEffectSlow(game, effect);
   } else if (effect.type === "accuracyEffect") {
     return stepEffectAccuracy(game, effect);
+  } else if(effect.type === 'backwardsEffect') {
+    return stepEffectBackwards(game, effect);
+  }
+
+  return { shouldRemove: false };
+}
+
+function stepEffectBackwards(
+  game: Game,
+  effect: BackwardsEffect
+): { shouldRemove: boolean } {
+  const backwardsDuration = 800;
+
+  if (effect.step < backwardsDuration) {
+    game.appliedEffects.backwards = true;
+  } else {
+    let shouldResetBackwards = true;
+    for (const iterEffect of game.effects) {
+      if (iterEffect === effect) continue;
+      if (iterEffect.type !== "accuracyEffect") continue;
+
+      shouldResetBackwards = false;
+      break;
+    }
+
+    if (shouldResetBackwards) {
+      game.appliedEffects.backwards = false;
+    }
+
+    return { shouldRemove: true };
   }
 
   return { shouldRemove: false };
@@ -365,19 +397,21 @@ function newBallEffect(
   _game: Game,
   chain: Chain
 ): ChainedBall["effect"] | undefined {
+  return 'backwardsEffect';
   // don't put power ups next to each other
   if (chain.foot?.value.effect) return;
 
   const value = Math.random();
-  if (value > 0.4) return;
+  if (value > 0.5) return;
 
-  const probabilities = {
+  const probabilities: Record<EffectType, number> = {
     slowEffect: 0.2,
     accuracyEffect: 0.2,
-    explosion: 0.1
+    explosion: 0.1,
+    backwardsEffect: 0.1,
   } as const;
 
-  const effects = Object.keys(probabilities) as EffectType[];
+  const effects = Object.keys(probabilities) as (keyof typeof probabilities)[];
   shuffleArray(effects);
 
   for(const effect of effects) {
@@ -516,6 +550,15 @@ function handleEvents(game: Game) {
 
     game.effects.push({
       type: "accuracyEffect",
+      step: 0,
+    });
+  });
+  
+  game.events.addEventListener("backwardsEffect", (event) => {
+    if (event.type !== "backwardsEffect") return;
+
+    game.effects.push({
+      type: "backwardsEffect",
       step: 0,
     });
   });

@@ -51,7 +51,7 @@ const renderEffects = (context: CanvasRenderingContext2D, game: Game) => {
 
 const renderEffectAccuracy  = (context: CanvasRenderingContext2D, game: Game) => {
   if(!game.appliedEffects.accuracy) return;
-  
+
   const start = game.launcher.position;
   const end = game.launcher.pointTo;
   context.beginPath();
@@ -91,6 +91,7 @@ const renderChainedBall = (
       'explosion': '💣',
       'slowEffect': '⏸️',
       'accuracyEffect': '🎯',
+      'backwardsEffect': '🔃',
     }[chainedBall.effect];
     context.font = "16pt helvetica";
     context.fillStyle = "white";

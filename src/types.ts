@@ -122,12 +122,19 @@ export interface AccuracyEffect {
   step: number;
 }
 
-export type Effect = Explosion | SlowEffect | AccuracyEffect;
+export interface BackwardsEffect {
+  type: "backwardsEffect";
+  step: number;
+}
+
+
+export type Effect = Explosion | SlowEffect | AccuracyEffect | BackwardsEffect;
 
 export interface Game {
   appliedEffects: {
     slowDown: boolean,
     accuracy: boolean,
+    backwards: boolean,
   },
   effects: Effect[];
   boardOver?: "won" | "lost";
@@ -164,7 +171,7 @@ export interface AppConfig {
   stepsPerFrame: number;
 }
 
-export type EffectType = "explosion" | "slowEffect" | "accuracyEffect";
+export type EffectType = "explosion" | "slowEffect" | "accuracyEffect" | "backwardsEffect";
 
 export type GameEventType =
   | "launchedBall"
@@ -260,10 +267,21 @@ export interface AccuracyEffectEvent extends BaseGameEvent {
   type: 'accuracyEffect';
 }
 
+export class BackwardsEffectEvent extends BaseGameEvent {
+  constructor() {
+    super('backwardsEffect');
+  }
+}
+
+export interface BackwardsEffectEvent extends BaseGameEvent {
+  type: 'backwardsEffect'
+}
+
 export type GameEvent =
   | ExplosionEffectEvent
   | SlowEffectEvent
   | AccuracyEffectEvent
+  | BackwardsEffectEvent
   | BallCollisionEvent
   | GameOverEvent
   | MatchedBallsEvent
