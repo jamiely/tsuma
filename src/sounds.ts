@@ -6,7 +6,7 @@ export const createSoundManager = (events: EventManager) => {
     GameEventType,
     ReturnType<typeof soundEffects.toAudio> | undefined
   > = {
-    slowEffect: undefined,
+    slowEffect: audioSlowEffect,
     explosion: audioExplosion,
     launchedBall: audioLaunchedBall,
     matchedBalls: audioMatchedBalls,
@@ -171,7 +171,7 @@ const audioExplosion = soundEffects.toAudio({
   sample_size: 8,
 });
 
-const audioSlowEffect = soundsEffects.toAudio({
+const audioSlowEffect = soundEffects.toAudio({
   "oldParams": true,
   "wave_type": 2,
   "p_env_attack": 0,
