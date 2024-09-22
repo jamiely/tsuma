@@ -278,26 +278,30 @@ function insertionPushChainForward({
 }
 
 export function stepNormalChain(game: Game, chain: Chain, {waypointDirection}: {waypointDirection: WaypointDirection}) {
-  if (!chain.foot) return;
+  let moveFrom = chain.foot;
+  let getPrev = (node: Node<ChainedBall>) => node.previous;
+  let getNext = (node: Node<ChainedBall>) => node.next;
 
-  updatePositionTowardsWaypoint({ node: chain.foot, chain, game, waypointDirection });
+  if (!moveFrom) return;
+
+  updatePositionTowardsWaypoint({ node: moveFrom, chain, game, waypointDirection });
 
   // after moving the foot, push along the next ball until it's
   // not colliding with the foot anymore. Continue the process
   // until the head.
-  if (!chain.foot.previous) return;
 
-  for (const { node } of iterateToHead(chain.foot.previous)) {
+  let next: Node<ChainedBall> | undefined;
+  for (const { node } of iterateToHead(getPrev(moveFrom))) {
     while (
       node &&
-      node.next &&
-      ballsCollide(game, node.value.ball, node.next.value.ball)
+      (next = getNext(node)) &&
+      ballsCollide(game, node.value.ball, next.value.ball)
     ) {
       const { ballRemoved } = updatePositionTowardsWaypoint({
         node,
         chain,
         game,
-        waypointDirection: "forwards",
+        waypointDirection,
       });
 
       if (ballRemoved) break;
