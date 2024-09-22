@@ -1,4 +1,4 @@
-export {};
+export declare const sfxr: SFXR;
 
 interface Audio {
   play(): void;
@@ -11,9 +11,5 @@ interface GeneratedSound {
 interface SFXR {
   generate(string): GeneratedSound;
   play(sound: GeneratedSound): void;
-  toAudio(definition: any): Audio;
-}
-
-declare global {
-  interface Window { sfxr: SFXR; }
+  toAudio(definition: object): Audio;
 }

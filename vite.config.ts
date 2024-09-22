@@ -8,6 +8,9 @@ export default defineConfig({
       external: ['sfxr'],
     }
   },
+  // define: {
+  //   'window.sfxr': 'sfxr',
+  // },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -33,7 +33,7 @@ var FastBase64 = {
     var dst = '';
     var i = 0;
     while (len > 2) {
-      n = (src[i] << 16) | (src[i+1]<<8) | src[i+2];
+      const n = (src[i] << 16) | (src[i+1]<<8) | src[i+2];
       dst+= this.encLookup[n >> 12] + this.encLookup[n & 0xFFF];
       len-= 3;
       i+= 3;
@@ -129,24 +129,4 @@ var RIFFWAVE = function(data) {
 
 }; // end RIFFWAVE
 
-(function (root, factory) {
-  if(typeof define === "function" && define.amd) {
-    // Now we're wrapping the factory and assigning the return
-    // value to the root (window) and returning it as well to
-    // the AMD loader.
-    define([], function(){
-      return (root.RIFFWAVE = factory());
-    });
-  } else if(typeof module === "object" && module.exports) {
-    // I've not encountered a need for this yet, since I haven't
-    // run into a scenario where plain modules depend on CommonJS
-    // *and* I happen to be loading in a CJS browser environment
-    // but I'm including it for the sake of being thorough
-    module.exports = (root.RIFFWAVE = factory());
-  } else {
-    root.RIFFWAVE = factory();
-  }
-}(this, function() {
-  // module code here....
-  return RIFFWAVE;
-}));
+export default RIFFWAVE;

@@ -22,7 +22,7 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["./src/global.d.ts"]
+    "types": ["./src/vendor/sfxr.d.ts"]
   },
   "include": ["src"]
 }

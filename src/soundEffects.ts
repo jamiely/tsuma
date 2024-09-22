@@ -1,5 +1,3 @@
-const noop: any = () => {};
+import {sfxr} from './vendor/sfxr'
 
-export const soundEffects = window.sfxr || {
-  toAudio: () => ({play: noop}),
-};
+export const soundEffects = sfxr

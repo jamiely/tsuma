@@ -1,4 +1,8 @@
 import './style.css'
+
+import './vendor/riffwave'
+import './vendor/sfxr'
+
 import { RenderOptions, renderGame } from './renderer.ts'
 import { createGame, step } from './game.ts'
 import { createInterface } from './interface.ts'
