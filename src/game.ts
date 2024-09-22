@@ -397,7 +397,6 @@ function newBallEffect(
   _game: Game,
   chain: Chain
 ): ChainedBall["effect"] | undefined {
-  return 'backwardsEffect';
   // don't put power ups next to each other
   if (chain.foot?.value.effect) return;
 
@@ -432,6 +431,7 @@ function newBallEffect(
 }
 
 function appendToChain(game: Game, chain: Chain) {
+  if(game.appliedEffects.backwards) return;
   if (game.ballsLeft <= 0) return;
 
   // we want to spawn a new ball when the foot has cleared the first waypoint.
@@ -450,7 +450,7 @@ function appendToChain(game: Game, chain: Chain) {
 
   let node: Node<ChainedBall> | undefined;
 
-  if (foot) {
+  if (chain.head && foot) {
     const dist = distance(foot.value.ball.position, path.start.value);
     if (dist < 2 * game.ballRadius) return;
 

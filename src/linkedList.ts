@@ -46,6 +46,8 @@ export const remove = <T>(node: Node<T>) => {
   if (node.next) {
     node.next.previous = node.previous;
   }
+  node.previous = undefined;
+  node.next = undefined;
 };
 
 export function iterateToTail<T>(head: Node<T> | undefined, predicate?: (node: Node<T>) => boolean) {

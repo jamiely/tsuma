@@ -35,7 +35,7 @@ export function stepMovement(game: Game) {
     stepBoardOver(game);
     return;
   }
-  stepChains(game, {waypointDirection: 'forwards'});
+  stepChains(game, {waypointDirection: game.appliedEffects.backwards ? 'backwards': 'forwards'});
   stepFreeBalls(game);
 }
 
@@ -281,6 +281,17 @@ export function stepNormalChain(game: Game, chain: Chain, {waypointDirection}: {
   let moveFrom = chain.foot;
   let getPrev = (node: Node<ChainedBall>) => node.previous;
   let getNext = (node: Node<ChainedBall>) => node.next;
+  let iterator = iterateToHead;
+
+  if(waypointDirection === 'backwards') {
+    moveFrom = chain.head;
+    let tmp = getPrev;
+    getPrev = getNext;
+    getNext = tmp;
+    iterator = iterateToTail;
+  }
+
+  console.debug('stepNormalChain', {waypointDirection, moveFrom, position: moveFrom?.value.ball.position})
 
   if (!moveFrom) return;
 
@@ -291,12 +302,15 @@ export function stepNormalChain(game: Game, chain: Chain, {waypointDirection}: {
   // until the head.
 
   let next: Node<ChainedBall> | undefined;
-  for (const { node } of iterateToHead(getPrev(moveFrom))) {
+  for (const { node } of iterator(getPrev(moveFrom))) {
     while (
       node &&
       (next = getNext(node)) &&
       ballsCollide(game, node.value.ball, next.value.ball)
     ) {
+      const nextFoot = chain.foot === node ? getNext(node) : undefined;
+      const nextHead = chain.head === node ? getPrev(node) : undefined;
+
       const { ballRemoved } = updatePositionTowardsWaypoint({
         node,
         chain,
@@ -304,7 +318,11 @@ export function stepNormalChain(game: Game, chain: Chain, {waypointDirection}: {
         waypointDirection,
       });
 
-      if (ballRemoved) break;
+      if (ballRemoved) {
+        if(nextFoot) chain.foot = nextFoot;
+        if(nextHead) chain.head = nextHead;
+        break;
+      }
     }
   }
 }
@@ -338,8 +356,10 @@ export function updatePositionTowardsWaypoint({
   let boardOverPossible = waypointDirection === "forwards";
   if (waypointDirection === "backwards") {
     if (!chainedBall.waypoint.previous) {
+      removeBall(chain, node);
+      // TODO: we should possibly replay ball state
       console.warn("No previous waypoint available.");
-      return { ballRemoved: false };
+      return { ballRemoved: true };
     }
     waypoint = chainedBall.waypoint.previous.value;
     nextWaypoint = chainedBall.waypoint.previous;
@@ -376,10 +396,8 @@ export function updatePositionTowardsWaypoint({
 }
 
 function removeBall(chain: Chain, node: Node<ChainedBall>) {
-  if (chain.head === node && node.next) {
+  if (chain.head === node) {
     chain.head = node.next;
-  } else if (chain.head === node) {
-    chain.head.value.ball.color = "black";
   }
   removeNode(node);
 }
