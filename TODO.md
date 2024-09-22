@@ -5,7 +5,7 @@
 5.  Power ups: backwards ball
 6.  Power ups: slow down ball
 7.  Power ups: accuracy ball (quicker shots + arrow target)
-8.  Power ups: explosion ball, sounds.
+8.  ~~Power ups: explosion ball, sounds.~~
 9.  ~~only launch balls that are still in the chain~~
 10. Bug when pushing/matching ball that falls into sink.
 11. Start the level over when you lose.

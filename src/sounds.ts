@@ -4,8 +4,9 @@ import { EventManager, GameEventType } from "./types";
 export const createSoundManager = (events: EventManager) => {
   const audio: Record<
     GameEventType,
-    ReturnType<typeof soundEffects.toAudio>
+    ReturnType<typeof soundEffects.toAudio> | undefined
   > = {
+    slowEffect: undefined,
     explosion: audioExplosion,
     launchedBall: audioLaunchedBall,
     matchedBalls: audioMatchedBalls,
@@ -15,7 +16,7 @@ export const createSoundManager = (events: EventManager) => {
 
   for (const [eventType, clip] of Object.entries(audio)) {
     events.addEventListener(eventType as GameEventType, () => {
-      clip.play();
+      clip?.play();
     });
   }
 };

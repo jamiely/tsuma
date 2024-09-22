@@ -16,12 +16,12 @@ export interface Rectangle extends HasPosition {
   size: Size;
 }
 
-export const SUPER_LIGHT_GRAY = '#f8f9f9';
+export const SUPER_LIGHT_GRAY = "#f8f9f9";
 
 export interface Node<T> {
   previous?: Node<T>;
   next?: Node<T>;
-  value: T
+  value: T;
 }
 
 export interface WaypointPath {
@@ -29,9 +29,17 @@ export interface WaypointPath {
   end: Node<Point>;
 }
 
-export type Color = "red" | "blue" | "green" | "gold" | "purple" | "black" | "#f8f9f9" | 'none';
+export type Color =
+  | "red"
+  | "blue"
+  | "green"
+  | "gold"
+  | "purple"
+  | "black"
+  | "#f8f9f9"
+  | "none";
 
-export type WaypointDirection = 'forwards' | 'backwards';
+export type WaypointDirection = "forwards" | "backwards";
 
 export interface Ball extends HasPosition {
   color: Color;
@@ -47,7 +55,7 @@ interface Insertion {
 
 export interface ChainedBall {
   ball: Ball;
-  effect?: 'explosion';
+  effect?: EffectType;
   waypoint?: Node<Point>;
   insertion?: Insertion;
 }
@@ -68,7 +76,21 @@ export interface Board {
   colors: Color[];
 }
 
-export type BoardName = 'shallowWave' | 'wave' | 'archimedes' | 'line' | 'test-tail' | 'test-head' | 'test' | 'board11' | 'board12' | 'board13' | 'board14' | 'board15' | 'test-chains' | 'test-chains-cross';
+export type BoardName =
+  | "shallowWave"
+  | "wave"
+  | "archimedes"
+  | "line"
+  | "test-tail"
+  | "test-head"
+  | "test"
+  | "board11"
+  | "board12"
+  | "board13"
+  | "board14"
+  | "board15"
+  | "test-chains"
+  | "test-chains-cross";
 
 interface Debug {
   enabled?: boolean;
@@ -84,25 +106,32 @@ interface Debug {
 }
 
 export interface Explosion {
-  type: 'explosion',
+  type: "explosion";
   center: Point;
   step: number;
   radius: number;
 }
 
-export type Effect = Explosion;
+export interface SlowEffect {
+  type: 'slowEffect',
+  step: number;
+}
+
+export type Effect = Explosion | SlowEffect;
 
 export interface Game {
-  effects: Effect[],
-  boardOver?: 'won' | 'lost';
+  effects: Effect[];
+  boardOver?: "won" | "lost";
   boardOverSteps: number;
   debug: Debug;
+  chainedBallSpeed: number;
   options: {
-    chainedBallSpeed: number;
+    defaultChainedBallSpeed: number;
+    magneticBallSpeed: number;
     launchedBallSpeed: number;
     insertingBallSpeed: number;
     firingDelay: number;
-  },
+  };
   ballsLeft: number;
   chains: Chain[];
   launcher: Launcher;
@@ -125,70 +154,109 @@ export interface AppConfig {
   stepsPerFrame: number;
 }
 
-export type GameEventType = 'launchedBall' | 'matchedBalls' | 'gameOver' | 'ballCollision' | 'explosion';
+export type GameEventType =
+  | "launchedBall"
+  | "matchedBalls"
+  | "gameOver"
+  | "ballCollision"
+  | "slowEffect"
+  | "explosion";
 
 export class BaseGameEvent extends Event {
   constructor(type: GameEventType) {
-    super(type)
+    super(type);
   }
 }
 
 export class LaunchedBallEvent extends BaseGameEvent {
   constructor() {
-    super('launchedBall');
+    super("launchedBall");
   }
 }
 
 export interface LaunchedBallEvent extends BaseGameEvent {
-  type: 'launchedBall'
+  type: "launchedBall";
 }
 
 export class MatchedBallsEvent extends BaseGameEvent {
   constructor() {
-    super('matchedBalls')
+    super("matchedBalls");
   }
 }
 
 export interface MatchedBallsEvent extends BaseGameEvent {
-  type: 'matchedBalls';
+  type: "matchedBalls";
 }
 
 export class GameOverEvent extends BaseGameEvent {
   constructor() {
-    super('gameOver')
+    super("gameOver");
   }
 }
 
 export interface GameOverEvent extends BaseGameEvent {
-  type: 'gameOver';
+  type: "gameOver";
 }
 
 export class BallCollisionEvent extends BaseGameEvent {
   constructor() {
-    super('ballCollision')
+    super("ballCollision");
   }
 }
 
 export interface BallCollisionEvent extends BaseGameEvent {
-  type: 'ballCollision';
+  type: "ballCollision";
 }
 
-export class ExplosionEvent extends BaseGameEvent {
+type EffectType = 'explosion'| 'slowEffect';
+
+class EffectEvent extends BaseGameEvent {
+  constructor(effectType: EffectType) {
+    super(effectType)
+  }
+}
+
+interface EffectEvent {
+  type: EffectType;
+}
+
+export class SlowEffectEvent extends EffectEvent {
+  constructor() {
+    super("slowEffect");
+  }
+}
+
+export interface SlowEffectEvent extends EffectEvent {
+  type: 'slowEffect';
+}
+
+export class ExplosionEffectEvent extends BaseGameEvent {
   constructor(public center: Point) {
-    super('explosion')
-  } 
+    super("explosion");
+  }
 }
 
-export interface ExplosionEvent extends BaseGameEvent {
-  type: 'explosion';
+export interface ExplosionEffectEvent extends BaseGameEvent {
+  type: "explosion";
   center: Point;
 }
 
-export type GameEvent = ExplosionEvent | BallCollisionEvent | GameOverEvent | MatchedBallsEvent | LaunchedBallEvent;
-
+export type GameEvent =
+  | ExplosionEffectEvent
+  | SlowEffectEvent
+  | BallCollisionEvent
+  | GameOverEvent
+  | MatchedBallsEvent
+  | LaunchedBallEvent;
 
 export interface EventManager {
   dispatchEvent(event: GameEvent): boolean;
-  removeEventListener: (type: GameEventType, callback: (event: GameEvent) => void) => void;
-  addEventListener: (type: GameEventType, callback: (event: GameEvent) => void) => void;
+  removeEventListener: (
+    type: GameEventType,
+    callback: (event: GameEvent) => void
+  ) => void;
+  addEventListener: (
+    type: GameEventType,
+    callback: (event: GameEvent) => void
+  ) => void;
 }

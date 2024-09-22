@@ -3,7 +3,7 @@ import { handleCollisions } from "./collision";
 import { insertAfter, iterateToTail, remove } from "./linkedList";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
-import { BallCollisionEvent, BoardName, Chain, ChainedBall, Color, Effect, Explosion, ExplosionEvent, Game, GameOverEvent, LaunchedBallEvent, Launcher, MatchedBallsEvent, WaypointPath } from "./types";
+import { BallCollisionEvent, BoardName, Chain, ChainedBall, Color, Effect, Explosion, ExplosionEffectEvent, Game, GameOverEvent, LaunchedBallEvent, Launcher, MatchedBallsEvent, SlowEffect, WaypointPath } from "./types";
 import { distance, randomColor as utilRandomColor, scale, subtract, toUnit } from "./util";
 import { Node } from "./types";
 import { createEventManager } from "./events";
@@ -51,11 +51,13 @@ export const createGame = ({currentBoard, debug}: Pick<Game, 'currentBoard'> & {
       debugSteps: 0,
     },
     effects: [],
+    chainedBallSpeed: 0.6,
     options: {
-      chainedBallSpeed: 0.6,
+      defaultChainedBallSpeed: 0.6,
       insertingBallSpeed: launchedBallSpeed/3,
       launchedBallSpeed,
       firingDelay: 400,
+      magneticBallSpeed: 0.6,
     },
     ballsLeft: 100,
     ballRadius: 20, 
@@ -166,16 +168,43 @@ export function step(game: Game) {
 }
 
 function stepEffect(game: Game, effect: Effect): {shouldRemove: boolean} {
+  effect.step++;
+
   if(effect.type === 'explosion') {
     return stepEffectExplosion(game, effect);
+  } else if(effect.type === 'slowEffect') {
+    return stepEffectSlow(game, effect);
+  }
+
+  return {shouldRemove: false};
+}
+
+function stepEffectSlow(game: Game, effect: SlowEffect): {shouldRemove: boolean} {
+  const slowDuration = 1200;
+
+  if(effect.step < slowDuration) {
+    game.chainedBallSpeed = game.options.defaultChainedBallSpeed * .25;
+  } else {
+    let shouldResetSpeed = true;
+    for(const iterEffect of game.effects) {
+      if(iterEffect === effect) continue;
+      if(iterEffect.type !== 'slowEffect') continue;
+
+      shouldResetSpeed = false;
+      break;
+    }
+
+    if(shouldResetSpeed) {
+      game.chainedBallSpeed = game.options.defaultChainedBallSpeed;
+    }
+
+    return {shouldRemove: true};
   }
 
   return {shouldRemove: false};
 }
 
 function stepEffectExplosion(game: Game, effect: Explosion): {shouldRemove: boolean} {
-  effect.step++;
-
   if(effect.step < 150) {
     effect.radius++;
     removeBallsFromExplosion();
@@ -205,13 +234,12 @@ function stepEffectExplosion(game: Game, effect: Explosion): {shouldRemove: bool
 
           if(node.value.effect) {
             if(node.value.effect === 'explosion') {
-              game.events.dispatchEvent(new ExplosionEvent(position));
+              game.events.dispatchEvent(new ExplosionEffectEvent(position));
             }
           }
         }
       }
     }
-
   }
 }
 
@@ -266,7 +294,7 @@ function appendToChain(game: Game, chain: Chain) {
 
   let effect: ChainedBall['effect'];
   if(!foot?.value.effect && Math.random() < .15) {
-    effect = 'explosion';
+    effect = Math.random() > 0.5 ? 'explosion' : 'slowEffect';
   }
 
   const nextBall = (): Node<ChainedBall> => ({
@@ -354,13 +382,22 @@ function remainingColors(game: Game): Set<Color> {
 
 function handleEvents(game: Game) {
   game.events.addEventListener('explosion', (event) => {
-    if(event.type === 'explosion') {
-      game.effects.push({
-        type: 'explosion',
-        center: event.center,
-        radius: 1,
-        step: 0,
-      })
-    }
+    if(event.type !== 'explosion') return;
+
+    game.effects.push({
+      type: 'explosion',
+      center: event.center,
+      radius: 1,
+      step: 0,
+    })
+  })
+
+  game.events.addEventListener('slowEffect', (event) => {
+    if(event.type !== 'slowEffect') return;
+
+    game.effects.push({
+      type: 'slowEffect',
+      step: 0,
+    })
   })
 }

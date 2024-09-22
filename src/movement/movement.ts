@@ -159,6 +159,7 @@ function magneticCheck(game: Game, chain: Chain): {didMove: boolean} {
           chain,
           node: current,
           waypointDirection: 'backwards',
+          speed: game.options.magneticBallSpeed,
         });
         
         if(ballRemoved) {
@@ -272,7 +273,7 @@ function insertionPushChainForward({
 
 export function stepNormalChain(game: Game, chain: Chain) {
   if(!chain.foot) return;
-  
+
   updatePositionTowardsWaypoint({ node: chain.foot, chain, game });
 
   // after moving the foot, push along the next ball until it's
@@ -303,11 +304,13 @@ export function updatePositionTowardsWaypoint({
   chain,
   game,
   waypointDirection = 'forwards',
+  speed,
 }: {
   node: Node<ChainedBall>;
   chain: Chain;
   game: Game;
   waypointDirection?: WaypointDirection;
+  speed?: number,
 }): { ballRemoved: boolean } {
   const { value: chainedBall } = node;
 
@@ -335,7 +338,7 @@ export function updatePositionTowardsWaypoint({
 
   add(
     position,
-    waypointVector(chainedBall, { scale: game.options.chainedBallSpeed, waypointDirection })
+    waypointVector(chainedBall, { scale: speed || game.chainedBallSpeed, waypointDirection })
   );
 
   // check if we have reached the next waypoint. there

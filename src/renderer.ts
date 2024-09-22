@@ -68,7 +68,10 @@ const renderChainedBall = (
   renderBall(context, game.ballRadius)(chainedBall.ball);
 
   if(chainedBall.effect) {
-    const text = '💣'; // for explosion
+    let text = {
+      'explosion': '💣',
+      'slowEffect': '⏸️'
+    }[chainedBall.effect];
     context.font = "16pt helvetica";
     context.fillStyle = "white";
     context.fillText(text, x - game.ballRadius/2, y + game.ballRadius / 2);
