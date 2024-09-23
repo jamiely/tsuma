@@ -46,6 +46,7 @@ export const archimedes = (bounds: Rectangle): Board => ({
   paths: [
     createWaypointPathCustom(simplify(10, archimedeanSpiral({ bounds }))),
   ],
+  ballCount: 5,
   colors: defaultColors,
 });
 

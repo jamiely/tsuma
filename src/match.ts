@@ -57,8 +57,7 @@ export function resolveMatches(game: Game, chain: Chain): {matches: boolean} {
 
         // disappear balls in chain by changing pointers
         if(start?.previous) {
-          if(isFoot) {
-            chain.foot = start.previous;
+          if(isFoot && didMatch) {
             start.previous.next = undefined;
           } else {
             start.previous.next = current;
