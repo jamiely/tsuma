@@ -120,6 +120,8 @@ export interface SlowEffect {
 export interface AccuracyEffect {
   type: "accuracyEffect";
   step: number;
+  pointFrom: Point;
+  pointTo: Point | undefined;
 }
 
 export interface BackwardsEffect {
@@ -133,7 +135,7 @@ export type Effect = Explosion | SlowEffect | AccuracyEffect | BackwardsEffect;
 export interface Game {
   appliedEffects: {
     slowDown: boolean,
-    accuracy: boolean,
+    accuracy?: AccuracyEffect,
     backwards: boolean,
   },
   effects: Effect[];

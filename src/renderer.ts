@@ -50,17 +50,19 @@ const renderEffects = (context: CanvasRenderingContext2D, game: Game) => {
 }
 
 const renderEffectAccuracy  = (context: CanvasRenderingContext2D, game: Game) => {
-  if(!game.appliedEffects.accuracy) return;
+  const {accuracy} = game.appliedEffects
+  if(!accuracy) return;
 
-  const start = game.launcher.position;
-  const end = game.launcher.pointTo;
+  const {pointFrom, pointTo} = accuracy
+  if(! pointTo) return;
+  
   context.beginPath();
   context.setLineDash([]);
-  context.lineWidth = 20;
+  context.lineWidth = 5;
   context.lineCap = "square";
   context.strokeStyle = 'cyan';
-  context.moveTo(start.x, start.y);
-  context.lineTo(end.x, end.y);
+  context.moveTo(pointFrom.x, pointFrom.y);
+  context.lineTo(pointTo.x, pointTo.y);
   context.globalAlpha = 0.5;
   context.stroke();
   context.globalAlpha = 1;

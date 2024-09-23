@@ -7,3 +7,5 @@
     use full screen.
 7.  ~~There is some bug clearing a match where the match happens right before the tail. Might happen after a magnetic. The tail will also get erroneously cleared.~~
 8.  When you use the backwards power-up, and balls go past the first waypoint, they get removed from the game. We should push these balls onto a queue to become the next spawned balls to provide continuity.
+9.  Display text on the board including game over, board name, and when you start over, x lives left.
+10. Make accuracy ball graphic a triangle. Make it collide with the nearest ball.

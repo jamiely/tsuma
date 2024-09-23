@@ -1,5 +1,5 @@
 import { buildBoards } from "./boards";
-import { handleCollisions } from "./collision";
+import { ballsCollide, handleCollisions } from "./collision";
 import { insertAfter, iterateToTail, remove } from "./linkedList";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
@@ -20,6 +20,7 @@ import {
   LaunchedBallEvent,
   Launcher,
   MatchedBallsEvent,
+  Point,
   SlowEffect,
   WaypointPath,
 } from "./types";
@@ -29,6 +30,8 @@ import {
   scale,
   subtract,
   toUnit,
+  inBounds,
+  add,
 } from "./util";
 import { Node } from "./types";
 import { createEventManager } from "./events";
@@ -81,7 +84,7 @@ export const createGame = ({
     },
     appliedEffects: {
       slowDown: false,
-      accuracy: false,
+      accuracy: undefined,
       backwards: false,
     },
     effects: [],
@@ -253,8 +256,11 @@ function stepEffectAccuracy(
   effect: AccuracyEffect
 ): { shouldRemove: boolean } {
   if (effect.step < game.options.accuracyDuration) {
-    game.appliedEffects.accuracy = true;
+    if(!game.appliedEffects.accuracy) {
+      game.appliedEffects.accuracy = effect;
+    }
     game.firingDelay = game.options.defaultFiringDelay / 2;
+    setPointTo();
   } else {
     let shouldResetAccuracy = true;
     for (const iterEffect of game.effects) {
@@ -265,8 +271,8 @@ function stepEffectAccuracy(
       break;
     }
 
+    game.appliedEffects.accuracy = undefined;
     if (shouldResetAccuracy) {
-      game.appliedEffects.accuracy = false;
       game.firingDelay = game.options.defaultFiringDelay;
     }
 
@@ -274,6 +280,35 @@ function stepEffectAccuracy(
   }
 
   return { shouldRemove: false };
+
+  function setPointTo() {
+    effect.pointTo = undefined;
+    
+    const directionVector = {...game.launcher.pointTo}
+    subtract(directionVector, effect.pointFrom);
+    toUnit(directionVector);
+
+    const current = {...effect.pointFrom};
+    let closestCollision: {distance: number, position: Point} | undefined = undefined;
+    while(inBounds(current, game.bounds)) {
+      for(const chain of game.chains) {
+        for(const {value: {ball: {position}}} of iterateToTail(chain.head)) {
+          const dist = distance(position, current);
+          if(dist > game.ballRadius * 2) continue;
+          if(closestCollision && closestCollision.distance < dist) continue;
+          
+          closestCollision = {
+            distance: dist,
+            position: {...current},
+          }
+        }
+      }
+      add(current, directionVector);
+    }
+
+    if(! closestCollision) return;
+    effect.pointTo = {...closestCollision.position};
+  }
 }
 
 function stepEffectSlow(
@@ -350,6 +385,12 @@ function stepEffectExplosion(
 
 function stepLauncher(game: Game) {
   const { launcher } = game;
+
+  // the color may come up in the remaining balls
+  if(game.ballsLeft > 10) {
+    return;
+  }
+
   const colorsLeft = remainingColors(game);
 
   if (colorsLeft.has(launcher.color)) {
@@ -395,6 +436,8 @@ function newBallEffect(
   _game: Game,
   chain: Chain
 ): ChainedBall["effect"] | undefined {
+  return 'accuracyEffect';
+
   // don't put power ups next to each other
   if (chain.foot?.value.effect) return;
 
@@ -549,6 +592,8 @@ function handleEvents(game: Game) {
     game.effects.push({
       type: "accuracyEffect",
       step: 0,
+      pointFrom: game.launcher.position,
+      pointTo: game.launcher.pointTo,
     });
   });
   
