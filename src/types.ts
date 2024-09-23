@@ -148,6 +148,10 @@ export interface Game {
     launchedBallSpeed: number;
     insertingBallSpeed: number;
     defaultFiringDelay: number;
+    backwardsDuration: number;
+    accuracyDuration: number;
+    slowDuration: number;
+    explosionExpansionDuration: number;
   };
   ballsLeft: number;
   chains: Chain[];

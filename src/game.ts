@@ -88,11 +88,15 @@ export const createGame = ({
     chainedBallSpeed: 0.6,
     firingDelay: defaultFiringDelay,
     options: {
+      accuracyDuration: 800,
+      backwardsDuration: 1000,
       defaultChainedBallSpeed: 0.6,
+      explosionExpansionDuration: 150,
       insertingBallSpeed: launchedBallSpeed / 3,
       launchedBallSpeed,
       defaultFiringDelay,
       magneticBallSpeed: 0.6,
+      slowDuration: 1200,
     },
     ballsLeft: 100,
     ballRadius: 20,
@@ -222,9 +226,7 @@ function stepEffectBackwards(
   game: Game,
   effect: BackwardsEffect
 ): { shouldRemove: boolean } {
-  const backwardsDuration = 800;
-
-  if (effect.step < backwardsDuration) {
+  if (effect.step < game.options.backwardsDuration) {
     game.appliedEffects.backwards = true;
   } else {
     let shouldResetBackwards = true;
@@ -250,9 +252,7 @@ function stepEffectAccuracy(
   game: Game,
   effect: AccuracyEffect
 ): { shouldRemove: boolean } {
-  const accuracyDuration = 800;
-
-  if (effect.step < accuracyDuration) {
+  if (effect.step < game.options.accuracyDuration) {
     game.appliedEffects.accuracy = true;
     game.firingDelay = game.options.defaultFiringDelay / 2;
   } else {
@@ -280,9 +280,7 @@ function stepEffectSlow(
   game: Game,
   effect: SlowEffect
 ): { shouldRemove: boolean } {
-  const slowDuration = 1200;
-
-  if (effect.step < slowDuration) {
+  if (effect.step < game.options.slowDuration) {
     game.chainedBallSpeed = game.options.defaultChainedBallSpeed * 0.25;
   } else {
     let shouldResetSpeed = true;
@@ -308,7 +306,7 @@ function stepEffectExplosion(
   game: Game,
   effect: Explosion
 ): { shouldRemove: boolean } {
-  if (effect.step < 150) {
+  if (effect.step < game.options.explosionExpansionDuration) {
     effect.radius++;
     removeBallsFromExplosion();
   } else if (effect.radius > 0) {
