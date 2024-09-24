@@ -1,5 +1,5 @@
 import { buildBoards } from "./boards";
-import { ballsCollide, handleCollisions } from "./collision";
+import { handleCollisions } from "./collision";
 import { insertAfter, iterateToTail, remove } from "./linkedList";
 import { resolveMatches } from "./match";
 import { stepMovement } from "./movement";
@@ -283,7 +283,7 @@ function stepEffectAccuracy(
 
   function setPointTo() {
     effect.pointTo = undefined;
-    
+
     const directionVector = {...game.launcher.pointTo}
     subtract(directionVector, effect.pointFrom);
     toUnit(directionVector);
@@ -436,7 +436,6 @@ function newBallEffect(
   _game: Game,
   chain: Chain
 ): ChainedBall["effect"] | undefined {
-  return 'accuracyEffect';
 
   // don't put power ups next to each other
   if (chain.foot?.value.effect) return;

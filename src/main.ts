@@ -80,14 +80,20 @@ function run() {
 
   createInterface(game)(canvas);
 
+  const updatesPerMilliseconds = appConfig.stepsPerFrame/15;
+  
+  let lastTime: number = new Date().getTime();
   function render() {
     requestAnimationFrame(() => {
-      for(let i=0; i<appConfig.stepsPerFrame; i++) {
+      const now = new Date().getTime();
+      const elapsed = now - lastTime;
+      const stepCount = Math.min(appConfig.stepsPerFrame, Math.floor(updatesPerMilliseconds * elapsed));
+      for(let i=0; i<stepCount; i++) {
         step(game);
       }
+      lastTime = now;
       
       renderGame(canvas)(game, renderOptions)
-
       render();
     })
   }
