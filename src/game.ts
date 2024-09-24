@@ -125,6 +125,9 @@ export const createGame = ({
 };
 
 const loadBoard = (game: Game) => {
+  // clear all effects
+  game.appliedEffects = {explosions: []};
+
   console.log("loading board", game.currentBoard);
   const { launcherPosition, paths, ballCount } = game.boards[game.currentBoard];
   game.ballsLeft = ballCount ?? 100;
