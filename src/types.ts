@@ -134,11 +134,11 @@ export type Effect = Explosion | SlowEffect | AccuracyEffect | BackwardsEffect;
 
 export interface Game {
   appliedEffects: {
-    slowDown: boolean,
+    slowDown?: SlowEffect,
     accuracy?: AccuracyEffect,
-    backwards: boolean,
+    backwards?: BackwardsEffect,
+    explosions: Explosion[],
   },
-  effects: Effect[];
   boardOver?: "won" | "lost";
   boardOverSteps: number;
   debug: Debug;

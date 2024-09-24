@@ -9,3 +9,4 @@
 8.  When you use the backwards power-up, and balls go past the first waypoint, they get removed from the game. We should push these balls onto a queue to become the next spawned balls to provide continuity.
 9.  Display text on the board including game over, board name, and when you start over, x lives left.
 10. Make accuracy ball graphic a triangle. Make it collide with the nearest ball.
+11. ~~It's possible for an effect to persist even after it is removed from the game.effects array. Change how these effects are stored.~~

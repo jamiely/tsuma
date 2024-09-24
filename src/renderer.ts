@@ -40,10 +40,8 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game, options: R
 };
 
 const renderEffects = (context: CanvasRenderingContext2D, game: Game) => {
-  for(const effect of game.effects) {
-    if(effect.type === 'explosion') {
-      renderEffectExplosion(context, game, effect);
-    }
+  for(const effect of game.appliedEffects.explosions) {
+    renderEffectExplosion(context, game, effect);
   }
 
   renderEffectAccuracy(context, game);
@@ -55,7 +53,7 @@ const renderEffectAccuracy  = (context: CanvasRenderingContext2D, game: Game) =>
 
   const {pointFrom, pointTo} = accuracy
   if(! pointTo) return;
-  
+
   context.beginPath();
   context.setLineDash([]);
   context.lineWidth = 5;

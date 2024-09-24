@@ -11,7 +11,6 @@ import {
   Chain,
   ChainedBall,
   Color,
-  Effect,
   EffectType,
   Explosion,
   ExplosionEffectEvent,
@@ -83,11 +82,8 @@ export const createGame = ({
       debugSteps: 0,
     },
     appliedEffects: {
-      slowDown: false,
-      accuracy: undefined,
-      backwards: false,
+      explosions: [],
     },
-    effects: [],
     chainedBallSpeed: 0.6,
     firingDelay: defaultFiringDelay,
     options: {
@@ -201,60 +197,33 @@ export function step(game: Game) {
 
   stepLauncher(game);
 
-  game.effects.forEach((effect) => stepEffect(game, effect));
-  for (let i = game.effects.length - 1; i >= 0; i--) {
-    const { shouldRemove } = stepEffect(game, game.effects[i]);
-    if (!shouldRemove) continue;
-    game.effects.splice(i, 1);
-  }
-}
+  const {accuracy, backwards, slowDown, explosions} = game.appliedEffects
 
-function stepEffect(game: Game, effect: Effect): { shouldRemove: boolean } {
-  effect.step++;
-
-  if (effect.type === "explosion") {
-    return stepEffectExplosion(game, effect);
-  } else if (effect.type === "slowEffect") {
-    return stepEffectSlow(game, effect);
-  } else if (effect.type === "accuracyEffect") {
-    return stepEffectAccuracy(game, effect);
-  } else if(effect.type === 'backwardsEffect') {
-    return stepEffectBackwards(game, effect);
-  }
-
-  return { shouldRemove: false };
+  if(accuracy) stepEffectAccuracy(game, accuracy);
+  if(backwards) stepEffectBackwards(game, backwards);
+  if(slowDown) stepEffectSlow(game, slowDown);
+  explosions?.forEach(effect => stepEffectExplosion(game, effect));
 }
 
 function stepEffectBackwards(
   game: Game,
   effect: BackwardsEffect
-): { shouldRemove: boolean } {
+) {
+  effect.step++;
+
   if (effect.step < game.options.backwardsDuration) {
-    game.appliedEffects.backwards = true;
+    // pass
   } else {
-    let shouldResetBackwards = true;
-    for (const iterEffect of game.effects) {
-      if (iterEffect === effect) continue;
-      if (iterEffect.type !== "accuracyEffect") continue;
-
-      shouldResetBackwards = false;
-      break;
-    }
-
-    if (shouldResetBackwards) {
-      game.appliedEffects.backwards = false;
-    }
-
-    return { shouldRemove: true };
+    game.appliedEffects.backwards = undefined;
   }
-
-  return { shouldRemove: false };
 }
 
 function stepEffectAccuracy(
   game: Game,
   effect: AccuracyEffect
-): { shouldRemove: boolean } {
+) {
+  effect.step++;
+
   if (effect.step < game.options.accuracyDuration) {
     if(!game.appliedEffects.accuracy) {
       game.appliedEffects.accuracy = effect;
@@ -262,24 +231,9 @@ function stepEffectAccuracy(
     game.firingDelay = game.options.defaultFiringDelay / 2;
     setPointTo();
   } else {
-    let shouldResetAccuracy = true;
-    for (const iterEffect of game.effects) {
-      if (iterEffect === effect) continue;
-      if (iterEffect.type !== "accuracyEffect") continue;
-
-      shouldResetAccuracy = false;
-      break;
-    }
-
+    game.firingDelay = game.options.defaultFiringDelay;
     game.appliedEffects.accuracy = undefined;
-    if (shouldResetAccuracy) {
-      game.firingDelay = game.options.defaultFiringDelay;
-    }
-
-    return { shouldRemove: true };
   }
-
-  return { shouldRemove: false };
 
   function setPointTo() {
     effect.pointTo = undefined;
@@ -314,33 +268,22 @@ function stepEffectAccuracy(
 function stepEffectSlow(
   game: Game,
   effect: SlowEffect
-): { shouldRemove: boolean } {
+ ) {
+  effect.step++;
+
   if (effect.step < game.options.slowDuration) {
     game.chainedBallSpeed = game.options.defaultChainedBallSpeed * 0.25;
   } else {
-    let shouldResetSpeed = true;
-    for (const iterEffect of game.effects) {
-      if (iterEffect === effect) continue;
-      if (iterEffect.type !== "slowEffect") continue;
-
-      shouldResetSpeed = false;
-      break;
-    }
-
-    if (shouldResetSpeed) {
-      game.chainedBallSpeed = game.options.defaultChainedBallSpeed;
-    }
-
-    return { shouldRemove: true };
+    game.chainedBallSpeed = game.options.defaultChainedBallSpeed;
   }
-
-  return { shouldRemove: false };
 }
 
 function stepEffectExplosion(
   game: Game,
   effect: Explosion
 ): { shouldRemove: boolean } {
+  effect.step++;
+
   if (effect.step < game.options.explosionExpansionDuration) {
     effect.radius++;
     removeBallsFromExplosion();
@@ -568,7 +511,7 @@ function handleEvents(game: Game) {
   game.events.addEventListener("explosion", (event) => {
     if (event.type !== "explosion") return;
 
-    game.effects.push({
+    game.appliedEffects.explosions.push({
       type: "explosion",
       center: event.center,
       radius: 1,
@@ -579,29 +522,29 @@ function handleEvents(game: Game) {
   game.events.addEventListener("slowEffect", (event) => {
     if (event.type !== "slowEffect") return;
 
-    game.effects.push({
+    game.appliedEffects.slowDown = {
       type: "slowEffect",
       step: 0,
-    });
+    };
   });
 
   game.events.addEventListener("accuracyEffect", (event) => {
     if (event.type !== "accuracyEffect") return;
 
-    game.effects.push({
+    game.appliedEffects.accuracy = {
       type: "accuracyEffect",
       step: 0,
       pointFrom: game.launcher.position,
       pointTo: game.launcher.pointTo,
-    });
+    };
   });
   
   game.events.addEventListener("backwardsEffect", (event) => {
     if (event.type !== "backwardsEffect") return;
 
-    game.effects.push({
+    game.appliedEffects.backwards = {
       type: "backwardsEffect",
       step: 0,
-    });
+    };
   });
 }
