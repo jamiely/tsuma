@@ -257,7 +257,12 @@ function insertionPushChainForward({
   chainedBall: ChainedBall;
   previous: Node<ChainedBall>;
 }) {
-  while (ballsCollide(game, chainedBall.ball, previous.value.ball)) {
+  for (let loopCount=0, MAX_LOOP=10_000; ballsCollide(game, chainedBall.ball, previous.value.ball); loopCount++) {
+    if(loopCount > MAX_LOOP) {
+      debugger;
+      throw 'Infinite loop in insertionPushChainForward';
+    }
+
     // now push the chain forward in front of the ball
     for (const {
       node,

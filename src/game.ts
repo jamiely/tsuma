@@ -252,7 +252,11 @@ function stepEffectAccuracy(
 
     const current = {...effect.pointFrom};
     let closestCollision: {distance: number, position: Point} | undefined = undefined;
-    while(inBounds(current, game.bounds)) {
+    for(let loopCount = 0, MAX_LOOP = 10_000; inBounds(current, game.bounds); loopCount ++) {
+      if(loopCount > MAX_LOOP) {
+        debugger;
+        throw 'Infinite loop in stepEffectAccuracy';
+      }
       for(const chain of game.chains) {
         for(const {value: {ball: {position}}} of iterateToTail(chain.head)) {
           const dist = distance(position, current);
@@ -485,12 +489,16 @@ function nextColor(game: Game, chain: Chain) {
   if (!previous) return randomColor(game);
   if (color !== previous.value.ball.color) return randomColor(game);
 
-  do {
+  for(let loopCount = 0, MAX_LOOP = 50; true; loopCount++) {
+    if(loopCount > MAX_LOOP) {
+      throw 'Infinite loop in nextColor';
+    }
+    
     const nextColor = randomColor(game);
     if (nextColor === color) continue;
 
     return nextColor;
-  } while (true);
+  }
 }
 
 function randomColor(game: Game) {

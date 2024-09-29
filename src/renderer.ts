@@ -217,9 +217,8 @@ const renderWaypoints = (context: CanvasRenderingContext2D, game: Game, options:
     const { start } = path;
 
     let previous: Node<Point> | undefined = undefined;
-    let current: Node<Point> | undefined = start;
 
-    while (current) {
+    for(const {node: current} of iterateToTail(start)) {
       if(options.waypoints.enabled) {
         context.beginPath();
         context.arc(current.value.x, current.value.y, options.waypoints.radius, 0, TwoPI);
@@ -237,7 +236,6 @@ const renderWaypoints = (context: CanvasRenderingContext2D, game: Game, options:
       }
 
       previous = current;
-      current = current.next;
     }
 
     if (!previous?.value) return;

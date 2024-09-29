@@ -28,8 +28,13 @@ export function handleCollisions(game: Game): {hasCollision: boolean} {
   // this is not quite what we want later,
   // since we don't want to balls to disappear
   let hasAnyCollision = false;
-  let hasCollision = false;
-  do {
+  let hasCollision = true;
+  for(let loopCount=0, MAX_LOOP = 10_000; hasCollision; loopCount++) {
+    if(loopCount > MAX_LOOP) {
+      debugger;
+      throw 'Infinite loop in handleCollisions';
+    }
+
     hasCollision = false;
     // slow
     outer: for (let i = freeBalls.length - 1; i >= 0; i--) {
@@ -102,11 +107,19 @@ export function handleCollisions(game: Game): {hasCollision: boolean} {
             waypoint,
           })
 
-          while (
+          for(let loopCount = 0, MAX_LOOP = 10_000;
             (insertingBefore || isCollisionNodeTail) &&
             insertionPointCollides &&
-            waypoint
+            waypoint;
+            loopCount++
           ) {
+            if(loopCount > MAX_LOOP) {
+              debugger;
+              let x = false;
+              if(x) {
+                throw 'InfiniteLoop in handleCollisions'
+              }
+            }
             const waypointVec = waypointVectorFromPosition(
               insertionPoint,
               waypoint.value
@@ -140,7 +153,7 @@ export function handleCollisions(game: Game): {hasCollision: boolean} {
         }
       }
     }
-  } while (hasCollision);
+  }
 
   return {hasCollision: hasAnyCollision};
 }
@@ -197,10 +210,14 @@ const backoffFreeBall = ({
   // backoff the ball until it is not colliding anymore
   const unitVelocity = { ...velocity };
   toUnit(unitVelocity);
-  while (
+  for(let loopCount=0, MAX_LOOP=1_000;
     distance(position, collisionNode.value.ball.position) <
-    game.ballRadius * 2
+    game.ballRadius * 2;
+    loopCount++
   ) {
+    if(loopCount > MAX_LOOP) {
+      throw 'Infinite loop in backoffFreeBall';
+    }
     subtract(position, unitVelocity);
   }
 };

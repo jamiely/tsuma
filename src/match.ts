@@ -9,12 +9,11 @@ export function resolveMatches(game: Game, chain: Chain): {matches: boolean} {
   if(chain.inserting) return {matches: false};
 
   let last: Node<ChainedBall> | undefined = undefined;
-  let current: Node<ChainedBall> | undefined = chain.head;
   let start: Node<ChainedBall> | undefined = chain.head;
   let length = 1;
 
   let matches = false;
-  while(current) {
+  for(const {node: current} of iterateToTail(chain.head)) {
     const lastBall = last?.value.ball;
     const didMatch = lastBall && lastBall.color === current.value.ball.color &&
     distance(lastBall.position, current.value.ball.position) < 2 * game.ballRadius + 1;
@@ -72,7 +71,6 @@ export function resolveMatches(game: Game, chain: Chain): {matches: boolean} {
     }
 
     last = current;
-    current = current.next;
   }
 
   return {matches};
