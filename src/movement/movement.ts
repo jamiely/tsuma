@@ -53,7 +53,7 @@ function stepBoardOver(game: Game) {
     }
   }
 
-  for (let i = game.freeBalls.length - 1; i >= 0; i++) {
+  for (let i = game.freeBalls.length - 1; i >= 0; i--) {
     game.freeBalls.splice(i, 1);
   }
 }
