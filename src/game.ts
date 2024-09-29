@@ -16,7 +16,6 @@ import {
   Explosion,
   ExplosionEffectEvent,
   Game,
-  GameOverEvent,
   LaunchedBallEvent,
   Launcher,
   MatchedBallsEvent,
