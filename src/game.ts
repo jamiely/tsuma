@@ -129,6 +129,8 @@ const loadBoard = (game: Game) => {
   game.boardSteps = 0;
   // clear all effects
   game.appliedEffects = {explosions: []};
+  game.chainedBallSpeed = game.options.defaultChainedBallSpeed;
+  game.firingDelay = game.options.defaultFiringDelay;
 
   console.log("loading board", game.currentBoard);
   const { launcherPosition, paths, ballCount } = game.boards[game.currentBoard];
@@ -382,9 +384,19 @@ function nextBoard(game: Game) {
 function stepBoardOverLost(game: Game) {
   game.boardOverSteps++;
   if (game.boardOverSteps === 1) {
-    game.events.dispatchEvent(new GameOverEvent());
+    game.events.dispatchEvent(new BoardOverEvent());
+  } else if(game.boardOverSteps > 300) {
+    resetBoard(game);
+    return;
   }
+
   stepMovement(game);
+}
+
+function resetBoard(game: Game) {
+  game.boardOverSteps = 0;
+  game.boardOver = undefined;
+  loadBoard(game);
 }
 
 function newBallEffect(
