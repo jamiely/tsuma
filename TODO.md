@@ -10,3 +10,5 @@
 9.  Display text on the board including game over, board name, and when you start over, x lives left.
 10. Make accuracy ball graphic a triangle. Make it collide with the nearest ball.
 11. ~~It's possible for an effect to persist even after it is removed from the game.effects array. Change how these effects are stored.~~
+12. bug where you get stuck when the balls go into the sink, everything seems to freeze.
+13. Somehow launched a black ball.
