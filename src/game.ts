@@ -76,6 +76,7 @@ export const createGame = ({
   createSoundManager(events);
   const defaultFiringDelay = 500
   const game: Game = {
+    boardSteps: 0,
     debug: {
       ...debug,
       stopOnCollision: true,
@@ -125,6 +126,7 @@ export const createGame = ({
 };
 
 const loadBoard = (game: Game) => {
+  game.boardSteps = 0;
   // clear all effects
   game.appliedEffects = {explosions: []};
 
@@ -132,6 +134,7 @@ const loadBoard = (game: Game) => {
   const { launcherPosition, paths, ballCount } = game.boards[game.currentBoard];
   game.ballsLeft = ballCount ?? 100;
   game.launcher.position = launcherPosition;
+  game.freeBalls = [];
   game.paths = paths;
   game.chains = paths.map((path) => createChain({ game, waypointPath: path }));
 };
@@ -171,6 +174,8 @@ export function step(game: Game) {
   if (game.debug.stop && game.debug.debugSteps <= 0) return;
 
   if (game.debug.debugSteps > 0) game.debug.debugSteps--;
+
+  game.boardSteps ++;
 
   if (game.boardOver) {
     stepBoardOver(game);

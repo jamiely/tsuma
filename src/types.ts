@@ -70,6 +70,7 @@ export interface Chain {
 }
 
 export interface Board {
+  name: string,
   launcherPosition: Point;
   paths: WaypointPath[];
   ballCount?: number;
@@ -139,6 +140,7 @@ export interface Game {
     backwards?: BackwardsEffect,
     explosions: Explosion[],
   },
+  boardSteps: number,
   boardOver?: "won" | "lost";
   boardOverSteps: number;
   debug: Debug;

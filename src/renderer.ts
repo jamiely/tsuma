@@ -36,8 +36,21 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game, options: R
   freeBalls.forEach(renderBall(context, ballRadius));
   renderLauncher(context, game);
   renderEffects(context, game);
+  renderText(context, game);
   renderDebug(context, game);
 };
+
+const renderText = (context: CanvasRenderingContext2D, game: Game) => {
+  if(game.boardSteps > 500) return;
+
+  const padding = 10;
+  const {size} = game.bounds
+  context.font = "20pt helvetica";
+  context.fillStyle = "black";
+  const text = game.boards[game.currentBoard].name;
+  const {width} = context.measureText(text);
+  context.fillText(text, size.width - width - padding, size.height - padding, width);
+}
 
 const renderEffects = (context: CanvasRenderingContext2D, game: Game) => {
   for(const effect of game.appliedEffects.explosions) {

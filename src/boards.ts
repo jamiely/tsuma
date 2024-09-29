@@ -21,6 +21,7 @@ const line = ({
 }: { bounds: Rectangle; launcherPosition?: Point } & Partial<
   Parameters<typeof linePath>[0]
 >): Board => ({
+  name: 'Line',
   colors: defaultColors,
   launcherPosition: launcherPosition || {
     x: bounds.size.width / 2,
@@ -42,6 +43,7 @@ const line = ({
 });
 
 export const archimedes = (bounds: Rectangle): Board => ({
+  name: 'Archimedes',
   launcherPosition: { x: 450, y: 300 },
   paths: [
     createWaypointPathCustom(simplify(10, archimedeanSpiral({ bounds }))),
@@ -51,6 +53,7 @@ export const archimedes = (bounds: Rectangle): Board => ({
 });
 
 const waveBoard = ({ bounds, ...rest }: Parameters<typeof sinWave>[0]) => ({
+  name: 'Wave',
   colors: defaultColors,
   launcherPosition: {
     x: bounds.size.width / 2,
@@ -181,6 +184,7 @@ const board11 = (bounds: Rectangle): Board => {
   }
 
   return {
+    name: '1-1 Spiral',
     launcherPosition: {
       x: bounds.size.width / 2 + 20,
       y: bounds.size.height / 2,
@@ -222,6 +226,7 @@ const board12 = ({ size: { width, height } }: Rectangle): Board => {
   }
 
   return {
+    name: '1-2 Talon',
     launcherPosition: { x: (width * 4.5) / 10, y: height / 2 },
     ballCount: 30,
     paths: [createWaypointPathFromArray(points())],
@@ -257,6 +262,7 @@ const board13 = ({ size: { width, height } }: Rectangle): Board => {
   }
 
   return {
+    name: '1-3 Riverbed',
     launcherPosition: { x: (width * 4.5) / 10, y: height / 2 },
     ballCount: 30,
     paths: [createWaypointPathFromArray(points())],
@@ -322,6 +328,7 @@ const board14 = (bounds: Rectangle): Board => {
   }
 
   return {
+    name: '1-4 Breath',
     launcherPosition: {
       x: (bounds.size.width * 9) / 20,
       y: bounds.size.height / 2,
@@ -410,6 +417,7 @@ const board15 = (bounds: Rectangle): Board => {
   }
 
   return {
+    name: '1-5 Vortex',
     launcherPosition: {
       x: bounds.size.width / 2 + 20,
       y: bounds.size.height / 2,
@@ -440,6 +448,7 @@ const testChains = (bounds: Rectangle): Board => {
     });
 
   return {
+    name: 'Test chains',
     ballCount: 2,
     colors: testColors,
     paths: [...line1.paths, ...line2.paths],
@@ -469,6 +478,7 @@ const testChainsCross = (bounds: Rectangle): Board => {
   console.log(line1.paths);
 
   return {
+    name: 'Test chains cross',
     ballCount: 2,
     colors: testColors,
     paths: [...line1.paths, ...line2.paths],
