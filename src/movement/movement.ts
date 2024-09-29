@@ -112,8 +112,10 @@ function pauseSteppingAfterMatch(chain: Chain) {
 }
 
 export function stepInsertingChain(game: Game, chain: Chain) {
+  let didSomeInsertion = false;
   for (const { node } of iterateToTail(chain.head)) {
     if (!node.value.insertion) continue;
+    didSomeInsertion = true;
 
     const { insertionComplete } = stepInsertingChainBall({
       game,
@@ -124,6 +126,11 @@ export function stepInsertingChain(game: Game, chain: Chain) {
     if (!insertionComplete) continue;
 
     chain.inserting--;
+  }
+
+  if(!didSomeInsertion) {
+    // we lost the insertions, so reset insertion status
+    chain.inserting = 0;
   }
 }
 
