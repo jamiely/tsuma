@@ -13,3 +13,7 @@
 12. bug where you get stuck when the balls go into the sink, everything seems to freeze.
 13. ~~Somehow launched a black ball.~~ addressed this by ensuring there is always some color (not undefined);
 14. Create a disconnected section by clearing matches on either end. Now pull that segment using magnetic. The segment's balls will stretch out a bit for a few pixels but otherwise won't move. The magnetic will not apply.
+15. When explosion removed an accuracy ball, accuracy effect was not applied.
+16. After a backwards ball was applied, all the balls went away and no new balls were spawned. In the console, I just see "no previous waypoint available". Eventually I saw board over "lost".
+17. Shot a ball near the tail and saw `TODO isCollidingWithPreviousBall true`. Handle this. After this happened, it seemed like the tail did not move, while the head moved alone. When I cleared the head, then the tail moved. What probably happened is that the tail somehow went ahead of the head.
+18. Tried to clear 2 blue balls in 1-5. I hit the tail (I think), then one of the balls kept going backwards indefinitely, and I hit `console.error("Do not remove a ball in this method");` The ball was removed after it went too far backwards, and the other 2 blue balls resumed continuing forward. Possibly insertion exceeded some threshold?
