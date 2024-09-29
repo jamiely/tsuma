@@ -7,7 +7,7 @@ import {
 } from "./types";
 
 export const defaultColors: Color[] = ["red", "green", "blue", "gold"];
-export const randomColor = (colors: Color[] = defaultColors) =>
+export const randomColor = (colors: Color[] = defaultColors): Color | undefined =>
   colors[Math.floor(Math.random() * colors.length)];
 
 export const distance = (pt1: Point, pt2: Point) => {

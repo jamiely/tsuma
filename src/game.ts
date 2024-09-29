@@ -348,7 +348,7 @@ function stepLauncher(game: Game) {
     return;
   }
 
-  launcher.color = utilRandomColor(Array.from(colorsLeft));
+  launcher.color = utilRandomColor(Array.from(colorsLeft)) || "red";
 }
 
 function stepBoardOver(game: Game) {
@@ -494,10 +494,12 @@ function nextColor(game: Game, chain: Chain) {
 }
 
 function randomColor(game: Game) {
-  const baseColors = game.boards[game.currentBoard].colors;
-  if (game.ballsLeft > 0) return utilRandomColor(baseColors);
+  const fallbackColor = "red";
 
-  return utilRandomColor(Array.from(remainingColors(game)));
+  const baseColors = game.boards[game.currentBoard].colors;
+  if (game.ballsLeft > 0) return utilRandomColor(baseColors) || fallbackColor;
+
+  return utilRandomColor(Array.from(remainingColors(game))) || fallbackColor;
 }
 
 function remainingColors(game: Game): Set<Color> {
