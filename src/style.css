@@ -99,6 +99,7 @@ button:focus-visible {
 #game {
   background-color: green;
   border: 5px gray solid;
+  cursor: none;
 }
 
 .github-fork-ribbon:before { background-color: #999;  }

@@ -1,11 +1,11 @@
 import { launchBall } from "./game";
 import { Game } from "./types";
 
-export const createInterface = (game: Game) => (element: HTMLElement) => {
+export const createInterface = (gameRef: {game: Game}) => (element: HTMLElement) => {
   element.addEventListener("mousemove", (event) => {
-    game.launcher.pointTo = {x: event.offsetX, y: event.offsetY};
+    gameRef.game.launcher.pointTo = {x: event.offsetX, y: event.offsetY};
   });
   element.addEventListener("click", () => {
-    launchBall(game);
+    launchBall(gameRef.game);
   })
 };

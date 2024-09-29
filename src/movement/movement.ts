@@ -156,22 +156,48 @@ function magneticCheck(game: Game, chain: Chain): { didMove: boolean } {
       if (!gapExists(game, value, next.value)) break outer;
 
       // pull the node towards the previous waypoint and everything after it
-      let current: Node<ChainedBall> | undefined = node;
-      while (current) {
+      let pushStart: Node<ChainedBall> | undefined = chain.head;
+
+      //
+      // if there is a magnetic with the current ball and
+      // the next ball, we want to go back towards the head
+      // to find the first gap or until we reach the head of 
+      // the chain. Call this ball the mini head.
+      // 
+      // push the balls back from this mini head until the
+      // current ball touches the next ball.
+
+
+      for(const {node: current, previous} of iterateToHead(node)) {
         // this is not quite working right
         // if(!current.previous) break outer;
-        if (
-          current.previous &&
-          gapExists(game, current.value, current.previous.value, { buffer: 2 })
-        ) {
-          break outer;
+
+        if(!previous) {
+          pushStart = current;
+          break;
         }
+
+        if(gapExists(game, current.value, previous.value, {buffer: 2})) {
+          pushStart = current;
+          break;
+        }
+      }
+
+      if(! pushStart) break outer;
+
+      // we know where to start pushing from, so push
+      for(const {node} of iterateToTail(pushStart)) {
+        if(node === next) break;
+
         didMove = true;
 
+        // TODO: instead of doing this, might be better to move the
+        // first ball, then use collision logic to determine whether
+        // to move the next ball.
         const { ballRemoved } = updatePositionTowardsWaypoint({
           game,
           chain,
-          node: current,
+          node,
           waypointDirection: "backwards",
           speed: game.options.magneticBallSpeed,
         });
@@ -180,9 +206,6 @@ function magneticCheck(game: Game, chain: Chain): { didMove: boolean } {
           console.error("Do not remove a ball in this method");
           debugger;
         }
-
-        // iterate towards head
-        current = current.previous;
       }
     }
 
@@ -210,7 +233,11 @@ export function stepInsertingChainBall({
   if (isCollidingWithPreviousBall) {
     console.log(
       "TODO isCollidingWithPreviousBall",
-      isCollidingWithPreviousBall
+      isCollidingWithPreviousBall,
+      'current ball',
+      chainedBall.ball,
+      'previous ball',
+      previous.value.ball,
     );
   }
 

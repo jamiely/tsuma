@@ -35,6 +35,7 @@ import {
 import { Node } from "./types";
 import { createEventManager } from "./events";
 import { createSoundManager } from "./sounds";
+import { gameExport, gameImport } from "./gameExport";
 
 const createChain = ({
   game,
@@ -48,7 +49,10 @@ const createChain = ({
   const chainedBall: ChainedBall = {
     waypoint: startingWaypoint,
     ball: {
-      position: { ...startingPosition },
+      position: { 
+        x: startingPosition.x,
+        y: startingPosition.y,
+      },
       color: randomColor(game),
     },
   };
@@ -63,15 +67,17 @@ const createChain = ({
   };
 };
 
+export const getDefaultGameBounds = () => ({
+  position: { x: 0, y: 0 },
+  size: { width: 1000, height: 600 },
+});
+
 export const createGame = ({
   currentBoard,
   debug,
 }: Pick<Game, "currentBoard"> & { debug: Partial<Game["debug"]> }): Game => {
   const launchedBallSpeed = 5;
-  const bounds = {
-    position: { x: 0, y: 0 },
-    size: { width: 1000, height: 600 },
-  };
+  const bounds = getDefaultGameBounds();
   const events = createEventManager();
   createSoundManager(events);
   const defaultFiringDelay = 500
@@ -81,6 +87,9 @@ export const createGame = ({
       ...debug,
       stopOnCollision: true,
       debugSteps: 0,
+      debugHistory: false,
+      history: [],
+      historyLimit: 100,
     },
     appliedEffects: {
       explosions: [],
@@ -172,6 +181,8 @@ export const launchBall = (game: Game) => {
   game.events.dispatchEvent(new LaunchedBallEvent());
 };
 
+const historyBuffer: string[] = [];
+
 export function step(game: Game) {
   if (game.debug.stop && game.debug.debugSteps <= 0) return;
 
@@ -191,9 +202,21 @@ export function step(game: Game) {
 
   stepMovement(game);
 
+  if(game.debug.debugHistory) {
+    historyBuffer.push(gameExport(game));
+    while(historyBuffer.length > 80) {
+      historyBuffer.shift();
+    }
+  }
+
   const { hasCollision } = handleCollisions(game);
   if (hasCollision) {
     game.events.dispatchEvent(new BallCollisionEvent());
+    game.debug.history.push(...historyBuffer.length ? historyBuffer : [gameExport(game)]);
+    historyBuffer.splice(0, historyBuffer.length);
+    while(game.debug.history.length > game.debug.historyLimit) {
+      game.debug.history.shift(); // fifo
+    } 
   }
 
   game.chains.forEach((chain) => {
@@ -444,11 +467,14 @@ function appendToChain(game: Game, chain: Chain) {
   // we want to spawn a new ball when the foot has cleared the first waypoint.
   const { foot, path } = chain;
 
+  const {x, y} = path.start.value;
   const nextBall = (): Node<ChainedBall> => ({
     value: {
       waypoint: path.start.next!,
       ball: {
-        position: { ...path.start.value },
+        position: {
+          x, y,
+        },
         color: nextColor(game, chain),
       },
       effect: newBallEffect(game, chain),
@@ -537,7 +563,9 @@ function remainingColors(game: Game): Set<Color> {
   return remainingColors;
 }
 
-function handleEvents(game: Game) {
+export function handleEvents(game: Game) {
+  game.events.removeAll();
+
   game.events.addEventListener("explosion", (event) => {
     if (event.type !== "explosion") return;
 
@@ -577,4 +605,21 @@ function handleEvents(game: Game) {
       step: 0,
     };
   });
+}
+
+export function rewindHistory(game: Game) {
+  const lastGameData = game.debug.history.pop();
+  if(!lastGameData) return game;
+  
+  const nextGame = setupNextGame(game, gameImport(lastGameData));
+  nextGame.debug.history = game.debug.history;
+  return nextGame;
+}
+
+export function setupNextGame(game: Game, nextGame: Game) {
+  nextGame.debug.stop = true;
+  const {events} = game
+  nextGame.events = events;
+  handleEvents(nextGame);
+  return nextGame;
 }

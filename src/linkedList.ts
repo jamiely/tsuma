@@ -72,3 +72,35 @@ export function* iterateWithTransform<T>(
     current = transformer(current);
   }
 }
+
+export function fromArray<T>(arr: T[]): {head: Node<T> | undefined, tail: Node<T> | undefined} {
+  let head: Node<T> | undefined = undefined;
+  let previous: Node<T> | undefined = undefined;
+  let tail: Node<T> | undefined = undefined;
+
+  for(const value of arr) {
+    const node: Node<T> = {
+      value,
+      previous,
+    }
+    if(!head) head = node;
+    if(previous) previous.next = node;
+    previous = node;
+    tail = node;
+  }
+
+  return {head, tail};
+}
+
+export function findNode<T>(node: Node<T>, predicate: (_: T) => boolean): Node<T> | undefined {
+  for(const {node: current} of iterateToTail(node)) {
+    if(predicate(current.value)) return current;
+  }
+
+  return undefined;
+}
+
+export function reduceList<T, TMemo>(node: Node<T>, reducer: (memo: TMemo, item: Node<T>) => TMemo, startingValue: TMemo) {
+  return Array.from(iterateToTail(node)).reduce((memo, item) =>
+    reducer(memo, item), startingValue);
+}

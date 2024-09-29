@@ -25,8 +25,8 @@ export interface Node<T> {
 }
 
 export interface WaypointPath {
-  start: Node<Point>;
-  end: Node<Point>;
+  start: Node<Waypoint>;
+  end: Node<Waypoint>;
 }
 
 export type Color =
@@ -53,10 +53,14 @@ interface Insertion {
   position: Point;
 }
 
+export interface Waypoint extends Point {
+  id: number;
+}
+
 export interface ChainedBall {
   ball: Ball;
   effect?: EffectType;
-  waypoint?: Node<Point>;
+  waypoint?: Node<Waypoint>;
   insertion?: Insertion;
 }
 
@@ -104,6 +108,9 @@ interface Debug {
   stop?: boolean;
   stopOnCollision?: boolean;
   debugSteps: number;
+  debugHistory: boolean;
+  history: string[],
+  historyLimit: number,
 }
 
 export interface Explosion {
@@ -309,6 +316,7 @@ export type GameEvent =
 
 export interface EventManager {
   dispatchEvent(event: GameEvent): boolean;
+  removeAll: () => void;
   removeEventListener: (
     type: GameEventType,
     callback: (event: GameEvent) => void

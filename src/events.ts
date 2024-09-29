@@ -6,11 +6,32 @@ export const createEventManager = (): EventManager => {
   const wrapCallback = (callback: (_: GameEvent) => void) => 
     (event: Event) => callback(event as GameEvent)
 
+  const eventListeners: {type: GameEventType, callback: any}[] = [];
+
+  const removeEventListener = (type: GameEventType, callback: (event: GameEvent) => void) => {
+    for(let i = eventListeners.length - 1; i >= 0; i--) {
+      if(type !== eventListeners[i].type || callback !== eventListeners[i].callback) continue;
+
+      eventListeners.splice(i, 1);
+      break;
+    }
+
+    return eventTarget.removeEventListener(type, wrapCallback(callback))
+  };
+
   return {
     dispatchEvent(event: GameEvent) {
       return eventTarget.dispatchEvent(event);
     },
-    removeEventListener: (type: GameEventType, callback: (event: GameEvent) => void) => eventTarget.removeEventListener(type, wrapCallback(callback)),
-    addEventListener: (type: GameEventType, callback: (event: GameEvent) => void) => eventTarget.addEventListener(type, wrapCallback(callback)),
+    removeAll: () => {
+      eventListeners.forEach(({type, callback}) => {
+        removeEventListener(type, callback);
+      })
+    },
+    removeEventListener,
+    addEventListener: (type: GameEventType, callback: (event: GameEvent) => void) => {
+      eventListeners.push({type, callback});
+      return eventTarget.addEventListener(type, wrapCallback(callback))
+    },
   }
 }

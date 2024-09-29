@@ -98,6 +98,7 @@ export function handleCollisions(game: Game): {hasCollision: boolean} {
             waypointAdjustmentDirection = closerToHead ? "toHead" : "toTail";
           } else if (isCollisionNodeTail && !insertingBefore) {
             waypointAdjustmentDirection = "toTail";
+            waypoint = waypoint?.previous;
           }
 
           console.log('handleCollisions', {

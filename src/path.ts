@@ -1,12 +1,12 @@
-import { Node, Point, Rectangle, WaypointPath } from "./types";
+import { Node, Point, Rectangle, Waypoint, WaypointPath } from "./types";
 import { distance } from "./util";
 
 export const createWaypointPath = (
   startPt: Point,
   endPt: Point
 ): WaypointPath => {
-  const start: Node<Point> = { value: startPt };
-  const end: Node<Point> = { value: endPt, previous: start };
+  const start: Node<Waypoint> = { value: {id: 1, ...startPt} };
+  const end: Node<Waypoint> = { value: {id: 2, ...endPt}, previous: start };
 
   start.next = end;
 
@@ -30,14 +30,25 @@ export const createWaypointPathCustom = (
   get: () => Generator<Point>
 ): WaypointPath => {
   const generator = get();
-  const start: Node<Point> = { value: generator.next().value };
-  let last: Node<Point> = start;
+  let id = 0;
+  const start: Node<Waypoint> = {
+    value: {
+      id: ++id,
+      ...generator.next().value
+    }
+  };
+  let last: Node<Waypoint> = start;
+  let currentPoint: Waypoint;
   do {
-    let { done, value: currentPoint } = generator.next();
+    let { done, value } = generator.next();
     if (done) break;
+    currentPoint = value;
 
     const current = {
-      value: currentPoint,
+      value: {
+        ...currentPoint,
+        id: ++id,
+      },
       previous: last,
     };
 
