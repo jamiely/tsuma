@@ -41,6 +41,24 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game, options: R
 };
 
 const renderText = (context: CanvasRenderingContext2D, game: Game) => {
+  renderBoardOver(context, game);
+  renderBoardName(context, game);
+};
+
+const renderBoardOver = (context: CanvasRenderingContext2D, game: Game) => {
+  if(!game.boardOver) return;
+
+  
+  const padding = 10;
+  const {size} = game.bounds
+  context.font = "20pt helvetica";
+  context.fillStyle = "black";
+  const text = "Whoops! Restarting the board.";
+  const {width} = context.measureText(text);
+  context.fillText(text, size.width - width - padding, size.height - padding, width);
+}
+
+const renderBoardName = (context: CanvasRenderingContext2D, game: Game) => {
   if(game.boardSteps > 500) return;
 
   const padding = 10;

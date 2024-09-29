@@ -184,6 +184,7 @@ export type EffectType = "explosion" | "slowEffect" | "accuracyEffect" | "backwa
 export type GameEventType =
   | "launchedBall"
   | "matchedBalls"
+  | "boardOver"
   | "gameOver"
   | "ballCollision"
   | EffectType;
@@ -222,6 +223,16 @@ export class GameOverEvent extends BaseGameEvent {
 
 export interface GameOverEvent extends BaseGameEvent {
   type: "gameOver";
+}
+
+export class BoardOverEvent extends BaseGameEvent {
+  constructor() {
+    super("boardOver");
+  }
+}
+
+export interface BoardOverEvent extends BaseGameEvent {
+  type: "boardOver";
 }
 
 export class BallCollisionEvent extends BaseGameEvent {
@@ -291,6 +302,7 @@ export type GameEvent =
   | AccuracyEffectEvent
   | BackwardsEffectEvent
   | BallCollisionEvent
+  | BoardOverEvent
   | GameOverEvent
   | MatchedBallsEvent
   | LaunchedBallEvent;

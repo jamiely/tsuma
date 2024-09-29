@@ -8,6 +8,7 @@ import {
   BackwardsEffect,
   BallCollisionEvent,
   BoardName,
+  BoardOverEvent,
   Chain,
   ChainedBall,
   Color,
