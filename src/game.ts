@@ -506,7 +506,7 @@ function nextColor(game: Game, chain: Chain) {
     if(loopCount > MAX_LOOP) {
       throw 'Infinite loop in nextColor';
     }
-    
+
     const nextColor = randomColor(game);
     if (nextColor === color) continue;
 

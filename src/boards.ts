@@ -475,8 +475,6 @@ const testChainsCross = (bounds: Rectangle): Board => {
       yIntercept: bounds.size.height * 0.8,
     });
 
-  console.log(line1.paths);
-
   return {
     name: 'Test chains cross',
     ballCount: 2,

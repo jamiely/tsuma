@@ -11,4 +11,5 @@
 10. Make accuracy ball graphic a triangle. Make it collide with the nearest ball.
 11. ~~It's possible for an effect to persist even after it is removed from the game.effects array. Change how these effects are stored.~~
 12. bug where you get stuck when the balls go into the sink, everything seems to freeze.
-13. Somehow launched a black ball.
+13. ~~Somehow launched a black ball.~~ addressed this by ensuring there is always some color (not undefined);
+14. Create a disconnected section by clearing matches on either end. Now pull that segment using magnetic. The segment's balls will stretch out a bit for a few pixels but otherwise won't move. The magnetic will not apply.

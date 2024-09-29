@@ -177,7 +177,8 @@ function magneticCheck(game: Game, chain: Chain): { didMove: boolean } {
         });
 
         if (ballRemoved) {
-          throw "Do not remove a ball in this method";
+          console.error("Do not remove a ball in this method");
+          debugger;
         }
 
         // iterate towards head
@@ -302,8 +303,6 @@ export function stepNormalChain(game: Game, chain: Chain, {waypointDirection}: {
     getNext = tmp;
     iterator = iterateToTail;
   }
-
-  console.debug('stepNormalChain', {waypointDirection, moveFrom, position: moveFrom?.value.ball.position})
 
   if (!moveFrom) return;
 
