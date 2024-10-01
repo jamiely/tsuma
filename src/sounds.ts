@@ -12,6 +12,9 @@ export const createSoundManager = (events: EventManager) => {
     matchedBalls: audioMatchedBalls,
     gameOver: audioGameOver,
     ballCollision: audioBallsCollision,
+    boardOver: undefined,
+    accuracyEffect: undefined,
+    backwardsEffect: undefined
   };
 
   for (const [eventType, clip] of Object.entries(audio)) {
