@@ -17,6 +17,7 @@
     "vitest": "^2.0.5"
   },
   "dependencies": {
+    "github-fork-ribbon-css": "^0.2.3",
     "jsfxr": "^1.2.2"
   }
 }

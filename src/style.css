@@ -100,3 +100,5 @@ button:focus-visible {
   background-color: green;
   border: 5px gray solid;
 }
+
+.github-fork-ribbon:before { background-color: #999;  }
