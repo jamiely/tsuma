@@ -46,8 +46,6 @@ export function handleCollisions(game: Game): {hasCollision: boolean} {
 
           // need this check BEFORE we add the new node
           const isCollisionNodeTail = chains[k].foot === collisionNode;
-          // this might need to be a special case
-          const isCollisionNodeHeadAndTail = isCollisionNodeTail && chains[k].head === collisionNode;
 
           chains[k].inserting++;
 
@@ -80,23 +78,7 @@ export function handleCollisions(game: Game): {hasCollision: boolean} {
 
           let waypointAdjustmentDirection: "toHead" | "toTail" = "toHead";
 
-          if (isCollisionNodeHeadAndTail) {
-            const comparisonPoint = position;
-            const distanceToNextWaypoint = waypoint?.next
-              ? distance(waypoint.next.value, comparisonPoint)
-              : Infinity;
-            const distanceToPrevWaypoint = waypoint?.previous
-              ? distance(waypoint.previous.value, comparisonPoint)
-              : Infinity;
-            const closerToHead =
-              waypoint?.next && distanceToNextWaypoint < distanceToPrevWaypoint;
-            console.log("isHeadAndTail", {
-              closerToHead,
-              distanceToNextWaypoint,
-              distanceToPrevWaypoint,
-            });
-            waypointAdjustmentDirection = closerToHead ? "toHead" : "toTail";
-          } else if (isCollisionNodeTail && !insertingBefore) {
+          if (isCollisionNodeTail && !insertingBefore) {
             waypointAdjustmentDirection = "toTail";
             waypoint = waypoint?.previous;
           }

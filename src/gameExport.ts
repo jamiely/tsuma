@@ -86,7 +86,6 @@ export const gameImport = (json: string): Game => {
       })
 
       const {head, tail} = fromArray(chainedBalls);
-      if(!tail) throw 'gameImport tail cannot be empty';
 
       return {
         ...chainDupe,
