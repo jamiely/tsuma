@@ -47,7 +47,7 @@ function run() {
     </div>
   `
 
-  function toggler({id, labelTrue, labelFalse, get, set}: {get: () => Boolean | undefined, set: (_: boolean) => void, labelTrue: string, labelFalse: string, id: string}) {
+  function toggler({id, labelTrue, labelFalse, get, set}: {get: () => boolean, set: (_: boolean) => void, labelTrue: string, labelFalse: string, id: string}) {
     const element = document.getElementById(id);
     if(! element) return;
 
@@ -58,6 +58,7 @@ function run() {
       updateLabel();
     });
 
+    set(get());
     updateLabel();    
   }
 
@@ -65,7 +66,7 @@ function run() {
     id: 'pause',
     labelTrue: 'Paused',
     labelFalse: 'Pause',
-    get: () => gameRef.game.debug.stop,
+    get: () => gameRef.game.debug.stop || false,
     set: (value) => gameRef.game.debug.stop = value,
   })
   
@@ -73,7 +74,7 @@ function run() {
     id: 'debug',
     labelTrue: 'Debug on',
     labelFalse: 'Debug off',
-    get: () => gameRef.game.debug.enabled,
+    get: () => gameRef.game.debug.enabled || false,
     set: (value) => gameRef.game.debug.enabled = value,
   })
 
@@ -85,7 +86,7 @@ function run() {
     set: (value) => gameRef.game.debug.debugHistory = value,
   })
   
-  let cursorEnabled = false;
+  let cursorEnabled = true;
   toggler({
     id: 'cursor',
     labelTrue: 'Cursor on',
