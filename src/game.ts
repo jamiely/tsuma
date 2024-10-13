@@ -392,7 +392,7 @@ function stepBoardOver(game: Game) {
 
 export function nextBoard(game: Game) {
   if (game.currentBoard.startsWith("board")) {
-    const boardList = ['board11', 'board12', 'board13', 'board14', 'board15', 'board21', 'board22'];
+    const boardList = ['board11', 'board12', 'board13', 'board14', 'board15', 'board21', 'board22', 'board23'];
     const index = boardList.indexOf(game.currentBoard);
     const nextIndex = (index + 1) % boardList.length;
     game.currentBoard = boardList[nextIndex] as BoardName;
