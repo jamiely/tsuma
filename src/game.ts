@@ -392,21 +392,13 @@ function stepBoardOver(game: Game) {
 
 export function nextBoard(game: Game) {
   if (game.currentBoard.startsWith("board")) {
-    let world = parseInt(game.currentBoard.substring(5,6));
-    let level = parseInt(game.currentBoard.substring(6));
-
-    level++;
-    if(level > 5) {
-      world++;
-      if(world > 2) world = 1;
-    }
-    if(level > 5) level = 1;
-
-    if (!isNaN(level)) {
-      game.currentBoard = `board${world}${level}` as BoardName;
-      return;
-    }
+    const boardList = ['board11', 'board12', 'board13', 'board14', 'board15', 'board21', 'board22'];
+    const index = boardList.indexOf(game.currentBoard);
+    const nextIndex = (index + 1) % boardList.length;
+    game.currentBoard = boardList[nextIndex] as BoardName;
+    return;
   }
+
   const boardNames = Object.keys(game.boards);
   const index = boardNames.indexOf(game.currentBoard);
   const nextIndex = (index + 1) % boardNames.length;
