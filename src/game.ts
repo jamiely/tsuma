@@ -390,11 +390,20 @@ function stepBoardOver(game: Game) {
   game.boardOverSteps = 0;
 }
 
-function nextBoard(game: Game) {
-  if (game.currentBoard.startsWith("board1")) {
-    const number = parseInt(game.currentBoard.substring(6));
-    if (!isNaN(number)) {
-      game.currentBoard = `board1${(number % 5) + 1}` as BoardName;
+export function nextBoard(game: Game) {
+  if (game.currentBoard.startsWith("board")) {
+    let world = parseInt(game.currentBoard.substring(5,6));
+    let level = parseInt(game.currentBoard.substring(6));
+
+    level++;
+    if(level > 5) {
+      world++;
+      if(world > 2) world = 1;
+    }
+    if(level > 5) level = 1;
+
+    if (!isNaN(level)) {
+      game.currentBoard = `board${world}${level}` as BoardName;
       return;
     }
   }
