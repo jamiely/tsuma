@@ -11,6 +11,7 @@ import { Board, Color, Game, Point, Rectangle } from "@/types";
 import { chaikinSmoothing, defaultColors } from "@/util";
 import { board22 } from "./board22";
 import { board23 } from "./board23";
+import { board24 } from "./board24";
 
 const testColors: Color[] = ["red", "green"];
 
@@ -106,6 +107,7 @@ export const buildBoards = (bounds: Rectangle): Game["boards"] => {
     board21: board21(bounds),
     board22: board22(bounds),
     board23: board23(bounds),
+    board24: board24(bounds),
     shallowWave: shallowWave(bounds),
     wave: wave(bounds),
     archimedes: archimedes(bounds),
