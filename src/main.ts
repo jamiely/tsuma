@@ -164,6 +164,25 @@ function run() {
   }
 
   render();
+
+  mapMode();
+}
+
+declare global {
+  interface Window {
+    __MAP_POINTS__: {x: number, y: number}[];
+  }
+}
+
+function mapMode() {
+  const points: any[] = [];
+  const canvas = document.getElementById('game')! as HTMLCanvasElement;
+  canvas.addEventListener('click', (event) => {
+    const lastPoint = {x: event.offsetX, y: event.offsetY};
+    console.log(lastPoint);
+    points.push(lastPoint);
+  });
+  window.__MAP_POINTS__ = points;
 }
 
 run();

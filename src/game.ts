@@ -404,6 +404,7 @@ export function nextBoard(game: Game) {
       "board22",
       "board23",
       "board24",
+      "board25",
     ];
     const index = boardList.indexOf(game.currentBoard);
     const nextIndex = (index + 1) % boardList.length;
