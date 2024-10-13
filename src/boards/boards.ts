@@ -6,9 +6,9 @@ import {
   linePath,
   simplify,
   sinWave,
-} from "./path";
-import { Board, Color, Game, Point, Rectangle } from "./types";
-import { chaikinSmoothing, defaultColors } from "./util";
+} from "@/path";
+import { Board, Color, Game, Point, Rectangle } from "@/types";
+import { chaikinSmoothing, defaultColors } from "@/util";
 
 const testColors: Color[] = ["red", "green"];
 

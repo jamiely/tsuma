@@ -1,4 +1,4 @@
-import { buildBoards } from "./boards";
+import { buildBoards } from "@/boards";
 import { handleCollisions } from "./collision";
 import { insertAfter, iterateToTail, remove } from "./linkedList";
 import { resolveMatches } from "./match";
