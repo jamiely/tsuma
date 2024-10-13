@@ -136,7 +136,7 @@ export const buildBoards = (bounds: Rectangle): Game["boards"] => {
       colors: testColors,
     },
     test: {
-      ballCount: 0,
+      ballCount: 1,
       ...line({
         launcherPosition: {
           x: bounds.size.width / 2,
@@ -148,7 +148,22 @@ export const buildBoards = (bounds: Rectangle): Game["boards"] => {
         slope: 0,
         yIntercept: bounds.size.height * 0.4,
       }),
-      colors: testColors,
+      colors: ['red'],
+    },
+    'test-sink': {
+      ballCount: 1,
+      ...line({
+        launcherPosition: {
+          x: bounds.size.width / 2,
+          y: (bounds.size.height * 5) / 6,
+        },
+        bounds,
+        startX: bounds.size.width * 0.3,
+        stopX: bounds.size.width * 0.5,
+        slope: 0,
+        yIntercept: bounds.size.height * 0.4,
+      }),
+      colors: ['red'],
     },
   };
 };

@@ -60,6 +60,7 @@ const renderBoardOver = (context: CanvasRenderingContext2D, game: Game) => {
 
 const renderBoardName = (context: CanvasRenderingContext2D, game: Game) => {
   if(game.boardSteps > 500) return;
+  if(game.boardOver) return;
 
   const padding = 10;
   const {size} = game.bounds
