@@ -49,7 +49,7 @@ const createChain = ({
   const chainedBall: ChainedBall = {
     waypoint: startingWaypoint,
     ball: {
-      position: { 
+      position: {
         x: startingPosition.x,
         y: startingPosition.y,
       },
@@ -80,7 +80,7 @@ export const createGame = ({
   const bounds = getDefaultGameBounds();
   const events = createEventManager();
   createSoundManager(events);
-  const defaultFiringDelay = 500
+  const defaultFiringDelay = 500;
   const game: Game = {
     boardSteps: 0,
     debug: {
@@ -137,7 +137,7 @@ export const createGame = ({
 const loadBoard = (game: Game) => {
   game.boardSteps = 0;
   // clear all effects
-  game.appliedEffects = {explosions: []};
+  game.appliedEffects = { explosions: [] };
   game.chainedBallSpeed = game.options.defaultChainedBallSpeed;
   game.firingDelay = game.options.defaultFiringDelay;
 
@@ -188,7 +188,7 @@ export function step(game: Game) {
 
   if (game.debug.debugSteps > 0) game.debug.debugSteps--;
 
-  game.boardSteps ++;
+  game.boardSteps++;
 
   if (game.boardOver) {
     stepBoardOver(game);
@@ -202,9 +202,9 @@ export function step(game: Game) {
 
   stepMovement(game);
 
-  if(game.debug.debugHistory) {
+  if (game.debug.debugHistory) {
     historyBuffer.push(gameExport(game));
-    while(historyBuffer.length > 80) {
+    while (historyBuffer.length > 80) {
       historyBuffer.shift();
     }
   }
@@ -212,11 +212,13 @@ export function step(game: Game) {
   const { hasCollision } = handleCollisions(game);
   if (hasCollision) {
     game.events.dispatchEvent(new BallCollisionEvent());
-    game.debug.history.push(...historyBuffer.length ? historyBuffer : [gameExport(game)]);
+    game.debug.history.push(
+      ...(historyBuffer.length ? historyBuffer : [gameExport(game)])
+    );
     historyBuffer.splice(0, historyBuffer.length);
-    while(game.debug.history.length > game.debug.historyLimit) {
+    while (game.debug.history.length > game.debug.historyLimit) {
       game.debug.history.shift(); // fifo
-    } 
+    }
   }
 
   game.chains.forEach((chain) => {
@@ -230,18 +232,15 @@ export function step(game: Game) {
 
   stepLauncher(game);
 
-  const {accuracy, backwards, slowDown, explosions} = game.appliedEffects
+  const { accuracy, backwards, slowDown, explosions } = game.appliedEffects;
 
-  if(accuracy) stepEffectAccuracy(game, accuracy);
-  if(backwards) stepEffectBackwards(game, backwards);
-  if(slowDown) stepEffectSlow(game, slowDown);
-  explosions?.forEach(effect => stepEffectExplosion(game, effect));
+  if (accuracy) stepEffectAccuracy(game, accuracy);
+  if (backwards) stepEffectBackwards(game, backwards);
+  if (slowDown) stepEffectSlow(game, slowDown);
+  explosions?.forEach((effect) => stepEffectExplosion(game, effect));
 }
 
-function stepEffectBackwards(
-  game: Game,
-  effect: BackwardsEffect
-) {
+function stepEffectBackwards(game: Game, effect: BackwardsEffect) {
   effect.step++;
 
   if (effect.step < game.options.backwardsDuration) {
@@ -251,14 +250,11 @@ function stepEffectBackwards(
   }
 }
 
-function stepEffectAccuracy(
-  game: Game,
-  effect: AccuracyEffect
-) {
+function stepEffectAccuracy(game: Game, effect: AccuracyEffect) {
   effect.step++;
 
   if (effect.step < game.options.accuracyDuration) {
-    if(!game.appliedEffects.accuracy) {
+    if (!game.appliedEffects.accuracy) {
       game.appliedEffects.accuracy = effect;
     }
     game.firingDelay = game.options.defaultFiringDelay / 2;
@@ -271,41 +267,47 @@ function stepEffectAccuracy(
   function setPointTo() {
     effect.pointTo = undefined;
 
-    const directionVector = {...game.launcher.pointTo}
+    const directionVector = { ...game.launcher.pointTo };
     subtract(directionVector, effect.pointFrom);
     toUnit(directionVector);
 
-    const current = {...effect.pointFrom};
-    let closestCollision: {distance: number, position: Point} | undefined = undefined;
-    for(let loopCount = 0, MAX_LOOP = 10_000; inBounds(current, game.bounds); loopCount ++) {
-      if(loopCount > MAX_LOOP) {
+    const current = { ...effect.pointFrom };
+    let closestCollision: { distance: number; position: Point } | undefined =
+      undefined;
+    for (
+      let loopCount = 0, MAX_LOOP = 10_000;
+      inBounds(current, game.bounds);
+      loopCount++
+    ) {
+      if (loopCount > MAX_LOOP) {
         debugger;
-        throw 'Infinite loop in stepEffectAccuracy';
+        throw "Infinite loop in stepEffectAccuracy";
       }
-      for(const chain of game.chains) {
-        for(const {value: {ball: {position}}} of iterateToTail(chain.head)) {
+      for (const chain of game.chains) {
+        for (const {
+          value: {
+            ball: { position },
+          },
+        } of iterateToTail(chain.head)) {
           const dist = distance(position, current);
-          if(dist > game.ballRadius * 2) continue;
-          if(closestCollision && closestCollision.distance < dist) continue;
-          
+          if (dist > game.ballRadius * 2) continue;
+          if (closestCollision && closestCollision.distance < dist) continue;
+
           closestCollision = {
             distance: dist,
-            position: {...current},
-          }
+            position: { ...current },
+          };
         }
       }
       add(current, directionVector);
     }
 
-    if(! closestCollision) return;
-    effect.pointTo = {...closestCollision.position};
+    if (!closestCollision) return;
+    effect.pointTo = { ...closestCollision.position };
   }
 }
 
-function stepEffectSlow(
-  game: Game,
-  effect: SlowEffect
- ) {
+function stepEffectSlow(game: Game, effect: SlowEffect) {
   effect.step++;
 
   if (effect.step < game.options.slowDuration) {
@@ -367,7 +369,7 @@ function stepLauncher(game: Game) {
   const { launcher } = game;
 
   // the color may come up in the remaining balls
-  if(game.ballsLeft > 10) {
+  if (game.ballsLeft > 10) {
     return;
   }
 
@@ -392,7 +394,17 @@ function stepBoardOver(game: Game) {
 
 export function nextBoard(game: Game) {
   if (game.currentBoard.startsWith("board")) {
-    const boardList = ['board11', 'board12', 'board13', 'board14', 'board15', 'board21', 'board22', 'board23', 'board24'];
+    const boardList = [
+      "board11",
+      "board12",
+      "board13",
+      "board14",
+      "board15",
+      "board21",
+      "board22",
+      "board23",
+      "board24",
+    ];
     const index = boardList.indexOf(game.currentBoard);
     const nextIndex = (index + 1) % boardList.length;
     game.currentBoard = boardList[nextIndex] as BoardName;
@@ -409,7 +421,7 @@ function stepBoardOverLost(game: Game) {
   game.boardOverSteps++;
   if (game.boardOverSteps === 1) {
     game.events.dispatchEvent(new BoardOverEvent());
-  } else if(game.boardOverSteps > 300) {
+  } else if (game.boardOverSteps > 300) {
     resetBoard(game);
     return;
   }
@@ -427,7 +439,6 @@ function newBallEffect(
   _game: Game,
   chain: Chain
 ): ChainedBall["effect"] | undefined {
-
   // don't put power ups next to each other
   if (chain.foot?.value.effect) return;
 
@@ -444,9 +455,9 @@ function newBallEffect(
   const effects = Object.keys(probabilities) as (keyof typeof probabilities)[];
   shuffleArray(effects);
 
-  for(const effect of effects) {
+  for (const effect of effects) {
     const prob = probabilities[effect];
-    if(Math.random() < prob) {
+    if (Math.random() < prob) {
       return effect;
     }
   }
@@ -455,26 +466,27 @@ function newBallEffect(
 
   function shuffleArray<T>(array: T[]) {
     for (let i = array.length - 1; i >= 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
     }
   }
 }
 
 function appendToChain(game: Game, chain: Chain) {
-  if(game.appliedEffects.backwards) return;
+  if (game.appliedEffects.backwards) return;
   if (game.ballsLeft <= 0) return;
 
   // we want to spawn a new ball when the foot has cleared the first waypoint.
   const { foot, path } = chain;
 
-  const {x, y} = path.start.value;
+  const { x, y } = path.start.value;
   const nextBall = (): Node<ChainedBall> => ({
     value: {
       waypoint: path.start.next!,
       ball: {
         position: {
-          x, y,
+          x,
+          y,
         },
         color: nextColor(game, chain),
       },
@@ -528,9 +540,9 @@ function nextColor(game: Game, chain: Chain) {
   if (!previous) return randomColor(game);
   if (color !== previous.value.ball.color) return randomColor(game);
 
-  for(let loopCount = 0, MAX_LOOP = 50; true; loopCount++) {
-    if(loopCount > MAX_LOOP) {
-      throw 'Infinite loop in nextColor';
+  for (let loopCount = 0, MAX_LOOP = 50; true; loopCount++) {
+    if (loopCount > MAX_LOOP) {
+      throw "Infinite loop in nextColor";
     }
 
     const nextColor = randomColor(game);
@@ -597,7 +609,7 @@ export function handleEvents(game: Game) {
       pointTo: game.launcher.pointTo,
     };
   });
-  
+
   game.events.addEventListener("backwardsEffect", (event) => {
     if (event.type !== "backwardsEffect") return;
 
@@ -610,8 +622,8 @@ export function handleEvents(game: Game) {
 
 export function rewindHistory(game: Game) {
   const lastGameData = game.debug.history.pop();
-  if(!lastGameData) return game;
-  
+  if (!lastGameData) return game;
+
   const nextGame = setupNextGame(game, gameImport(lastGameData));
   nextGame.debug.history = game.debug.history;
   return nextGame;
@@ -619,7 +631,7 @@ export function rewindHistory(game: Game) {
 
 export function setupNextGame(game: Game, nextGame: Game) {
   nextGame.debug.stop = true;
-  const {events} = game
+  const { events } = game;
   nextGame.events = events;
   handleEvents(nextGame);
   return nextGame;
