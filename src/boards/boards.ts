@@ -22,6 +22,7 @@ import { board13 } from "./board13";
 import { board14 } from "./board14";
 import { board15 } from "./board15";
 import { board21 } from "./board21";
+import { board41, board42, board43, board44, board45 } from "./board4";
 
 const testColors: Color[] = ["red", "green"];
 
@@ -124,6 +125,11 @@ export const buildBoards = (bounds: Rectangle): Game["boards"] => {
     board33: board33(bounds),
     board34: board34(bounds),
     board35: board35(bounds),
+    board41: board41(bounds),
+    board42: board42(bounds),
+    board43: board43(bounds),
+    board44: board44(bounds),
+    board45: board45(bounds),
     shallowWave: shallowWave(bounds),
     wave: wave(bounds),
     archimedes: archimedes(bounds),
