@@ -8,6 +8,7 @@ import {
 
 export const defaultColors: Color[] = ["red", "green", "blue", "gold"];
 export const colorsLevel2: Color[] = ["red", "green", "blue", "gold", "purple"];
+export const colorsLevel3: Color[] = ["red", "green", "blue", "gold", "purple", "silver"];
 export const randomColor = (colors: Color[] = defaultColors): Color | undefined =>
   colors[Math.floor(Math.random() * colors.length)];
 

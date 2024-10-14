@@ -36,6 +36,7 @@ export type Color =
   | "gold"
   | "purple"
   | "black"
+  | "silver"
   | "#f8f9f9"
   | "none";
 
@@ -122,6 +123,13 @@ export type BoardName =
   | "board64"
   | "board65"
   | "board66"
+  | "board71"
+  | "board72"
+  | "board73"
+  | "board74"
+  | "board75"
+  | "board76"
+  | "board77"
   | "test-sink"
   | "test-chains"
   | "test-chains-cross";
