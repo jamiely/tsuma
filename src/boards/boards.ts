@@ -27,6 +27,7 @@ import { board51, board52, board53, board54, board55, board56 } from "./board5";
 import { board61, board62, board63, board64, board65, board66 } from "./board6";
 import { board71, board72, board73, board74, board75, board76, board77 } from "./board7";
 import { board81, board82, board83, board84, board85, board86, board87 } from "./board8";
+import { board91, board92, board93, board94, board95, board96, board97 } from "./board9";
 const testColors: Color[] = ["red", "green"];
 
 const line = ({
@@ -160,6 +161,13 @@ export const buildBoards = (bounds: Rectangle): Game["boards"] => {
     board85: board85(bounds),
     board86: board86(bounds),
     board87: board87(bounds),
+    board91: board91(bounds),
+    board92: board92(bounds),
+    board93: board93(bounds),
+    board94: board94(bounds),
+    board95: board95(bounds),
+    board96: board96(bounds),
+    board97: board97(bounds),
     shallowWave: shallowWave(bounds),
     wave: wave(bounds),
     archimedes: archimedes(bounds),

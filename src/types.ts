@@ -137,6 +137,13 @@ export type BoardName =
   | "board85"
   | "board86"
   | "board87"
+  | "board91"
+  | "board92"
+  | "board93"
+  | "board94"
+  | "board95"
+  | "board96"
+  | "board97"
   | "test-sink"
   | "test-chains"
   | "test-chains-cross";
