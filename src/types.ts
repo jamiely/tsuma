@@ -109,6 +109,7 @@ export type BoardName =
   | "board43"
   | "board44"
   | "board45"
+  | "board46"
   | "test-sink"
   | "test-chains"
   | "test-chains-cross";
