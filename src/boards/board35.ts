@@ -9,7 +9,7 @@ export const board35 = (bounds: Rectangle): Board => {
       x: bounds.size.width * 7/20,
       y: bounds.size.height * 11/20,
     },
-    ballCount: 100,
+    ballCount: 150,
     paths: [
       createWaypointPathCustom(() => points1()),
       createWaypointPathCustom(() => points2()),
