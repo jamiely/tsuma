@@ -37,6 +37,8 @@ function run() {
     currentBoard: params.get('board') as Game['currentBoard'] || "board11",
   });
 
+  gameRef.game.debug.enableMapEditMode = params.get('mapEditMode') !== null;
+
 
   document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div>
@@ -165,7 +167,7 @@ function run() {
 
   render();
 
-  mapMode();
+  mapEditMode(gameRef.game);
 }
 
 declare global {
@@ -174,15 +176,18 @@ declare global {
   }
 }
 
-function mapMode() {
+function mapEditMode(game: Game) {
+  if(!game.debug.enableMapEditMode) return;
+
   const points: any[] = [];
   const canvas = document.getElementById('game')! as HTMLCanvasElement;
   canvas.addEventListener('click', (event) => {
     const lastPoint = {x: event.offsetX, y: event.offsetY};
-    console.log(lastPoint);
+    console.log('lastPoint', lastPoint);
     points.push(lastPoint);
   });
   window.__MAP_POINTS__ = points;
+  console.log('all points', points);
 }
 
 run();

@@ -85,6 +85,7 @@ export const createGame = ({
     boardSteps: 0,
     debug: {
       ...debug,
+      enableMapEditMode: false,
       stopOnCollision: true,
       debugSteps: 0,
       debugHistory: false,

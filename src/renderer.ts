@@ -38,15 +38,18 @@ export const renderGame = (canvas: HTMLCanvasElement) => (game: Game, options: R
   renderEffects(context, game);
   renderText(context, game);
   renderDebug(context, game);
-  // renderBackground(context);
+  
+  renderMapEditorBackground(context, game);
 };
 
-// const renderBackground = (context: CanvasRenderingContext2D) => {
-//   const imageSrc = '/tsuma/zuma_2-5.png';
-//   const image = new Image();
-//   image.src = imageSrc;
-//   context.drawImage(image, 0, 0);
-// }
+const renderMapEditorBackground = (context: CanvasRenderingContext2D, game: Game) => {
+  if(!game.debug.enableMapEditMode) return;
+
+  const imageSrc = '/tsuma/mapEditorBackground.png';
+  const image = new Image();
+  image.src = imageSrc;
+  context.drawImage(image, 0, 0);
+}
 
 const renderText = (context: CanvasRenderingContext2D, game: Game) => {
   renderBoardOver(context, game);

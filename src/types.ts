@@ -104,6 +104,7 @@ export type BoardName =
   | "test-chains-cross";
 
 interface Debug {
+  enableMapEditMode: boolean;
   enabled?: boolean;
   collisionVector?: Point;
   movementVector?: Point;
