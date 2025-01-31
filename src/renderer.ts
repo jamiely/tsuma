@@ -3,6 +3,7 @@ import { Node, ChainedBall, Game, Point, Explosion } from "./types";
 import { add, scale, subtract, toUnit } from "./util";
 
 export interface RenderOptions {
+  showControls: boolean,
   waypoints: {
     enabled: boolean;
     color: string;
@@ -67,6 +68,15 @@ const renderBoardOver = (context: CanvasRenderingContext2D, game: Game) => {
   const text = "Whoops! Restarting the board.";
   const {width} = context.measureText(text);
   context.fillText(text, size.width - width - padding, size.height - padding, width);
+}
+
+const debugText = (context: CanvasRenderingContext2D, text: string, {x, y}: Point, offset: number = 5) => {
+  context.font = "15pt helvetica";
+  context.fillStyle = "cyan";
+  context.strokeStyle = "black"
+  const {width} = context.measureText(text);
+  context.strokeText(text, x + offset, y + offset, width);
+  context.fillText(text, x + offset, y + offset, width);
 }
 
 const renderBoardName = (context: CanvasRenderingContext2D, game: Game) => {
@@ -194,6 +204,8 @@ const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
     const copy = { ...game.debug.movementVector };
     scale(copy, 10);
     line(copy, "pink", game.debug.collisionChainedBallPosition);
+    debugPoint(context, copy)
+    debugPoint(context, game.debug.collisionChainedBallPosition)
   }
 
   if (
@@ -315,3 +327,8 @@ const renderLauncher = (context: CanvasRenderingContext2D, game: Game) => {
 
   context.lineCap = "butt";
 };
+
+const ptText = ({x, y}: Point): string => `(${x.toFixed(0)}, ${y.toFixed(0)})`
+
+const debugPoint = (context: CanvasRenderingContext2D, pt: Point) =>
+  debugText(context, ptText(pt), pt)

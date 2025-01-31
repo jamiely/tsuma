@@ -11,6 +11,7 @@ import { AppConfig, Game } from './types.ts';
 import { gameExport, gameImport } from './gameExport.ts'
 
 const renderOptions: RenderOptions = {
+  showControls: window.location.search.includes('controls'),
   waypoints: {
     enabled: false,
     color: "lightgray",
@@ -62,6 +63,13 @@ function run() {
 
     set(get());
     updateLabel();    
+  }
+
+  if(renderOptions.showControls) {
+    const controls = document.getElementById('controls');
+    if(controls) {
+      controls.style.display = '';
+    }
   }
 
   toggler({
