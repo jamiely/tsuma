@@ -95,6 +95,7 @@ function run() {
     if(banner instanceof HTMLElement) {
       banner.style.display = 'none';
     }
+    gameRef.game.audio.enabled = false;
   }
 
   toggler({

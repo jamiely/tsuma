@@ -195,6 +195,9 @@ export interface BackwardsEffect {
 export type Effect = Explosion | SlowEffect | AccuracyEffect | BackwardsEffect;
 
 export interface Game {
+  audio: {
+    enabled: boolean;
+  },
   appliedEffects: {
     slowDown?: SlowEffect,
     accuracy?: AccuracyEffect,

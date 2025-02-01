@@ -81,9 +81,11 @@ export const createGame = ({
   const launchedBallSpeed = 5;
   const bounds = getDefaultGameBounds();
   const events = createEventManager();
-  createSoundManager(events);
   const defaultFiringDelay = 500;
   const game: Game = {
+    audio: {
+      enabled: true,
+    },
     boardSteps: 0,
     debug: {
       ...debug,
@@ -129,6 +131,7 @@ export const createGame = ({
     events,
     renderOptions,
   };
+  createSoundManager(game, events);
   handleEvents(game);
 
   game.launcher.color = randomColor(game);
