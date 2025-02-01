@@ -36,6 +36,7 @@ import { Node } from "./types";
 import { createEventManager } from "./events";
 import { createSoundManager } from "./sounds";
 import { gameExport, gameImport } from "./gameExport";
+import { RenderOptions } from "./renderer";
 
 const createChain = ({
   game,
@@ -73,9 +74,10 @@ export const getDefaultGameBounds = () => ({
 });
 
 export const createGame = ({
+  renderOptions,
   currentBoard,
   debug,
-}: Pick<Game, "currentBoard"> & { debug: Partial<Game["debug"]> }): Game => {
+}: Pick<Game, "currentBoard"> & { debug: Partial<Game["debug"]>, renderOptions: RenderOptions }): Game => {
   const launchedBallSpeed = 5;
   const bounds = getDefaultGameBounds();
   const events = createEventManager();
@@ -125,6 +127,7 @@ export const createGame = ({
     boards: buildBoards(bounds),
     currentBoard,
     events,
+    renderOptions,
   };
   handleEvents(game);
 

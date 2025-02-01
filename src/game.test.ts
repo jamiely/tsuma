@@ -5,7 +5,7 @@ vitest.mock('@/vendor/sfxr');
 
 describe('nextBoard', () => {
   it('gets the next board', () => {
-    const game = createGame({ currentBoard: 'board15', debug: {} });
+    const game = createGame({ currentBoard: 'board15', debug: {}, renderOptions: {} as any });
     nextBoard(game);
     expect(game.currentBoard).toBe('board21');
   })

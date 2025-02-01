@@ -1,3 +1,5 @@
+import { RenderOptions } from "./renderer";
+
 export interface Point {
   x: number;
   y: number;
@@ -227,6 +229,7 @@ export interface Game {
   boards: Record<BoardName, Board>;
   currentBoard: BoardName;
   events: EventManager;
+  renderOptions: RenderOptions;
 }
 
 export interface Launcher extends Ball {

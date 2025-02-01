@@ -11,6 +11,8 @@ import { AppConfig, Game } from './types.ts';
 import { gameExport, gameImport } from './gameExport.ts'
 
 const renderOptions: RenderOptions = {
+  scale: getRenderingScale(),
+  size: { width: window.innerWidth, height: window.innerHeight },
   showControls: window.location.search.includes('controls'),
   waypoints: {
     enabled: false,
@@ -22,6 +24,21 @@ const renderOptions: RenderOptions = {
     width: 10,
   }
 }
+
+function getRenderingScale() {
+  return Math.max(Math.min(window.innerWidth / 1000, window.innerHeight / 600), 0.1);
+}
+
+window.addEventListener('resize', () => {
+  renderOptions.scale = getRenderingScale();
+  renderOptions.size = { width: window.innerWidth, height: window.innerHeight };
+  const canvas = document.getElementById('game') as HTMLCanvasElement;
+  if(!canvas) {
+    return;
+  }
+  canvas.width = renderOptions.size.width;
+  canvas.height = renderOptions.size.height;
+});
 
 const gameRef: {game: Game} = {game: {} as any};
 
@@ -36,6 +53,7 @@ function run() {
       enabled: Boolean(params.get('debug')),
     },
     currentBoard: params.get('board') as Game['currentBoard'] || "board11",
+    renderOptions,
   });
 
   gameRef.game.debug.enableMapEditMode = params.get('mapEditMode') !== null;
@@ -45,8 +63,8 @@ function run() {
     <div>
       <canvas 
         id="game" 
-        width="${gameRef.game.bounds.position.x + gameRef.game.bounds.size.width}" 
-        height="${gameRef.game.bounds.position.y + gameRef.game.bounds.size.height}" />
+        width="${renderOptions.size.width}" 
+        height="${renderOptions.size.height}" />
     </div>
   `
 
@@ -69,6 +87,13 @@ function run() {
     const controls = document.getElementById('controls');
     if(controls) {
       controls.style.display = '';
+    }
+  }
+
+  if(window.location.search.includes('simple')) {
+    const banner = document.querySelector('.github-fork-ribbon');
+    if(banner instanceof HTMLElement) {
+      banner.style.display = 'none';
     }
   }
 

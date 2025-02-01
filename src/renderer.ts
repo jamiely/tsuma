@@ -3,6 +3,11 @@ import { Node, ChainedBall, Game, Point, Explosion } from "./types";
 import { add, scale, subtract, toUnit } from "./util";
 
 export interface RenderOptions {
+  scale: number,
+  size: {
+    width: number;
+    height: number,
+  }
   showControls: boolean,
   waypoints: {
     enabled: boolean;
@@ -15,19 +20,29 @@ export interface RenderOptions {
   }
 }
 
+declare global {
+  interface CanvasRenderingContext2D {
+    set scaledFontSize(value: number);
+    origfillRect: CanvasRenderingContext2D['fillRect'];
+    origfillText: CanvasRenderingContext2D['fillText'];
+  }
+}
+
+
 export const renderGame = (canvas: HTMLCanvasElement) => (game: Game, options: RenderOptions) => {
   const { chains, freeBalls, ballRadius } = game;
-  const context = canvas.getContext("2d");
-  if (!context) {
+  const originalContext = canvas.getContext("2d");
+  if (!originalContext) {
     console.error("There is no 2d context available.");
     return;
   }
 
+  const context = enrichContext(originalContext, options);
   // clear the canvas
   context.fillStyle = "white";
-  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.origfillRect(0, 0, canvas.width, canvas.height);
 
-    renderWaypoints(context, game, options);
+  renderWaypoints(context, game, options);
 
   for (let i = 0; i < chains.length; i++) {
     for(const {value} of iterateToTail(chains[i].head)) {
@@ -63,15 +78,15 @@ const renderBoardOver = (context: CanvasRenderingContext2D, game: Game) => {
   
   const padding = 10;
   const {size} = game.bounds
-  context.font = "20pt helvetica";
+  context.scaledFontSize = 27;
   context.fillStyle = "black";
   const text = "Whoops! Restarting the board.";
   const {width} = context.measureText(text);
-  context.fillText(text, size.width - width - padding, size.height - padding, width);
+  context.origfillText(text, size.width - width - padding, size.height - padding, width);
 }
 
 const debugText = (context: CanvasRenderingContext2D, text: string, {x, y}: Point, offset: number = 5) => {
-  context.font = "15pt helvetica";
+  context.scaledFontSize = 15;
   context.fillStyle = "cyan";
   context.strokeStyle = "black"
   const {width} = context.measureText(text);
@@ -85,11 +100,15 @@ const renderBoardName = (context: CanvasRenderingContext2D, game: Game) => {
 
   const padding = 10;
   const {size} = game.bounds
-  context.font = "20pt helvetica";
+  context.scaledFontSize = 27;
   context.fillStyle = "black";
   const text = game.boards[game.currentBoard].name;
   const {width} = context.measureText(text);
-  context.fillText(text, size.width - width - padding, size.height - padding, width);
+  const sc = game.renderOptions.scale;
+  const x = size.width * sc - width - padding;
+  const y = size.height * sc - padding;
+  console.log('board name', x, y)
+  context.origfillText(text, x, y, width);
 }
 
 const renderEffects = (context: CanvasRenderingContext2D, game: Game) => {
@@ -146,14 +165,14 @@ const renderChainedBall = (
       'accuracyEffect': '🎯',
       'backwardsEffect': '🔃',
     }[chainedBall.effect];
-    context.font = "16pt helvetica";
+    context.scaledFontSize = 22;
     context.fillStyle = "white";
     context.fillText(text, x - game.ballRadius/2, y + game.ballRadius / 2);
   }
 
   if (!insertion || !game.debug.enabled) return;
 
-  context.font = "20pt helvetica";
+  context.scaledFontSize = 27;
   context.fillStyle = "black";
   context.fillText("ins", x - game.ballRadius, y + game.ballRadius / 2);
 
@@ -239,7 +258,7 @@ const renderDebug = (context: CanvasRenderingContext2D, game: Game) => {
       } = value;
 
       if (insertion) {
-        context.font = "20pt helvetica";
+        context.scaledFontSize = 27;
         context.fillStyle = "black";
         context.fillText("ins", x - game.ballRadius, y + game.ballRadius / 2);
 
@@ -332,3 +351,71 @@ const ptText = ({x, y}: Point): string => `(${x.toFixed(0)}, ${y.toFixed(0)})`
 
 const debugPoint = (context: CanvasRenderingContext2D, pt: Point) =>
   debugText(context, ptText(pt), pt)
+
+function enrichContext(context: CanvasRenderingContext2D, options: RenderOptions) {
+  const sc = options.scale;
+  const lookup: Record<string, any> = {
+    arc,
+    fillRect,
+    fillText,
+    lineTo,
+    moveTo,
+    strokeText,
+  }
+  const handler = {
+    get(target: any, prop: string) {
+      if(prop.startsWith('orig')) return target[prop.substring(4)].bind(target);
+      if(lookup[prop]) return lookup[prop];
+
+      if (typeof target[prop] === "function") {
+        return target[prop].bind(target);
+      }
+      return target[prop];
+    },
+    set(target: any, prop: string, value: any) {
+      if(prop === 'scaledFontSize') {
+        const scaledFontSize = Math.max(Math.round(value * options.scale), 5);
+        target.font = `${scaledFontSize}px helvetica`;
+        console.log(target.font);
+        return true;
+      } else if(prop === 'lineWidth') {
+        target.lineWidth = Math.max(value * options.scale, 0.5);
+        return true;
+      }
+      // Allow setting properties normally (like fillStyle)
+      target[prop] = value;
+      return true;
+    },
+  };
+  return new Proxy(context, handler) as CanvasRenderingContext2D;
+
+  function fillRect(...props: Parameters<CanvasRenderingContext2D['fillRect']>) {
+    const [x, y, w, h] = props;
+    context.fillRect(x * sc, y * sc, w * sc, h * sc)
+  }
+
+  function arc(...props: Parameters<CanvasRenderingContext2D['arc']>) {
+    const [x, y, radius, startAngle, endAngle, counterClockwise] = props;
+    context.arc(x * sc, y * sc, radius * sc, startAngle, endAngle, counterClockwise);
+  }
+
+  function lineTo(...props: Parameters<CanvasRenderingContext2D['lineTo']>) {
+    const [x, y] = props;
+    context.lineTo(x * sc, y * sc);
+  }
+  
+  function moveTo(...props: Parameters<CanvasRenderingContext2D['moveTo']>) {
+    const [x, y] = props;
+    context.moveTo(x * sc, y * sc);
+  }
+
+  function fillText(...props: Parameters<CanvasRenderingContext2D['fillText']>) {
+    const [text, x, y, maxWidth] = props;
+    context.fillText(text, x * sc, y * sc, maxWidth)
+  }
+  
+  function strokeText(...props: Parameters<CanvasRenderingContext2D['strokeText']>) {
+    const [text, x, y, maxWidth] = props;
+    context.strokeText(text, x * sc, y * sc, maxWidth)
+  }
+}
