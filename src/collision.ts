@@ -143,7 +143,7 @@ export function handleCollisions(game: Game): {hasCollision: boolean} {
 
 export const ballsCollide = (game: Game, ball1: Ball, ball2: Ball) => {
   const diameter = game.ballRadius * 2;
-  return diameter > distance(ball1.position, ball2.position);
+  return diameter >= distance(ball1.position, ball2.position);
 };
 
 const shouldInsertBefore = (
