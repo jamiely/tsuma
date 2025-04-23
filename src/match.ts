@@ -25,7 +25,9 @@ export function resolveMatches(game: Game, chain: Chain): {matches: boolean} {
     if(!didMatch || isFoot) {
       // we are at a new color, so resolve the last match
       if(length >= 3) {
-        for(const {value: {effect, ball}} of iterateToTail(start, (node) => node !== current)) {
+        // Include the current node in the iteration if it's a match and it's the foot
+        const stopNode = (didMatch && isFoot) ? current.next : current;
+        for(const {value: {effect, ball}} of iterateToTail(start, (node) => node !== stopNode)) {
           if(!effect) continue;
 
           if(effect === 'explosion') {
