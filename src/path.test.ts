@@ -2,13 +2,12 @@ import { describe, it, expect } from 'vitest';
 import {
   createWaypointPath,
   createWaypointPathFromArray,
-  createWaypointPathCustom,
   simplify,
   sinWave,
   archimedeanSpiral,
   linePath,
 } from './path';
-import { Point, Rectangle, WaypointPath } from './types';
+import { Point, Rectangle } from './types';
 
 describe('path', () => {
   describe('createWaypointPath', () => {
@@ -42,8 +41,9 @@ describe('path', () => {
       while (current) {
         expect(current.value.x).toBe(points[index].x);
         expect(current.value.y).toBe(points[index].y);
-        current = current.next;
         index++;
+        if (!current.next) break;
+        current = current.next;
       }
       expect(index).toBe(points.length);
     });

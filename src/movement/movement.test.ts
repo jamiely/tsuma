@@ -1,14 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import {
-  stepMovement,
   stepFreeBalls,
   stepChains,
-  stepInsertingChain,
-  stepNormalChain,
   updatePositionTowardsWaypoint,
   updatePositionTowardsInsertion,
 } from './movement';
-import { Chain, ChainedBall, FreeBall, Game, Node, Point, Waypoint, Board, BoardName } from '@/types';
+import { Chain, ChainedBall, FreeBall, Game, Node, Waypoint, Board, BoardName } from '@/types';
 
 // Create a base game mock that can be extended
 const createGameMock = (partial: Partial<Game> = {}): Game => {

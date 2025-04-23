@@ -1,6 +1,6 @@
 import { expect, test, describe } from 'vitest'
 import { handleCollisions, ballsCollide } from './collision'
-import { Ball, Chain, ChainedBall, FreeBall, Game, Node, Point, Waypoint, WaypointPath, BoardName, Board } from './types'
+import { Ball, ChainedBall, Game, Node, Waypoint, WaypointPath, Board } from './types'
 
 const createTestGame = (ballRadius: number): Game => {
   const testBoard: Board = {
