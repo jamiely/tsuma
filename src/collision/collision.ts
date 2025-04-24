@@ -1,5 +1,5 @@
-import { insertAfter, insertBefore, iterateToTail } from "./linkedList";
-import { Ball, Chain, ChainedBall, FreeBall, Game } from "./types";
+import { insertAfter, insertBefore, iterateToTail } from "../linkedList";
+import { Ball, Chain, ChainedBall, FreeBall, Game } from "../types";
 import {
   add,
   distance,
@@ -9,9 +9,9 @@ import {
   toUnit,
   waypointVector,
   waypointVectorFromPosition,
-} from "./util";
-import { Node } from "./types";
-import { WAYPOINT_DISTANCE_DELTA } from "./constants";
+} from "../util";
+import { Node } from "../types";
+import { WAYPOINT_DISTANCE_DELTA } from "../constants";
 
 // when a launched ball collides with a chain,
 // there are 3 things that happen.
@@ -141,16 +141,16 @@ export function handleCollisions(game: Game): {hasCollision: boolean} {
   return {hasCollision: hasAnyCollision};
 }
 
-export const ballsCollide = (game: Game, ball1: Ball, ball2: Ball) => {
+export function ballsCollide(game: Game, ball1: Ball, ball2: Ball) {
   const diameter = game.ballRadius * 2;
   return diameter >= distance(ball1.position, ball2.position);
-};
+}
 
-const shouldInsertBefore = (
+export function shouldInsertBefore(
   game: Game,
   chainedBall: ChainedBall,
   freeBall: FreeBall
-): boolean => {
+): boolean {
   // get the exact point of contact
   const pointOfContact = { ...chainedBall.ball.position };
   subtract(pointOfContact, freeBall.position);
@@ -177,9 +177,9 @@ const shouldInsertBefore = (
   })
 
   return scalarProjection > 0;
-};
+}
 
-const backoffFreeBall = ({
+export function backoffFreeBall({
   game,
   collisionNode,
   freeBall,
@@ -187,7 +187,7 @@ const backoffFreeBall = ({
   game: Game;
   collisionNode: Node<ChainedBall>;
   freeBall: FreeBall;
-}) => {
+}) {
   const { position, velocity } = freeBall;
 
   // backoff the ball until it is not colliding anymore
@@ -203,9 +203,9 @@ const backoffFreeBall = ({
     }
     subtract(position, unitVelocity);
   }
-};
+}
 
-const addNewNode = ({
+export function addNewNode({
   game,
   chain,
   collisionNode,
@@ -215,7 +215,7 @@ const addNewNode = ({
   chain: Chain;
   collisionNode: Node<ChainedBall>;
   freeBall: FreeBall;
-}) => {
+}) {
   const { position, color } = freeBall;
   const newBall = {
     ball: {
@@ -261,4 +261,4 @@ const addNewNode = ({
     insertingBefore,
     insertionPoint,
   };
-};
+} 

@@ -104,6 +104,7 @@ export function radiansToDegrees(radians: number): number {
 }
 
 export function normal({ x, y }: Point): Point {
+  if (x === 0 && y === 0) return { x: 0, y: 0 };
   return { x: -y, y: x };
 }
 

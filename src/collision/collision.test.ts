@@ -1,6 +1,6 @@
-import { expect, test, describe } from 'vitest'
-import { handleCollisions, ballsCollide } from './collision'
-import { Ball, ChainedBall, Game, Node, Waypoint, WaypointPath, Board } from './types'
+import { expect, describe, it } from 'vitest'
+import { handleCollisions, ballsCollide, shouldInsertBefore, backoffFreeBall, addNewNode } from './collision'
+import { Ball, ChainedBall, Game, Node, Waypoint, WaypointPath, Board, FreeBall, Chain } from '../types'
 
 const createTestGame = (ballRadius: number): Game => {
   const testBoard: Board = {
@@ -8,7 +8,7 @@ const createTestGame = (ballRadius: number): Game => {
     launcherPosition: { x: 0, y: 0 },
     paths: [],
     colors: ['red', 'blue']
-  }
+  };
 
   const boards = {
     test: testBoard,
@@ -75,7 +75,7 @@ const createTestGame = (ballRadius: number): Game => {
     board95: testBoard,
     board96: testBoard,
     board97: testBoard,
-  }
+  };
 
   return {
     ballRadius,
@@ -147,25 +147,38 @@ const createTestGame = (ballRadius: number): Game => {
         width: 2
       }
     }
-  }
-}
+  };
+};
+
+const createWaypointPath = (): WaypointPath => {
+  const startWaypoint = { id: 1, x: 0, y: 0 };
+  const endWaypoint = { id: 2, x: 100, y: 0 };
+  const startNode: Node<Waypoint> = { value: startWaypoint };
+  const endNode: Node<Waypoint> = { value: endWaypoint };
+  startNode.next = endNode;
+  endNode.previous = startNode;
+  return {
+    start: startNode,
+    end: endNode
+  };
+};
 
 describe('ballsCollide', () => {
-  test('returns true when balls overlap', () => {
+  it('returns true when balls overlap', () => {
     const game = createTestGame(5)
     const ball1: Ball = { position: { x: 0, y: 0 }, color: 'red' }
     const ball2: Ball = { position: { x: 8, y: 0 }, color: 'blue' }
     expect(ballsCollide(game, ball1, ball2)).toBe(true)
   })
 
-  test('returns false when balls do not overlap', () => {
+  it('returns false when balls do not overlap', () => {
     const game = createTestGame(5)
     const ball1: Ball = { position: { x: 0, y: 0 }, color: 'red' }
     const ball2: Ball = { position: { x: 20, y: 0 }, color: 'blue' }
     expect(ballsCollide(game, ball1, ball2)).toBe(false)
   })
 
-  test('returns true when balls just touch', () => {
+  it('returns true when balls just touch', () => {
     const game = createTestGame(5)
     const ball1: Ball = { position: { x: 0, y: 0 }, color: 'red' }
     const ball2: Ball = { position: { x: 10, y: 0 }, color: 'blue' }
@@ -174,32 +187,13 @@ describe('ballsCollide', () => {
 })
 
 describe('handleCollisions', () => {
-  const createWaypoint = (id: number, x: number, y: number): Waypoint => ({
-    id,
-    x,
-    y
-  })
-
-  const createWaypointPath = (): WaypointPath => {
-    const startWaypoint = createWaypoint(1, 0, 0)
-    const endWaypoint = createWaypoint(2, 100, 0)
-    const startNode: Node<Waypoint> = { value: startWaypoint }
-    const endNode: Node<Waypoint> = { value: endWaypoint }
-    startNode.next = endNode
-    endNode.previous = startNode
-    return {
-      start: startNode,
-      end: endNode
-    }
-  }
-
-  test('returns no collision when no balls present', () => {
+  it('returns no collision when no balls present', () => {
     const game = createTestGame(5)
     const result = handleCollisions(game)
     expect(result.hasCollision).toBe(false)
   })
 
-  test('returns no collision when balls do not overlap', () => {
+  it('returns no collision when balls do not overlap', () => {
     const game = createTestGame(5)
     const path = createWaypointPath()
     const chainedBall: ChainedBall = {
@@ -213,7 +207,8 @@ describe('handleCollisions', () => {
       path,
       head: chainNode,
       foot: chainNode,
-      inserting: 0
+      inserting: 0,
+      pauseStepsAfterMatch: undefined
     })
 
     game.freeBalls.push({
@@ -226,7 +221,7 @@ describe('handleCollisions', () => {
     expect(result.hasCollision).toBe(false)
   })
 
-  test('detects collision between free ball and chain', () => {
+  it('detects collision between free ball and chain', () => {
     const game = createTestGame(5)
     const path = createWaypointPath()
     const chainedBall: ChainedBall = {
@@ -240,7 +235,8 @@ describe('handleCollisions', () => {
       path,
       head: chainNode,
       foot: chainNode,
-      inserting: 0
+      inserting: 0,
+      pauseStepsAfterMatch: undefined
     })
 
     game.freeBalls.push({
@@ -253,5 +249,126 @@ describe('handleCollisions', () => {
     expect(result.hasCollision).toBe(true)
     expect(game.freeBalls.length).toBe(0) // Free ball should be consumed
     expect(game.chains[0].inserting).toBe(1)
+  })
+})
+
+describe('shouldInsertBefore', () => {
+  it('returns true when collision point is ahead of chained ball movement', () => {
+    const game = createTestGame(5)
+    const waypoint: Node<Waypoint> = {
+      value: { id: 1, x: 100, y: 0 },
+      next: undefined
+    }
+    const chainedBall: ChainedBall = {
+      ball: { position: { x: 0, y: 0 }, color: 'red' },
+      waypoint
+    }
+    const freeBall: FreeBall = {
+      position: { x: 10, y: 0 },
+      velocity: { x: -1, y: 0 },
+      color: 'blue'
+    }
+
+    expect(shouldInsertBefore(game, chainedBall, freeBall)).toBe(true)
+  })
+
+  it('returns false when collision point is behind chained ball movement', () => {
+    const game = createTestGame(5)
+    const waypoint: Node<Waypoint> = {
+      value: { id: 1, x: 100, y: 0 },
+      next: undefined
+    }
+    const chainedBall: ChainedBall = {
+      ball: { position: { x: 10, y: 0 }, color: 'red' },
+      waypoint
+    }
+    const freeBall: FreeBall = {
+      position: { x: 0, y: 0 },
+      velocity: { x: 1, y: 0 },
+      color: 'blue'
+    }
+
+    expect(shouldInsertBefore(game, chainedBall, freeBall)).toBe(false)
+  })
+})
+
+describe('backoffFreeBall', () => {
+  it('backs off free ball until no collision', () => {
+    const game = createTestGame(5)
+    const chainedBall: ChainedBall = {
+      ball: { position: { x: 0, y: 0 }, color: 'red' },
+      waypoint: { value: { id: 1, x: 100, y: 0 } }
+    }
+    const chainNode: Node<ChainedBall> = { value: chainedBall }
+    const freeBall: FreeBall = {
+      position: { x: 8, y: 0 },
+      velocity: { x: -1, y: 0 },
+      color: 'blue'
+    }
+
+    backoffFreeBall({ game, collisionNode: chainNode, freeBall })
+
+    // Should be backed off to at least the collision range (2 * radius = 10)
+    expect(freeBall.position.x).toBeGreaterThanOrEqual(10)
+  })
+})
+
+describe('addNewNode', () => {
+  it('adds new node before collision node when appropriate', () => {
+    const game = createTestGame(5)
+    const path = createWaypointPath()
+    const chainedBall: ChainedBall = {
+      ball: { position: { x: 10, y: 0 }, color: 'red' },
+      waypoint: path.start,
+      insertion: { position: { x: 10, y: 0 } }
+    }
+    const chainNode: Node<ChainedBall> = { value: chainedBall }
+    const chain: Chain = {
+      path,
+      head: chainNode,
+      foot: chainNode,
+      inserting: 0,
+      pauseStepsAfterMatch: undefined
+    }
+    const freeBall: FreeBall = {
+      position: { x: 0, y: 0 },
+      velocity: { x: 1, y: 0 },
+      color: 'blue'
+    }
+
+    const result = addNewNode({ game, chain, collisionNode: chainNode, freeBall })
+
+    expect(result.insertingBefore).toBe(true)
+    expect(result.newBall.ball.color).toBe('blue')
+    expect(chain.inserting).toBe(0) // Should not modify chain.inserting
+  })
+
+  it('adds new node after collision node when appropriate', () => {
+    const game = createTestGame(5)
+    const path = createWaypointPath()
+    const chainedBall: ChainedBall = {
+      ball: { position: { x: 0, y: 0 }, color: 'red' },
+      waypoint: path.start,
+      insertion: { position: { x: 0, y: 0 } }
+    }
+    const chainNode: Node<ChainedBall> = { value: chainedBall }
+    const chain: Chain = {
+      path,
+      head: chainNode,
+      foot: chainNode,
+      inserting: 0,
+      pauseStepsAfterMatch: undefined
+    }
+    const freeBall: FreeBall = {
+      position: { x: 10, y: 0 },
+      velocity: { x: -1, y: 0 },
+      color: 'blue'
+    }
+
+    const result = addNewNode({ game, chain, collisionNode: chainNode, freeBall })
+
+    expect(result.insertingBefore).toBe(false)
+    expect(result.newBall.ball.color).toBe('blue')
+    expect(chain.inserting).toBe(0) // Should not modify chain.inserting
   })
 }) 
